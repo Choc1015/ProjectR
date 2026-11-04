@@ -125,6 +125,67 @@ class AnimationAssetTools(unreal.ToolsetDefinition):
 
     @toolset_registry.tool_call
     @staticmethod
+    def set_montage_notify(montage: unreal.AnimMontage, notify_name: str, time: float) -> None:
+        """Places a Montage Notify with the given name at a time in the montage, moving it if it exists.
+        Gameplay code receives it through the AnimInstance's OnPlayMontageNotifyBegin.
+
+        Args:
+            montage: The montage to edit.
+            notify_name: The notify name gameplay code listens for, e.g. 'Hit'. Also used as its track name.
+            time: Seconds from the montage start, before any play rate is applied.
+        """
+        AnimationAssetTools._require_montage(montage)
+        if not notify_name:
+            raise ValueError('notify_name must not be empty.')
+        if time < 0.0 or time > montage.get_play_length():
+            raise ValueError(f'time {time} is outside the montage (0 to {montage.get_play_length()} s).')
+        lib = unreal.AnimationLibrary
+        if lib.is_valid_anim_notify_track_name(montage, notify_name):
+            lib.remove_animation_notify_events_by_track(montage, notify_name)
+        else:
+            lib.add_animation_notify_track(montage, notify_name, unreal.LinearColor(1.0, 0.3, 0.2, 1.0))
+        notify = lib.add_animation_notify_event(
+            montage, notify_name, time, unreal.AnimNotify_PlayMontageNotify.static_class())
+        notify.set_editor_property('notify_name', notify_name)
+
+    @toolset_registry.tool_call
+    @staticmethod
+    def get_montage_notify_time(montage: unreal.AnimMontage, notify_name: str) -> float:
+        """Returns when a notify placed with set_montage_notify fires.
+
+        Args:
+            montage: The montage to read.
+            notify_name: The notify name.
+
+        Returns:
+            Seconds from the montage start, before any play rate is applied.
+        """
+        AnimationAssetTools._require_montage(montage)
+        lib = unreal.AnimationLibrary
+        if not lib.is_valid_anim_notify_track_name(montage, notify_name):
+            raise ValueError(f'{montage.get_name()} has no notify named "{notify_name}".')
+        events = lib.get_animation_notify_events_for_track(montage, notify_name)
+        if not events:
+            raise ValueError(f'{montage.get_name()} has no notify named "{notify_name}".')
+        return lib.get_anim_notify_event_trigger_time(events[0])
+
+    @toolset_registry.tool_call
+    @staticmethod
+    def remove_montage_notify(montage: unreal.AnimMontage, notify_name: str) -> None:
+        """Removes a notify placed with set_montage_notify, along with its track.
+
+        Args:
+            montage: The montage to edit.
+            notify_name: The notify name.
+        """
+        AnimationAssetTools._require_montage(montage)
+        lib = unreal.AnimationLibrary
+        if not lib.is_valid_anim_notify_track_name(montage, notify_name):
+            raise ValueError(f'{montage.get_name()} has no notify named "{notify_name}".')
+        lib.remove_animation_notify_track(montage, notify_name)
+
+    @toolset_registry.tool_call
+    @staticmethod
     def create_anim_blueprint(
             folder_path: str, asset_name: str, skeleton: unreal.Skeleton,
             parent_class: unreal.Class) -> unreal.AnimBlueprint:
@@ -148,6 +209,11 @@ class AnimationAssetTools(unreal.ToolsetDefinition):
         factory.set_editor_property('target_skeleton', skeleton)
         factory.set_editor_property('parent_class', parent_class)
         return create_asset(folder_path, asset_name, unreal.AnimBlueprint.static_class(), factory)
+
+    @staticmethod
+    def _require_montage(montage: unreal.AnimMontage) -> None:
+        if montage is None:
+            raise ValueError('montage must not be None.')
 
     @staticmethod
     def _fbx_options(import_type: unreal.FBXImportType, skeleton: unreal.Skeleton | None) -> unreal.FbxImportUI:

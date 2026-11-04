@@ -246,6 +246,11 @@ void AProjectRCharacter::BeginPlay()
 	ApplyCameraMode();
 	SwordBaseRotation = SwordMesh->GetRelativeRotation().Quaternion();
 
+	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+	{
+		AnimInstance->OnPlayMontageNotifyBegin.AddDynamic(this, &AProjectRCharacter::OnMontageNotifyBegin);
+	}
+
 	if (const APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
@@ -380,8 +385,29 @@ void AProjectRCharacter::PlayComboAttack(int32 Index)
 	AnimInstance->Montage_SetEndDelegate(EndDelegate, Montage);
 
 	FTimerManager& Timers = GetWorldTimerManager();
-	Timers.SetTimer(HitTimer, this, &AProjectRCharacter::PerformHitTrace, Duration * HitTimeFraction, false);
+	// Hit 노티파이가 있으면 그 프레임에서 판정하고, 없으면 몽타주 길이 비율로 판정한다.
+	if (!HasHitNotify(Montage))
+	{
+		Timers.SetTimer(HitTimer, this, &AProjectRCharacter::PerformHitTrace, Duration * HitTimeFraction, false);
+	}
 	Timers.SetTimer(ComboTimer, this, &AProjectRCharacter::OnComboTime, Duration * ComboTimeFraction, false);
+}
+
+bool AProjectRCharacter::HasHitNotify(const UAnimMontage* Montage) const
+{
+	const FString HitName = HitNotifyName.ToString();
+	return Montage->Notifies.ContainsByPredicate([&HitName](const FAnimNotifyEvent& Event)
+	{
+		return Event.Notify && Event.Notify->GetNotifyName() == HitName;
+	});
+}
+
+void AProjectRCharacter::OnMontageNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& Payload)
+{
+	if (NotifyName == HitNotifyName && ComboIndex != INDEX_NONE)
+	{
+		PerformHitTrace();
+	}
 }
 
 void AProjectRCharacter::PerformHitTrace()

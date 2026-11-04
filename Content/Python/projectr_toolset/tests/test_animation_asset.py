@@ -118,6 +118,60 @@ class AnimationAssetToolsTestCase(ToolCallTestCase):
         with self.assertToolRaisesRuntimeError():
             AnimationAssetTools.get_montage_animations(None)
 
+    def _walk_montage(self) -> unreal.AnimMontage:
+        return AnimationAssetTools.create_montage(self.folder, 'AM_Walk', self._import_walk())
+
+    def test_set_montage_notify_places_notify_at_time(self):
+        """Places a Montage Notify on its own track at the given time."""
+        montage = self._walk_montage()
+        AnimationAssetTools.set_montage_notify(montage, 'Hit', 0.3)
+        self.assertAlmostEqual(AnimationAssetTools.get_montage_notify_time(montage, 'Hit'), 0.3, places=3)
+        events = unreal.AnimationLibrary.get_animation_notify_events_for_track(montage, 'Hit')
+        self.assertEqual(len(events), 1)
+        notify = events[0].get_editor_property('notify')
+        self.assertIsInstance(notify, unreal.AnimNotify_PlayMontageNotify)
+        self.assertEqual(str(notify.get_editor_property('notify_name')), 'Hit')
+
+    def test_set_montage_notify_moves_existing_notify(self):
+        """Setting the same notify again moves it instead of adding a second one."""
+        montage = self._walk_montage()
+        AnimationAssetTools.set_montage_notify(montage, 'Hit', 0.3)
+        AnimationAssetTools.set_montage_notify(montage, 'Hit', 0.5)
+        self.assertAlmostEqual(AnimationAssetTools.get_montage_notify_time(montage, 'Hit'), 0.5, places=3)
+        self.assertEqual(len(unreal.AnimationLibrary.get_animation_notify_events_for_track(montage, 'Hit')), 1)
+
+    def test_set_montage_notify_raises_on_time_outside_montage(self):
+        """Raises when the time is past the montage end."""
+        montage = self._walk_montage()
+        with self.assertToolRaisesRuntimeError():
+            AnimationAssetTools.set_montage_notify(montage, 'Hit', montage.get_play_length() + 1.0)
+
+    def test_set_montage_notify_raises_on_empty_name(self):
+        """Raises when the notify name is empty."""
+        montage = self._walk_montage()
+        with self.assertToolRaisesRuntimeError():
+            AnimationAssetTools.set_montage_notify(montage, '', 0.1)
+
+    def test_get_montage_notify_time_raises_when_missing(self):
+        """Raises when the montage has no notify with that name."""
+        montage = self._walk_montage()
+        with self.assertToolRaisesRuntimeError():
+            AnimationAssetTools.get_montage_notify_time(montage, 'Hit')
+
+    def test_remove_montage_notify_removes_it(self):
+        """Removes the notify so it can no longer be read."""
+        montage = self._walk_montage()
+        AnimationAssetTools.set_montage_notify(montage, 'Hit', 0.3)
+        AnimationAssetTools.remove_montage_notify(montage, 'Hit')
+        with self.assertToolRaisesRuntimeError():
+            AnimationAssetTools.get_montage_notify_time(montage, 'Hit')
+
+    def test_remove_montage_notify_raises_when_missing(self):
+        """Raises when there is nothing to remove."""
+        montage = self._walk_montage()
+        with self.assertToolRaisesRuntimeError():
+            AnimationAssetTools.remove_montage_notify(montage, 'Hit')
+
     def test_create_anim_blueprint_targets_skeleton(self):
         """Creates an Animation Blueprint for the skeleton with the given parent class."""
         abp = AnimationAssetTools.create_anim_blueprint(

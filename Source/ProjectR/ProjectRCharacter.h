@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Animation/AnimInstance.h"
 #include "GameFramework/Character.h"
 #include "ProjectRCharacter.generated.h"
 
@@ -127,7 +128,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	TArray<FRotator> AttackSwordRotationOffsets;
 
-	/** 몽타주 길이 대비 타격 판정 시점(0~1). */
+	/**
+	 * 몽타주에서 이 이름의 Montage Notify가 오는 순간 타격 판정을 한다.
+	 * 몽타주 에디터에서 노티파이를 끌어 칼이 닿는 프레임에 맞춘다. 없으면 HitTimeFraction을 쓴다.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	FName HitNotifyName = TEXT("Hit");
+
+	/** Hit 노티파이가 없는 몽타주에서 쓰는 타격 판정 시점(몽타주 길이 대비 0~1). */
 	UPROPERTY(EditDefaultsOnly, Category = "Combat", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float HitTimeFraction = 0.4f;
 
@@ -166,6 +174,10 @@ private:
 	void Attack();
 
 	void PlayComboAttack(int32 Index);
+	bool HasHitNotify(const UAnimMontage* Montage) const;
+
+	UFUNCTION()
+	void OnMontageNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& Payload);
 	void PerformHitTrace();
 	void OnComboTime();
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);

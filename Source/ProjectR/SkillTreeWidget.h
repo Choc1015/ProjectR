@@ -10,6 +10,8 @@ class UImage;
 class UTextBlock;
 class USkillTreeComponent;
 class USkillTreeWidget;
+class UWidget;
+struct FSkillTreeRow;
 
 /** 클릭하면 자기 스킬 ID를 위젯에 알려 주는 노드 버튼 */
 UCLASS()
@@ -57,6 +59,7 @@ private:
 	int32 CountLeaves(FName Id) const;
 	void AddNode(FName Id, const FVector2D& Position);
 	void AddLine(const FVector2D& From, const FVector2D& To, FName ChildId);
+	UWidget* MakeTooltip(FName Id, const FSkillTreeRow& Row);
 
 	UFUNCTION()
 	void Refresh();
@@ -85,6 +88,10 @@ private:
 	/** 선 그림과, 그 선이 이어 주는 자식 스킬 ID(같은 순서) */
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UImage>> LineImages;
+
+	/** 설명창의 상태 줄(비용·해금 여부). 해금할 때마다 갱신한다. */
+	UPROPERTY(Transient)
+	TMap<FName, TObjectPtr<UTextBlock>> TooltipStatus;
 
 	TArray<FName> LineChildIds;
 	TMap<FName, TArray<FName>> Children;

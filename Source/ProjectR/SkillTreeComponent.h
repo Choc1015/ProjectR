@@ -59,6 +59,21 @@ struct FSkillTreeStyle
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Style")
 	TObjectPtr<UTexture2D> LineActive;
 
+	/** 노드에 마우스를 올리면 뜨는 설명창 바탕(9-슬라이스로 늘어난다) */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tooltip")
+	TObjectPtr<UTexture2D> Tooltip;
+
+	/** 늘어나지 않는 테두리 비율(0~0.5). 모서리 장식이 찌그러지면 키운다. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tooltip", meta = (ClampMin = "0.0", ClampMax = "0.5"))
+	float TooltipSliceMargin = 0.2f;
+
+	/** 글자와 테두리 사이 여백 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tooltip")
+	FMargin TooltipPadding = FMargin(30.f, 34.f, 30.f, 30.f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tooltip", meta = (ClampMin = "100.0"))
+	float TooltipWidth = 300.f;
+
 	/** 한 단계(부모→자식)마다 중심에서 멀어지는 거리 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Layout", meta = (ClampMin = "10.0"))
 	float RingSpacing = 170.f;

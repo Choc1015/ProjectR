@@ -1,7 +1,11 @@
 #include "SkillTreeWidget.h"
 
 #include "Blueprint/WidgetTree.h"
+#include "Components/Border.h"
 #include "Components/ButtonSlot.h"
+#include "Components/SizeBox.h"
+#include "Components/VerticalBox.h"
+#include "Components/VerticalBoxSlot.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/Image.h"
@@ -137,6 +141,7 @@ FReply USkillTreeWidget::NativeOnMouseWheel(const FGeometry& InGeometry, const F
 void USkillTreeWidget::Build()
 {
 	Nodes.Reset();
+	TooltipStatus.Reset();
 	LineImages.Reset();
 	LineChildIds.Reset();
 	Children.Reset();
@@ -302,8 +307,7 @@ void USkillTreeWidget::AddNode(FName Id, const FVector2D& Position)
 	Button->SkillId = Id;
 	Button->Owner = this;
 	Button->BindClick();
-	Button->SetToolTipText(FText::Format(FText::FromString(TEXT("{0}  (비용 {1})\n{2}")),
-		Row->DisplayName, FText::AsNumber(Row->Cost), Row->Description));
+	Button->SetToolTip(MakeTooltip(Id, *Row));
 
 	if (UTexture2D* Icon = Row->Icon.LoadSynchronous())
 	{
@@ -332,6 +336,57 @@ void USkillTreeWidget::AddNode(FName Id, const FVector2D& Position)
 
 	PlaceCentered(Board, Button, Position, FVector2D(Style.NodeSize));
 	Nodes.Add(Id, Button);
+}
+
+UWidget* USkillTreeWidget::MakeTooltip(FName Id, const FSkillTreeRow& Row)
+{
+	const FSkillTreeStyle& Style = Skills->Style;
+
+	UBorder* Panel = WidgetTree->ConstructWidget<UBorder>();
+	FSlateBrush Brush;
+	if (Style.Tooltip)
+	{
+		// 그림 폭을 설명창 폭에 맞춰야 모서리 장식이 원래 비율로 그려진다(위아래로만 늘어남).
+		const float Aspect = Style.Tooltip->GetSurfaceHeight() / FMath::Max(1.f, Style.Tooltip->GetSurfaceWidth());
+		Brush = MakeBrush(Style.Tooltip, FVector2D(Style.TooltipWidth, Style.TooltipWidth * Aspect));
+		Brush.DrawAs = ESlateBrushDrawType::Box;
+		Brush.Margin = FMargin(Style.TooltipSliceMargin);
+	}
+	else
+	{
+		Brush.TintColor = FSlateColor(FLinearColor(0.93f, 0.86f, 0.72f));
+	}
+	Panel->SetBrush(Brush);
+	Panel->SetPadding(Style.TooltipPadding);
+
+	UVerticalBox* Lines = WidgetTree->ConstructWidget<UVerticalBox>();
+	Panel->SetContent(Lines);
+
+	const float TextWidth = Style.TooltipWidth - Style.TooltipPadding.Left - Style.TooltipPadding.Right;
+	auto AddText = [&](const FText& Text, int32 FontSize, float Gap) -> UTextBlock*
+	{
+		UTextBlock* Block = WidgetTree->ConstructWidget<UTextBlock>();
+		Block->SetText(Text);
+		Block->SetColorAndOpacity(FSlateColor(Style.TextColor));
+		Block->SetAutoWrapText(true);
+		Block->SetWrapTextAt(TextWidth);
+		FSlateFontInfo Font = Block->GetFont();
+		Font.Size = FontSize;
+		Block->SetFont(Font);
+		if (UVerticalBoxSlot* LineSlot = Lines->AddChildToVerticalBox(Block))
+		{
+			LineSlot->SetPadding(FMargin(0.f, 0.f, 0.f, Gap));
+		}
+		return Block;
+	};
+	AddText(Row.DisplayName, 20, 4.f);
+	TooltipStatus.Add(Id, AddText(FText::GetEmpty(), 12, 12.f));
+	AddText(Row.Description, 14, 0.f);
+
+	USizeBox* Box = WidgetTree->ConstructWidget<USizeBox>();
+	Box->SetWidthOverride(Style.TooltipWidth);
+	Box->SetContent(Panel);
+	return Box;
 }
 
 void USkillTreeWidget::Refresh()
@@ -364,6 +419,36 @@ void USkillTreeWidget::Refresh()
 		ButtonStyle.SetPressedPadding(FMargin(0.f));
 		Pair.Value->SetStyle(ButtonStyle);
 		Pair.Value->SetRenderOpacity(bUnlocked || bAvailable ? 1.f : 0.75f);
+
+		if (UTextBlock* Status = TooltipStatus.FindRef(Pair.Key))
+		{
+			const FSkillTreeRow* Row = Skills->FindSkill(Pair.Key);
+			const FSkillTreeRow* ParentRow = Row ? Skills->FindSkill(Row->Parent) : nullptr;
+			FText State;
+			FLinearColor Color;
+			if (bUnlocked)
+			{
+				State = FText::FromString(TEXT("해금됨"));
+				Color = FLinearColor(0.62f, 0.45f, 0.12f);
+			}
+			else if (bAvailable)
+			{
+				State = FText::FromString(TEXT("해금 가능"));
+				Color = Style.TextColor;
+			}
+			else if (ParentRow && !Skills->IsUnlocked(Row->Parent))
+			{
+				State = FText::Format(FText::FromString(TEXT("먼저 '{0}' 해금 필요")), ParentRow->DisplayName);
+				Color = FLinearColor(0.45f, 0.1f, 0.08f);
+			}
+			else
+			{
+				State = FText::FromString(TEXT("포인트 부족"));
+				Color = FLinearColor(0.45f, 0.1f, 0.08f);
+			}
+			Status->SetText(FText::Format(FText::FromString(TEXT("비용 {0}  ·  {1}")), FText::AsNumber(Row ? Row->Cost : 0), State));
+			Status->SetColorAndOpacity(FSlateColor(Color));
+		}
 	}
 
 	for (int32 i = 0; i < LineImages.Num(); ++i)

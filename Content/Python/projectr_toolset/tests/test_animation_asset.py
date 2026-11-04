@@ -5,7 +5,6 @@ import unreal
 
 from toolset_registry.tests.toolset_testcase import ToolCallTestCase
 from toolset_registry.tests.automation import create_temp_folder
-from editor_toolset.toolsets.skeletal_mesh import SkeletalMeshTools
 from projectr_toolset.toolsets.animation_asset import AnimationAssetTools
 
 # Mixamo exports in the project: skinned mesh + one animation each.
@@ -24,15 +23,58 @@ class AnimationAssetToolsTestCase(ToolCallTestCase):
         # tearDown is skipped when setUp fails, so register cleanup before anything can raise.
         self.addCleanup(self._release)
         self.folder = self._stack.enter_context(create_temp_folder()).rstrip('/')
-        mesh = SkeletalMeshTools.import_file(self.folder, 'SK_Test', _IDLE_FBX)[0]
-        self.skeleton = mesh.get_editor_property('skeleton')
+        self.mesh = AnimationAssetTools.import_skeletal_mesh(self.folder, 'SK_Test', _IDLE_FBX)
+        self.skeleton = self.mesh.get_editor_property('skeleton')
 
     def _release(self):
+        self.mesh = None
         self.skeleton = None
         self._stack.close()
 
     def _import_walk(self) -> unreal.AnimSequence:
         return AnimationAssetTools.import_animation(self.folder, 'A_Walk', _WALK_FBX, self.skeleton)
+
+    @staticmethod
+    def _height(mesh: unreal.SkeletalMesh) -> float:
+        return mesh.get_bounds().box_extent.z * 2.0
+
+    def test_import_skeletal_mesh_creates_mesh_and_skeleton(self):
+        """Imports a SkeletalMesh with a new Skeleton when none is given."""
+        self.assertIsInstance(self.mesh, unreal.SkeletalMesh)
+        self.assertIsInstance(self.skeleton, unreal.Skeleton)
+
+    def test_import_skeletal_mesh_applies_uniform_scale(self):
+        """Scales the imported geometry by uniform_scale."""
+        scaled = AnimationAssetTools.import_skeletal_mesh(
+            self.folder, 'SK_Scaled', _IDLE_FBX, uniform_scale=100.0)
+        self.assertAlmostEqual(self._height(scaled), self._height(self.mesh) * 100.0, delta=self._height(self.mesh))
+
+    def test_import_skeletal_mesh_replaces_existing_in_place(self):
+        """Overwrites the existing asset at the same path when replace_existing is True."""
+        replaced = AnimationAssetTools.import_skeletal_mesh(
+            self.folder, 'SK_Test', _IDLE_FBX, skeleton=self.skeleton,
+            uniform_scale=100.0, replace_existing=True)
+        self.assertEqual(replaced.get_path_name(), self.mesh.get_path_name())
+        self.assertEqual(replaced.get_editor_property('skeleton'), self.skeleton)
+        self.assertGreater(self._height(replaced), 10.0)
+
+    def test_import_skeletal_mesh_raises_when_asset_exists(self):
+        """Raises when the asset exists and replace_existing is False."""
+        with self.assertToolRaisesRuntimeError():
+            AnimationAssetTools.import_skeletal_mesh(self.folder, 'SK_Test', _IDLE_FBX)
+
+    def test_import_skeletal_mesh_raises_on_missing_file(self):
+        """Raises when the source file does not exist, including when replacing."""
+        with self.assertToolRaisesRuntimeError():
+            AnimationAssetTools.import_skeletal_mesh(
+                self.folder, 'SK_Test', os.path.join(_MIXAMO_DIR, 'missing.fbx'), replace_existing=True)
+
+    def test_import_animation_replaces_existing_in_place(self):
+        """Overwrites the existing animation at the same path when replace_existing is True."""
+        anim = self._import_walk()
+        replaced = AnimationAssetTools.import_animation(
+            self.folder, 'A_Walk', _WALK_FBX, self.skeleton, uniform_scale=100.0, replace_existing=True)
+        self.assertEqual(replaced.get_path_name(), anim.get_path_name())
 
     def test_import_animation_creates_sequence_on_skeleton(self):
         """Imports an AnimSequence bound to the given skeleton."""

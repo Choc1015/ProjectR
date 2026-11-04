@@ -25,6 +25,8 @@ public:
 
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
+	virtual void OnConstruction(const FTransform& Transform) override;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -36,11 +38,11 @@ protected:
 
 	/** 검을 붙일 스켈레톤 본/소켓 이름. */
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
-	FName WeaponSocketName = TEXT("mixamorig_RightHand");
+	FName WeaponSocketName = TEXT("RightHand");
 
 	/** 1인칭 카메라에 걸리지 않도록 숨길 본(하위 본 포함). None이면 숨기지 않는다. */
 	UPROPERTY(EditDefaultsOnly, Category = "Camera")
-	FName HiddenHeadBoneName = TEXT("mixamorig_Head");
+	FName HiddenHeadBoneName = TEXT("Head");
 
 	/** 콤보 순서대로 재생할 공격 몽타주. */
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")

@@ -22,8 +22,8 @@ AProjectRCharacter::AProjectRCharacter()
 	GetCharacterMovement()->MaxWalkSpeed = 450.f;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 
-	// 메시 원점은 발바닥, 정면은 블렌더 -Y → 캡슐 바닥에 맞추고 언리얼 +X를 보게 돌린다.
-	GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -90.f), FRotator(0.f, -90.f, 0.f));
+	// 메시 원점은 발바닥, 미사모 임포트 결과 정면이 -X → 캡슐 바닥에 맞추고 +X를 보게 돌린다.
+	GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -90.f), FRotator(0.f, 180.f, 0.f));
 
 	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
 	FirstPersonCamera->SetupAttachment(GetCapsuleComponent());
@@ -36,12 +36,17 @@ AProjectRCharacter::AProjectRCharacter()
 	SwordMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
+void AProjectRCharacter::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	// 블루프린트에서 소켓 이름을 바꿨을 수 있으니 다시 붙인다. 에디터 배치 시에도 손에 보이게 여기서 한다.
+	SwordMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, WeaponSocketName);
+}
+
 void AProjectRCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// 블루프린트에서 소켓 이름을 바꿨을 수 있으니 다시 붙인다.
-	SwordMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, WeaponSocketName);
 
 	if (!HiddenHeadBoneName.IsNone() && GetMesh()->GetBoneIndex(HiddenHeadBoneName) != INDEX_NONE)
 	{

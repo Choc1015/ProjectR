@@ -65,7 +65,7 @@
 - 임포트·몽타주·애님BP 생성은 프로젝트 툴셋 `projectr_toolset.toolsets.animation_asset.AnimationAssetTools`를 쓴다.
   수정 후 다시 불러오기: 엔진 파이썬으로 `toolset_registry/tests/reload_remote.py projectr_toolset` (새 테스트 추가는 에디터 재시작 필요).
 - `ActorTools.set_actor_transform`은 빠진 필드를 0으로 덮어쓴다. 위치·회전·스케일을 모두 넘긴다.
-- 직접 만든 애니메이션(블렌더): 미사모 FBX를 불러온 아마추어는 X 90도 회전이 걸려 있다. 애니메이션만 내보내기 전에
-  아마추어에 회전 적용(`transform_apply(rotation=True)`)을 해야 언리얼에서 눕지 않는다. 임포트는 `uniform_scale=100`.
-  원본: `SourceArt/PlayerSlashAnims.blend` (A_Slash1~3, IK로 손 궤적 → FK 베이크, 생성 스크립트 `slash_lib` 텍스트 포함).
+- 블렌더에서 미사모 리그로 애니메이션을 만들 때: 불러온 아마추어에 X 90도 회전이 걸려 있어, 내보내기 전에
+  회전 적용(`transform_apply(rotation=True)`)을 해야 언리얼에서 눕지 않는다. 임포트는 `uniform_scale=100`.
+  (직접 만든 베기 모션은 품질 문제로 폐기하고 미사모 Attack 1~3을 쓴다. 기록은 커밋 b96adc6.)
 - 알려진 문제: 애니메이션을 `replace_existing=True`로 재임포트하면 배율이 두 번 곱해진다(x10000). 지우고 새로 임포트한다.

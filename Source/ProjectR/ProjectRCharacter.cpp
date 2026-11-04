@@ -2,6 +2,7 @@
 
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
+#include "AnimationRuntime.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -60,13 +61,26 @@ void AProjectRCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if (CameraMode == EFirstPersonCameraMode::CameraFollowsBody
-		&& GetMesh()->GetBoneIndex(CameraBoneName) != INDEX_NONE)
+	USkeletalMeshComponent* BodyMesh = GetMesh();
+	const int32 BoneIndex = BodyMesh->GetBoneIndex(CameraBoneName);
+	if (CameraMode != EFirstPersonCameraMode::CameraFollowsBody || BoneIndex == INDEX_NONE
+		|| !BodyMesh->GetComponentSpaceTransforms().IsValidIndex(BoneIndex))
 	{
-		const FRotator YawRotation(0.f, GetControlRotation().Yaw, 0.f);
-		FirstPersonCamera->SetWorldLocation(
-			GetMesh()->GetBoneLocation(CameraBoneName) + YawRotation.RotateVector(CameraBoneOffset));
+		return;
 	}
+
+	// 기준 포즈 대비 머리가 애니메이션으로 얼마나 돌았는지(메시 공간) → 캡슐 공간으로 옮긴다.
+	const FQuat RefHead = FAnimationRuntime::GetComponentSpaceTransformRefPose(
+		BodyMesh->GetSkeletalMeshAsset()->GetRefSkeleton(), BoneIndex).GetRotation();
+	const FQuat AnimHead = BodyMesh->GetComponentSpaceTransforms()[BoneIndex].GetRotation();
+	const FQuat MeshToActor = BodyMesh->GetRelativeRotation().Quaternion();
+	const FQuat HeadDelta = MeshToActor * (AnimHead * RefHead.Inverse()) * MeshToActor.Inverse();
+
+	// 마우스 시점 위에 머리 회전을 더한다.
+	const FQuat ViewRotation = GetControlRotation().Quaternion()
+		* FQuat::Slerp(FQuat::Identity, HeadDelta, CameraRotationFollowAlpha);
+	FirstPersonCamera->SetWorldLocationAndRotation(
+		BodyMesh->GetBoneLocation(CameraBoneName) + ViewRotation.RotateVector(CameraBoneOffset), ViewRotation);
 }
 
 bool AProjectRCharacter::ShouldUseLocomotionAnimation() const
@@ -78,6 +92,8 @@ void AProjectRCharacter::ApplyCameraMode()
 {
 	// 몸 전체가 보이는 모드에서만 그림자를 드리운다. 팔만 있을 때 그림자는 어색하다.
 	GetMesh()->SetCastShadow(CameraMode == EFirstPersonCameraMode::CameraFollowsBody);
+	// 몸 따라가기에서는 Tick이 마우스 시점과 머리 회전을 합쳐 직접 회전시킨다.
+	FirstPersonCamera->bUsePawnControlRotation = CameraMode == EFirstPersonCameraMode::ArmsOnCamera;
 
 	if (CameraMode == EFirstPersonCameraMode::CameraFollowsBody)
 	{

@@ -17,7 +17,7 @@ enum class EFirstPersonCameraMode : uint8
 {
 	/** 옛 1인칭 템플릿처럼 메시를 카메라에 붙인다. 카메라는 캡슐에 고정되고 팔이 시점을 따라온다. */
 	ArmsOnCamera UMETA(DisplayName = "팔을 카메라에 부착"),
-	/** 메시는 캡슐에 서 있고 카메라가 매 프레임 본 위치를 따라간다. 모션에 따라 시점이 함께 움직인다. */
+	/** 메시는 캡슐에 서 있고 카메라가 머리 본이 된다. 애니메이션의 머리 위치·회전이 시점에 그대로 실린다. */
 	CameraFollowsBody UMETA(DisplayName = "카메라가 몸을 따라감"),
 };
 
@@ -80,9 +80,16 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Camera|Camera Follows Body")
 	FName CameraBoneName = TEXT("Head");
 
-	/** [몸 따라가기] 본에서 카메라까지 오프셋(cm). X = 시선 앞, Y = 오른쪽, Z = 위. 시선 좌우 회전만 반영한다. */
+	/** [몸 따라가기] 본에서 눈(카메라)까지 오프셋(cm). X = 시선 앞, Y = 오른쪽, Z = 위. 카메라 회전을 따라 돈다. */
 	UPROPERTY(EditDefaultsOnly, Category = "Camera|Camera Follows Body")
 	FVector CameraBoneOffset = FVector(10.f, 0.f, 8.f);
+
+	/**
+	 * [몸 따라가기] 애니메이션의 머리 회전을 시점에 얼마나 싣는지. 1 = 머리 그대로, 0 = 마우스 시점만.
+	 * 머리 회전은 기준 포즈(T포즈) 머리 대비 변화량으로, 마우스 시점 위에 더해진다.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Camera|Camera Follows Body", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float CameraRotationFollowAlpha = 1.f;
 
 	/** [몸 따라가기] 숨길 본. */
 	UPROPERTY(EditDefaultsOnly, Category = "Camera|Camera Follows Body")

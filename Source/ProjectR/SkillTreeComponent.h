@@ -65,11 +65,15 @@ struct FSkillTreeStyle
 
 	/** 늘어나지 않는 테두리 비율(0~0.5). 모서리 장식이 찌그러지면 키운다. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tooltip", meta = (ClampMin = "0.0", ClampMax = "0.5"))
-	float TooltipSliceMargin = 0.2f;
+	float TooltipSliceMargin = 0.14f;
 
-	/** 글자와 테두리 사이 여백 */
+	/** 글자와 테두리 사이 여백. 위아래는 모서리 장식 아래로 글자가 오도록 넉넉히. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tooltip")
-	FMargin TooltipPadding = FMargin(30.f, 34.f, 30.f, 30.f);
+	FMargin TooltipPadding = FMargin(30.f, 52.f, 30.f, 46.f);
+
+	/** 이름 / 상태 줄 / 설명 글자 크기 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tooltip")
+	FIntVector TooltipFontSizes = FIntVector(16, 11, 12);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tooltip", meta = (ClampMin = "100.0"))
 	float TooltipWidth = 300.f;

@@ -379,12 +379,17 @@ UWidget* USkillTreeWidget::MakeTooltip(FName Id, const FSkillTreeRow& Row)
 		}
 		return Block;
 	};
-	AddText(Row.DisplayName, 20, 4.f);
-	TooltipStatus.Add(Id, AddText(FText::GetEmpty(), 12, 12.f));
-	AddText(Row.Description, 14, 0.f);
+	AddText(Row.DisplayName, Style.TooltipFontSizes.X, 2.f);
+	TooltipStatus.Add(Id, AddText(FText::GetEmpty(), Style.TooltipFontSizes.Y, 8.f));
+	AddText(Row.Description, Style.TooltipFontSizes.Z, 0.f);
 
 	USizeBox* Box = WidgetTree->ConstructWidget<USizeBox>();
 	Box->SetWidthOverride(Style.TooltipWidth);
+	if (Style.Tooltip)
+	{
+		// 위아래 모서리 장식이 서로 겹치지 않을 만큼은 높이를 확보한다.
+		Box->SetMinDesiredHeight(Brush.ImageSize.Y * Style.TooltipSliceMargin * 2.f + 16.f);
+	}
 	Box->SetContent(Panel);
 	return Box;
 }

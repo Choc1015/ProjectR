@@ -36,6 +36,14 @@ Reference sheet of a simple one-handed longsword, shown horizontally in front vi
 - 세 장을 **같은 대화창**에서 연달아 뽑으면 톤이 더 잘 맞는다. 두 번째부터는 "앞 이미지와 같은 스타일로"를 덧붙인다.
 - 캐릭터가 T포즈가 아니거나 뷰가 겹쳐 나오면 다시 뽑는다. 모델링 정확도에 바로 영향을 준다.
 
+## UI 공통 스타일 문구 (모든 UI·아이콘 프롬프트 끝에 붙인다)
+
+```
+Vintage parchment game UI style matching an old illuminated manuscript or treasure map. Clean tidy sepia brown ink lines of even width, aged gold leaf for highlights, small dark red wax seal accents. Muted warm palette: parchment beige, sepia brown, aged gold, deep red. Flat front view, crisp edges, no text. Isolated on a pure flat solid white background (#FFFFFF), no paper texture behind, no shadow.
+```
+- 바탕(종이) 자체를 뽑을 때만 마지막 문장(흰 배경)을 빼고 쓴다.
+- 스킬 아이콘처럼 노드 안에 들어갈 그림도 이 문구를 붙여 잉크 + 금박 느낌으로 맞춘다.
+
 ## 스킬트리 UI (캐릭터 스타일 기준)
 - 배경: Vintage aged parchment paper texture for a game UI background, 16:9. Plain empty sheet, warm parchment beige with subtle stains, soft worn edges, light vignette, faint paper grain. Muted warm palette: parchment beige, leather brown edges. No drawings, no lines, no icons, no text, completely empty.
 - 연결선: Two straight horizontal skill tree connector lines, isolated on a pure flat solid white background (#FFFFFF), no paper, no texture, no shadow. Top: inactive, thin faded sepia brown dashed ink line. Bottom: active, solid aged gold leaf bar with a thin deep brown ink outline. Even width, long and straight, centered, lots of empty space around, no text.

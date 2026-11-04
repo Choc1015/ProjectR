@@ -35,6 +35,15 @@ AProjectRCharacter::AProjectRCharacter()
 	FirstPersonCamera->bUsePawnControlRotation = true;
 	FirstPersonCamera->SetFieldOfView(90.f);
 
+	// 몸 따라가기 모드의 카메라. 머리 본에 붙어 위치를 따라가고, 회전은 Tick이 정한다.
+	// 위치는 BP 뷰포트에서 눈 위치로 끌어 맞춘다(미사모 본 스케일 때문에 숫자는 작게 보인다).
+	HeadCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("HeadCamera"));
+	HeadCamera->SetupAttachment(GetMesh(), CameraBoneName);
+	HeadCamera->SetUsingAbsoluteRotation(true);
+	HeadCamera->SetUsingAbsoluteScale(true);
+	HeadCamera->bUsePawnControlRotation = false;
+	HeadCamera->SetFieldOfView(90.f);
+
 	// 메시 원점은 발바닥, 미사모 임포트 결과 정면이 -X라 180도 돌린다.
 	// 팔 부착 모드에서는 ApplyCameraMode가 카메라에 다시 붙이며, 이 값은 그때 카메라 기준 위치가 된다.
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -90.f), FRotator(0.f, 180.f, 0.f));
@@ -53,6 +62,7 @@ void AProjectRCharacter::OnConstruction(const FTransform& Transform)
 
 	// 블루프린트에서 소켓 이름을 바꿨을 수 있으니 다시 붙인다. 에디터 배치 시에도 손에 보이게 여기서 한다.
 	SwordMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, WeaponSocketName);
+	HeadCamera->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, CameraBoneName);
 
 	ApplyCameraMode();
 }
@@ -97,11 +107,16 @@ void AProjectRCharacter::Tick(float DeltaSeconds)
 	}
 
 	// 마우스 시점 위에 머리 움직임을 더한다.
+	// 위치는 머리 본에 붙은 HeadCamera가 따라가므로 회전만 정한다.
 	FRotator ViewRotation = GetControlRotation() + HeadOffset;
 	ViewRotation.Pitch = FMath::ClampAngle(ViewRotation.Pitch, -89.f, 89.f);
 	ViewRotation.Roll = 0.f;
-	FirstPersonCamera->SetWorldLocationAndRotation(
-		BodyMesh->GetBoneLocation(CameraBoneName) + ViewRotation.RotateVector(CameraBoneOffset), ViewRotation);
+	HeadCamera->SetWorldRotation(ViewRotation);
+}
+
+UCameraComponent* AProjectRCharacter::GetActiveCamera() const
+{
+	return CameraMode == EFirstPersonCameraMode::CameraFollowsBody ? HeadCamera : FirstPersonCamera;
 }
 
 bool AProjectRCharacter::ShouldUseLocomotionAnimation() const
@@ -113,8 +128,9 @@ void AProjectRCharacter::ApplyCameraMode()
 {
 	// 몸 전체가 보이는 모드에서만 그림자를 드리운다. 팔만 있을 때 그림자는 어색하다.
 	GetMesh()->SetCastShadow(CameraMode == EFirstPersonCameraMode::CameraFollowsBody);
-	// 몸 따라가기에서는 Tick이 마우스 시점과 머리 회전을 합쳐 직접 회전시킨다.
-	FirstPersonCamera->bUsePawnControlRotation = CameraMode == EFirstPersonCameraMode::ArmsOnCamera;
+	// 뷰 타깃은 활성화된 첫 카메라를 쓰므로 모드에 맞는 카메라 하나만 켠다.
+	FirstPersonCamera->SetActive(CameraMode == EFirstPersonCameraMode::ArmsOnCamera);
+	HeadCamera->SetActive(CameraMode == EFirstPersonCameraMode::CameraFollowsBody);
 
 	// 부모만 바꾼다. 위치·회전은 BP에서 CharacterMesh0에 정한 값을 그대로 쓴다.
 	if (CameraMode == EFirstPersonCameraMode::CameraFollowsBody)
@@ -310,8 +326,9 @@ void AProjectRCharacter::PlayComboAttack(int32 Index)
 
 void AProjectRCharacter::PerformHitTrace()
 {
-	const FVector Start = FirstPersonCamera->GetComponentLocation();
-	const FVector End = Start + FirstPersonCamera->GetForwardVector() * AttackRange;
+	const UCameraComponent* Camera = GetActiveCamera();
+	const FVector Start = Camera->GetComponentLocation();
+	const FVector End = Start + Camera->GetForwardVector() * AttackRange;
 
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(ProjectRAttack), false, this);
 	TArray<FHitResult> Hits;

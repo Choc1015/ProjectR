@@ -45,8 +45,13 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	/** 팔 부착 모드 카메라. 캡슐에 붙고 마우스 시점으로 돈다. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UCameraComponent> FirstPersonCamera;
+
+	/** 몸 따라가기 모드 카메라. 머리 본에 붙으며, BP에서 옮긴 위치가 그대로 눈 위치가 된다. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UCameraComponent> HeadCamera;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> SwordMesh;
@@ -72,13 +77,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Camera|Arms On Camera")
 	bool bArmsFollowLocomotion = false;
 
-	/** [몸 따라가기] 카메라가 따라갈 본. */
+	/** [몸 따라가기] HeadCamera를 붙일 본/소켓. */
 	UPROPERTY(EditDefaultsOnly, Category = "Camera|Camera Follows Body")
 	FName CameraBoneName = TEXT("Head");
-
-	/** [몸 따라가기] 본에서 눈(카메라)까지 오프셋(cm). X = 시선 앞, Y = 오른쪽, Z = 위. 카메라 회전을 따라 돈다. */
-	UPROPERTY(EditDefaultsOnly, Category = "Camera|Camera Follows Body")
-	FVector CameraBoneOffset = FVector(10.f, 0.f, 8.f);
 
 	/**
 	 * [몸 따라가기] 애니메이션의 머리 움직임을 시점에 얼마나 싣는지. 1 = 머리 그대로, 0 = 마우스 시점만.
@@ -122,6 +123,9 @@ private:
 	/** CameraMode에 맞게 메시를 붙이고 숨길 본·재질을 적용한다. */
 	void ApplyCameraMode();
 	void ApplyFirstPersonVisibility(const TArray<FName>& BoneNames, const TArray<FName>& MaterialSlotNames);
+
+	/** 현재 모드에서 시점으로 쓰는 카메라. */
+	UCameraComponent* GetActiveCamera() const;
 
 	void CreateInput();
 

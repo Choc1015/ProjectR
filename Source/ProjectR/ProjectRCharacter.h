@@ -90,6 +90,18 @@ protected:
 	FName CameraBoneName = TEXT("Head");
 
 	/**
+	 * [몸 따라가기] 켜면 HeadCamera가 머리 본에 소켓처럼 붙어 위치·회전을 모두 그대로 따른다.
+	 * 기준 포즈에서 캐릭터 정면을 보도록 자동으로 맞춘다. 마우스 위아래 시점과 기울기 보정은 쓰지 않는다.
+	 * 끄면 위치만 머리를 따르고 회전은 마우스 시점 + 머리 움직임(기울기 없음)이 된다.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Camera|Camera Follows Body")
+	bool bUseHeadSocketRotation = false;
+
+	/** [몸 따라가기] bUseHeadSocketRotation일 때 자동 정렬 위에 더하는 카메라 회전. */
+	UPROPERTY(EditDefaultsOnly, Category = "Camera|Camera Follows Body")
+	FRotator HeadSocketRotationOffset = FRotator::ZeroRotator;
+
+	/**
 	 * [몸 따라가기] 애니메이션의 머리 움직임을 시점에 얼마나 싣는지. 1 = 머리 그대로, 0 = 마우스 시점만.
 	 * 시작 직후 대기 자세의 머리 방향 대비 좌우·위아래 변화량만 더하고, 기울기(롤)는 쓰지 않는다.
 	 */
@@ -135,6 +147,8 @@ private:
 	/** 현재 모드에서 시점으로 쓰는 카메라. */
 	UCameraComponent* GetActiveCamera() const;
 
+	/** bUseHeadSocketRotation이면 HeadCamera를 머리 본 회전에 붙이고 정면을 보도록 정렬한다. */
+	void AlignHeadCameraToSocket();
 	void UpdateHeadCameraRotation(float DeltaSeconds);
 	void UpdateAttackCameraPush(float DeltaSeconds);
 

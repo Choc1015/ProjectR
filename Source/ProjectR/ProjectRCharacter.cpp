@@ -95,6 +95,11 @@ void AProjectRCharacter::UpdateAttackCameraPush(float DeltaSeconds)
 
 void AProjectRCharacter::UpdateHeadCameraRotation(float DeltaSeconds)
 {
+	if (bUseHeadSocketRotation)
+	{
+		return;
+	}
+
 	USkeletalMeshComponent* BodyMesh = GetMesh();
 	const int32 BoneIndex = BodyMesh->GetBoneIndex(CameraBoneName);
 	if (CameraMode != EFirstPersonCameraMode::CameraFollowsBody || BoneIndex == INDEX_NONE
@@ -138,6 +143,30 @@ void AProjectRCharacter::UpdateHeadCameraRotation(float DeltaSeconds)
 	HeadCamera->SetWorldRotation(ViewRotation);
 }
 
+void AProjectRCharacter::AlignHeadCameraToSocket()
+{
+	HeadCamera->SetUsingAbsoluteRotation(!bUseHeadSocketRotation);
+	if (!bUseHeadSocketRotation)
+	{
+		return;
+	}
+
+	USkeletalMeshComponent* BodyMesh = GetMesh();
+	const USkeletalMesh* MeshAsset = BodyMesh->GetSkeletalMeshAsset();
+	const int32 BoneIndex = MeshAsset ? MeshAsset->GetRefSkeleton().FindBoneIndex(CameraBoneName) : INDEX_NONE;
+	if (BoneIndex == INDEX_NONE)
+	{
+		return;
+	}
+
+	// 기준 포즈에서 카메라가 캐릭터 정면(캡슐 +X)을 보고 위가 +Z가 되도록, 머리 본 기준 회전을 구한다.
+	const FQuat RefHead = FAnimationRuntime::GetComponentSpaceTransformRefPose(MeshAsset->GetRefSkeleton(), BoneIndex).GetRotation();
+	const FQuat ActorToMesh = BodyMesh->GetRelativeRotation().Quaternion().Inverse();
+	const FQuat CameraInMesh = FRotationMatrix::MakeFromXZ(
+		ActorToMesh.RotateVector(FVector::ForwardVector), ActorToMesh.RotateVector(FVector::UpVector)).ToQuat();
+	HeadCamera->SetRelativeRotation(RefHead.Inverse() * CameraInMesh * HeadSocketRotationOffset.Quaternion());
+}
+
 UCameraComponent* AProjectRCharacter::GetActiveCamera() const
 {
 	return CameraMode == EFirstPersonCameraMode::CameraFollowsBody ? HeadCamera : FirstPersonCamera;
@@ -160,6 +189,7 @@ void AProjectRCharacter::ApplyCameraMode()
 	if (CameraMode == EFirstPersonCameraMode::CameraFollowsBody)
 	{
 		GetMesh()->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+		AlignHeadCameraToSocket();
 		bHasCameraBaseline = false;
 		CameraBaselineDelay = 0.3f;
 		ApplyFirstPersonVisibility(BodyHiddenBoneNames, BodyHiddenMaterialSlotNames);

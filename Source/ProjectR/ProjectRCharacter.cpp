@@ -12,28 +12,28 @@
 #include "InputMappingContext.h"
 #include "InputModifiers.h"
 #include "Kismet/GameplayStatics.h"
+#include "Rendering/SkeletalMeshRenderData.h"
 #include "TimerManager.h"
 
 AProjectRCharacter::AProjectRCharacter()
 {
-	PrimaryActorTick.bCanEverTick = true;
-	// 애니메이션이 머리 위치를 갱신한 뒤 카메라를 옮긴다.
-	PrimaryActorTick.TickGroup = TG_PostUpdateWork;
-
 	GetCapsuleComponent()->InitCapsuleSize(35.f, 90.f);
 
 	bUseControllerRotationYaw = true;
 	GetCharacterMovement()->MaxWalkSpeed = 450.f;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 
-	// 메시 원점은 발바닥, 미사모 임포트 결과 정면이 -X → 캡슐 바닥에 맞추고 +X를 보게 돌린다.
-	GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -90.f), FRotator(0.f, 180.f, 0.f));
-
 	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
 	FirstPersonCamera->SetupAttachment(GetCapsuleComponent());
-	FirstPersonCamera->SetRelativeLocation(FVector(12.f, 0.f, 70.f));
+	FirstPersonCamera->SetRelativeLocation(FVector(0.f, 0.f, 70.f));
 	FirstPersonCamera->bUsePawnControlRotation = true;
 	FirstPersonCamera->SetFieldOfView(90.f);
+
+	// 1인칭 템플릿처럼 메시를 카메라에 붙여 시점과 함께 움직이게 한다.
+	// 메시 원점은 발바닥, 미사모 임포트 결과 정면이 -X라 180도 돌린다. 위치는 BP에서 눈높이에 맞춘다.
+	GetMesh()->SetupAttachment(FirstPersonCamera);
+	GetMesh()->SetRelativeLocationAndRotation(FVector(-5.f, 0.f, -160.f), FRotator(0.f, 180.f, 0.f));
+	GetMesh()->SetCastShadow(false);
 
 	SwordMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SwordMesh"));
 	SwordMesh->SetupAttachment(GetMesh(), WeaponSocketName);
@@ -48,18 +48,45 @@ void AProjectRCharacter::OnConstruction(const FTransform& Transform)
 
 	// 블루프린트에서 소켓 이름을 바꿨을 수 있으니 다시 붙인다. 에디터 배치 시에도 손에 보이게 여기서 한다.
 	SwordMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, WeaponSocketName);
+
+	ApplyFirstPersonVisibility();
 }
 
-void AProjectRCharacter::Tick(float DeltaSeconds)
+void AProjectRCharacter::ApplyFirstPersonVisibility()
 {
-	Super::Tick(DeltaSeconds);
-
-	// 자세가 몸을 비트는 애니메이션이라 캡슐 기준 카메라는 눈과 어긋난다. 머리 본을 따라간다.
-	if (!CameraBoneName.IsNone() && GetMesh()->GetBoneIndex(CameraBoneName) != INDEX_NONE)
+	USkeletalMeshComponent* BodyMesh = GetMesh();
+	USkeletalMesh* MeshAsset = BodyMesh->GetSkeletalMeshAsset();
+	if (!MeshAsset)
 	{
-		const FRotator YawRotation(0.f, GetControlRotation().Yaw, 0.f);
-		FirstPersonCamera->SetWorldLocation(
-			GetMesh()->GetBoneLocation(CameraBoneName) + YawRotation.RotateVector(CameraBoneOffset));
+		return;
+	}
+
+	for (const FName& BoneName : HiddenBoneNames)
+	{
+		if (BodyMesh->GetBoneIndex(BoneName) != INDEX_NONE)
+		{
+			BodyMesh->HideBoneByName(BoneName, PBO_None);
+		}
+	}
+
+	const FSkeletalMeshRenderData* RenderData = MeshAsset->GetResourceForRendering();
+	if (!RenderData)
+	{
+		return;
+	}
+	for (int32 LODIndex = 0; LODIndex < RenderData->LODRenderData.Num(); ++LODIndex)
+	{
+		BodyMesh->ShowAllMaterialSections(LODIndex);
+		const TArray<FSkelMeshRenderSection>& Sections = RenderData->LODRenderData[LODIndex].RenderSections;
+		for (int32 SectionIndex = 0; SectionIndex < Sections.Num(); ++SectionIndex)
+		{
+			const int32 MaterialIndex = Sections[SectionIndex].MaterialIndex;
+			const TArray<FSkeletalMaterial>& Materials = MeshAsset->GetMaterials();
+			if (Materials.IsValidIndex(MaterialIndex) && HiddenMaterialSlotNames.Contains(Materials[MaterialIndex].MaterialSlotName))
+			{
+				BodyMesh->ShowMaterialSection(MaterialIndex, SectionIndex, false, LODIndex);
+			}
+		}
 	}
 }
 
@@ -67,10 +94,7 @@ void AProjectRCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (!HiddenHeadBoneName.IsNone() && GetMesh()->GetBoneIndex(HiddenHeadBoneName) != INDEX_NONE)
-	{
-		GetMesh()->HideBoneByName(HiddenHeadBoneName, PBO_None);
-	}
+	ApplyFirstPersonVisibility();
 
 	if (const APlayerController* PC = Cast<APlayerController>(GetController()))
 	{

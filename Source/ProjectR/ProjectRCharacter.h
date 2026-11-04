@@ -27,8 +27,6 @@ public:
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-	virtual void Tick(float DeltaSeconds) override;
-
 protected:
 	virtual void BeginPlay() override;
 
@@ -42,17 +40,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	FName WeaponSocketName = TEXT("RightHand");
 
-	/** 1인칭 카메라에 걸리지 않도록 숨길 본(하위 본 포함). None이면 숨기지 않는다. */
+	/** 1인칭에서 숨길 본(하위 본 포함). 팔만 남기도록 목과 다리를 숨긴다. */
 	UPROPERTY(EditDefaultsOnly, Category = "Camera")
-	FName HiddenHeadBoneName = TEXT("Head");
+	TArray<FName> HiddenBoneNames = { TEXT("Neck"), TEXT("LeftUpLeg"), TEXT("RightUpLeg") };
 
-	/** 카메라가 매 프레임 따라갈 본(눈 위치 기준). None이면 캡슐에 고정된 위치를 쓴다. */
+	/** 1인칭에서 숨길 메시 재질 슬롯. 몸통·머리 부분 재질을 숨긴다. */
 	UPROPERTY(EditDefaultsOnly, Category = "Camera")
-	FName CameraBoneName = TEXT("Head");
-
-	/** 따라갈 본에서 카메라까지의 오프셋(cm). X = 시선 앞, Y = 오른쪽, Z = 위. 시선 좌우 회전만 반영한다. */
-	UPROPERTY(EditDefaultsOnly, Category = "Camera")
-	FVector CameraBoneOffset = FVector(10.f, 0.f, 8.f);
+	TArray<FName> HiddenMaterialSlotNames = {
+		TEXT("M_Player_Hair"), TEXT("M_Player_Eye"), TEXT("M_Player_Leather"),
+		TEXT("M_Player_Pants"), TEXT("M_Player_Boots"), TEXT("M_Player_Metal") };
 
 	/** 콤보 순서대로 재생할 공격 몽타주. */
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
@@ -78,6 +74,9 @@ protected:
 	float AttackDamage = 10.f;
 
 private:
+	/** HiddenBoneNames와 HiddenMaterialSlotNames를 메시에 적용해 팔만 보이게 한다. */
+	void ApplyFirstPersonVisibility();
+
 	void CreateInput();
 
 	void Move(const FInputActionValue& Value);

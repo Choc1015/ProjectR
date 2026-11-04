@@ -17,7 +17,8 @@ class AnimationAssetTools(unreal.ToolsetDefinition):
     def import_skeletal_mesh(
             folder_path: str, asset_name: str, source_file: str,
             skeleton: unreal.Skeleton | None = None, uniform_scale: float = 1.0,
-            import_materials: bool = False, replace_existing: bool = False) -> unreal.SkeletalMesh:
+            import_materials: bool = False, replace_existing: bool = False,
+            update_reference_pose: bool = False) -> unreal.SkeletalMesh:
         """Imports the skinned mesh in an FBX file as a SkeletalMesh. Animations in the file are ignored.
 
         Args:
@@ -25,12 +26,13 @@ class AnimationAssetTools(unreal.ToolsetDefinition):
             asset_name: The name of the new asset.
             source_file: The absolute path to the FBX file on disk.
             skeleton: An existing skeleton to bind to. When None, a new Skeleton asset is created.
-                When given, the skeleton's reference pose is updated to the imported mesh.
             uniform_scale: Multiplier applied to the file's geometry, e.g. 100 for a file whose
                 meters were read as centimeters.
             import_materials: When True, create Material assets for the file's materials.
             replace_existing: When True, overwrite an existing asset at the same path in place,
                 keeping references to it. When False, raises if the asset exists.
+            update_reference_pose: When True, the given skeleton's reference pose is replaced by
+                the imported mesh's bind pose. This affects every mesh using the skeleton.
 
         Returns:
             The imported SkeletalMesh.
@@ -39,7 +41,7 @@ class AnimationAssetTools(unreal.ToolsetDefinition):
         options.import_mesh = True
         options.import_animations = False
         options.import_materials = import_materials
-        settings = {'import_uniform_scale': uniform_scale, 'update_skeleton_reference_pose': skeleton is not None}
+        settings = {'import_uniform_scale': uniform_scale, 'update_skeleton_reference_pose': update_reference_pose}
         for key, value in settings.items():
             options.skeletal_mesh_import_data.set_editor_property(key, value)
         assets = AnimationAssetTools._import(

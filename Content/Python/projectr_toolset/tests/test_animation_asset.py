@@ -53,7 +53,7 @@ class AnimationAssetToolsTestCase(ToolCallTestCase):
         """Overwrites the existing asset at the same path when replace_existing is True."""
         replaced = AnimationAssetTools.import_skeletal_mesh(
             self.folder, 'SK_Test', _IDLE_FBX, skeleton=self.skeleton,
-            uniform_scale=100.0, replace_existing=True)
+            uniform_scale=100.0, replace_existing=True, update_reference_pose=True)
         self.assertEqual(replaced.get_path_name(), self.mesh.get_path_name())
         self.assertEqual(replaced.get_editor_property('skeleton'), self.skeleton)
         self.assertGreater(self._height(replaced), 10.0)

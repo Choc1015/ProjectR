@@ -6,6 +6,7 @@
 #include "SkillTreeComponent.generated.h"
 
 class UTexture2D;
+class UFontFace;
 
 /** 스킬 표(CSV) 한 줄. 행 이름이 스킬 ID다. Parent가 비어 있으면 중심 스킬. */
 USTRUCT(BlueprintType)
@@ -71,9 +72,13 @@ struct FSkillTreeStyle
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tooltip")
 	FMargin TooltipPadding = FMargin(30.f, 52.f, 30.f, 46.f);
 
+	/** 설명창 글꼴. 비우면 엔진 기본 글꼴. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tooltip")
+	TObjectPtr<UFontFace> TooltipFont;
+
 	/** 이름 / 상태 줄 / 설명 글자 크기 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tooltip")
-	FIntVector TooltipFontSizes = FIntVector(16, 11, 12);
+	FIntVector TooltipFontSizes = FIntVector(22, 15, 17);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tooltip", meta = (ClampMin = "100.0"))
 	float TooltipWidth = 300.f;

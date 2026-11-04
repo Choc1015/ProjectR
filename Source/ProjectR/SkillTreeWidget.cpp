@@ -11,7 +11,9 @@
 #include "Components/CanvasPanelSlot.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "Engine/FontFace.h"
 #include "Engine/Texture2D.h"
+#include "Fonts/CompositeFont.h"
 #include "SkillTreeComponent.h"
 
 namespace
@@ -386,6 +388,13 @@ UWidget* USkillTreeWidget::MakeTooltip(FName Id, const FSkillTreeRow& Row)
 	LinesSlot->SetVerticalAlignment(VAlign_Center);
 
 	const float TextWidth = Width - Style.TooltipPadding.Left - Style.TooltipPadding.Right;
+	if (Style.TooltipFont && !TooltipComposite.IsValid())
+	{
+		TSharedRef<FCompositeFont> Composite = MakeShared<FCompositeFont>();
+		FTypefaceEntry& Entry = Composite->DefaultTypeface.Fonts.Add_GetRef(FTypefaceEntry(TEXT("Regular")));
+		Entry.Font = FFontData(Style.TooltipFont);
+		TooltipComposite = Composite;
+	}
 	auto AddText = [&](const FText& Text, int32 FontSize, float Gap) -> UTextBlock*
 	{
 		UTextBlock* Block = WidgetTree->ConstructWidget<UTextBlock>();
@@ -393,7 +402,7 @@ UWidget* USkillTreeWidget::MakeTooltip(FName Id, const FSkillTreeRow& Row)
 		Block->SetColorAndOpacity(FSlateColor(Style.TextColor));
 		Block->SetAutoWrapText(true);
 		Block->SetWrapTextAt(TextWidth);
-		FSlateFontInfo Font = Block->GetFont();
+		FSlateFontInfo Font = TooltipComposite.IsValid() ? FSlateFontInfo(TooltipComposite, FontSize) : Block->GetFont();
 		Font.Size = FontSize;
 		Block->SetFont(Font);
 		if (UVerticalBoxSlot* LineSlot = Lines->AddChildToVerticalBox(Block))

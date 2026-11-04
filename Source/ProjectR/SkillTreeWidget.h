@@ -12,6 +12,7 @@ class USkillTreeComponent;
 class USkillTreeWidget;
 class UWidget;
 struct FSkillTreeRow;
+struct FCompositeFont;
 
 /** 클릭하면 자기 스킬 ID를 위젯에 알려 주는 노드 버튼 */
 UCLASS()
@@ -92,6 +93,9 @@ private:
 	/** 설명창의 상태 줄(비용·해금 여부). 해금할 때마다 갱신한다. */
 	UPROPERTY(Transient)
 	TMap<FName, TObjectPtr<UTextBlock>> TooltipStatus;
+
+	/** 설명창 글꼴(Style.TooltipFont로 만든 것). 글꼴 에셋은 컴포넌트가 붙잡고 있다. */
+	TSharedPtr<const FCompositeFont> TooltipComposite;
 
 	TArray<FName> LineChildIds;
 	TMap<FName, TArray<FName>> Children;

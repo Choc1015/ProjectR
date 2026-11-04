@@ -478,7 +478,7 @@ void USkillTreeWidget::Refresh()
 				State = FText::FromString(TEXT("포인트 부족"));
 				Color = FLinearColor(0.45f, 0.1f, 0.08f);
 			}
-			Status->SetText(FText::Format(FText::FromString(TEXT("비용 {0}  ·  {1}")), FText::AsNumber(Row ? Row->Cost : 0), State));
+			Status->SetText(FText::Format(FText::FromString(TEXT("비용 {0}  /  {1}")), FText::AsNumber(Row ? Row->Cost : 0), State));
 			Status->SetColorAndOpacity(FSlateColor(Color));
 		}
 	}

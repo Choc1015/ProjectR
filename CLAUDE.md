@@ -87,7 +87,7 @@
   (`SourceArt/Export/A_Attack*_ArmsOnly.fbx`). Hit 노티파이는 오른손 속도가 최대인 프레임에 둔다.
 - 폴더 규칙: 개발용 스크립트는 `Tools/`, 프로젝트 툴셋은 `Content/Python/projectr_toolset/`
 - 네이밍 규칙: UE 표준 접두사(`BP_`, `WBP_`, `M_`, `MI_`, `SM_`, `SK_`, `T_`, `ABP_`, `NS_`)
-- 글꼴: 상업적 무료(SIL OFL 등)만 쓴다. 원본·라이선스는 `SourceArt/Fonts/`, 에셋은 `/Game/UI/Fonts/FF_<이름>`(FontFace, Inline). 설명창 글꼴은 나눔손글씨 펜(`FF_NanumPenScript`)
+- 글꼴: 상업적 무료(SIL OFL 등)만 쓴다. 원본·라이선스는 `SourceArt/Fonts/`, 에셋은 `/Game/UI/Fonts/FF_<이름>`(FontFace, Inline). 설명창 글꼴은 나눔손글씨 펜(`FF_NanumPenScript`). 이 글꼴엔 `·` 같은 특수기호가 없어 네모로 깨진다(표 설명에도 쓰지 말 것)
 
 ## 에셋 규칙 (블렌더 → 언리얼)
 <!-- 첫 에셋을 언리얼로 가져와 방향·크기를 확인한 뒤 확정한 값을 적는다. -->

@@ -44,8 +44,8 @@
 
 ## 프로젝트 구조
 <!-- 자주 조회하는 정보를 적어 두면 매번 MCP로 확인할 필요가 없다. 알게 될 때마다 채운다. -->
-- 엔진 버전: 5.8 (C:Program Filespic GamesE_5.8, C++ ˪�˓� `PROJECTR`)
-- 주요 레벨: GameDefaultMap = `/Engine/Maps/Templates/OpenWorld` (템플릿 기본값)
+- 엔진 버전: UE 5.8 (`C:\Program Files\Epic Games\UE_5.8`), C++ 모듈 `ProjectR`
+- 주요 레벨: `/Game/DevMap`, `/Game/Maps/DevMap` (GameDefaultMap은 아직 템플릿 기본값 `/Engine/Maps/Templates/OpenWorld`)
 - Unreal MCP: `http://127.0.0.1:8010/mcp` (Config/DefaultEditorPerProjectUserSettings.ini에서 자동 시작)
 - 주요 C++ 클래스 / 블루프린트 위치:
 - 폴더 규칙:

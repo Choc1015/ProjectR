@@ -15,6 +15,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Rendering/SkeletalMeshRenderData.h"
 #include "SkillTreeComponent.h"
+#include "PlayerStatsComponent.h"
 #include "SkillTreeWidget.h"
 #include "TimerManager.h"
 
@@ -51,6 +52,7 @@ AProjectRCharacter::AProjectRCharacter()
 	GetMesh()->SetCastShadow(false);
 
 	SkillTree = CreateDefaultSubobject<USkillTreeComponent>(TEXT("SkillTree"));
+	Stats = CreateDefaultSubobject<UPlayerStatsComponent>(TEXT("Stats"));
 	SwordMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SwordMesh"));
 	SwordMesh->SetupAttachment(GetMesh(), WeaponSocketName);
 	SwordMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -381,7 +383,9 @@ void AProjectRCharacter::PlayComboAttack(int32 Index)
 	ComboIndex = Index;
 	bComboQueued = false;
 
-	const float Duration = AnimInstance->Montage_Play(Montage);
+	// 공격 속도 스탯(100 = 원래 속도)만큼 빨리 재생한다. Duration도 빨라진 길이라 판정·콤보 타이밍이 같이 당겨진다.
+	const float PlayRate = FMath::Max(0.1f, Stats->GetStat(EPlayerStat::AttackSpeed) / 100.f);
+	const float Duration = AnimInstance->Montage_Play(Montage, PlayRate, EMontagePlayReturnType::Duration);
 	if (Duration <= 0.f)
 	{
 		ResetCombo();
@@ -443,10 +447,19 @@ void AProjectRCharacter::PerformHitTrace()
 		if (HitActor && !Damaged.Contains(HitActor))
 		{
 			Damaged.Add(HitActor);
-			UGameplayStatics::ApplyPointDamage(HitActor, AttackDamage, GetActorForwardVector(), Hit,
+			bool bCrit = false;
+			const float Damage = Stats->RollOutgoingDamage(false, bCrit);
+			UGameplayStatics::ApplyPointDamage(HitActor, Damage, GetActorForwardVector(), Hit,
 				GetController(), this, nullptr);
 		}
 	}
+}
+
+float AProjectRCharacter::TakeDamage(float DamageAmount, const FDamageEvent& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	const float Raw = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	const UPlayerStatsComponent* AttackerStats = DamageCauser ? DamageCauser->FindComponentByClass<UPlayerStatsComponent>() : nullptr;
+	return Stats->ApplyIncomingDamage(Raw, AttackerStats ? AttackerStats->GetStat(EPlayerStat::ArmorPenetration) : 0.f);
 }
 
 void AProjectRCharacter::OnComboTime()

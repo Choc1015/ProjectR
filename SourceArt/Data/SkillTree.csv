@@ -1,65 +1,65 @@
-﻿---,DisplayName,Parent,Cost,Icon,Description
-Swordsmanship,검사의 길,,1,/Game/UI/SkillIcons/T_Skill_Swordsmanship.T_Skill_Swordsmanship,모든 기술의 시작
-Endurance,인내,Swordsmanship,1,/Game/UI/SkillIcons/T_Skill_Endurance.T_Skill_Endurance,버티는 힘. 최대 체력 +5%
-Wisdom,지혜,Swordsmanship,1,/Game/UI/SkillIcons/T_Skill_Wisdom.T_Skill_Wisdom,마나를 다루는 힘. 최대 마나 +5%
-Valor,용맹,Swordsmanship,1,/Game/UI/SkillIcons/T_Skill_Valor.T_Skill_Valor,베는 힘. 기본 공격력 +5%
-End_Life1,단련된 몸,Endurance,1,/Game/UI/SkillIcons/T_Skill_End_Life1.T_Skill_End_Life1,최대 체력 +10%
-End_Life2,두꺼운 피부,End_Life1,1,/Game/UI/SkillIcons/T_Skill_End_Life2.T_Skill_End_Life2,최대 체력 +10%
-End_Life3,버티는 자,End_Life2,2,/Game/UI/SkillIcons/T_Skill_End_Life3.T_Skill_End_Life3,체력 30% 이하일 때 받는 피해 -15%
-End_Life4,거인의 체력,End_Life2,2,/Game/UI/SkillIcons/T_Skill_End_Life4.T_Skill_End_Life4,최대 체력 +15%
-End_Life5,불굴,End_Life4,3,/Game/UI/SkillIcons/T_Skill_End_Life5.T_Skill_End_Life5,죽을 피해를 받으면 체력 1로 버팀 (120초에 1번)
-End_Regen1,숨 고르기,Endurance,1,/Game/UI/SkillIcons/T_Skill_End_Regen1.T_Skill_End_Regen1,체력 재생 +1/초
-End_Regen2,휴식,End_Regen1,1,/Game/UI/SkillIcons/T_Skill_End_Regen2.T_Skill_End_Regen2,전투 밖 체력 재생 2배
-End_Regen3,전리품,End_Regen1,2,/Game/UI/SkillIcons/T_Skill_End_Regen3.T_Skill_End_Regen3,적 처치 시 체력 5% 회복
-End_Regen4,끈질긴 생명,End_Regen1,2,/Game/UI/SkillIcons/T_Skill_End_Regen4.T_Skill_End_Regen4,체력 재생 +2/초
-End_Regen5,피의 맹세,End_Regen4,3,/Game/UI/SkillIcons/T_Skill_End_Regen5.T_Skill_End_Regen5,준 피해의 3%만큼 체력 회복
-End_Armor1,가죽 갑옷,Endurance,1,/Game/UI/SkillIcons/T_Skill_End_Armor1.T_Skill_End_Armor1,방어력 +5
-End_Armor2,덧댄 갑옷,End_Armor1,1,/Game/UI/SkillIcons/T_Skill_End_Armor2.T_Skill_End_Armor2,방어력 +5
-End_Armor3,정면 대응,End_Armor1,2,/Game/UI/SkillIcons/T_Skill_End_Armor3.T_Skill_End_Armor3,앞에서 받는 피해 -10%
-End_Armor4,강철 갑옷,End_Armor2,2,/Game/UI/SkillIcons/T_Skill_End_Armor4.T_Skill_End_Armor4,방어력 +10
-End_Armor5,가시 갑옷,End_Armor3,3,/Game/UI/SkillIcons/T_Skill_End_Armor5.T_Skill_End_Armor5,맞을 때 받은 피해의 20%를 되돌려 줌
-End_Poise1,굳은 다리,End_Armor1,1,/Game/UI/SkillIcons/T_Skill_End_Poise1.T_Skill_End_Poise1,강인도 +10
-End_Poise2,흔들림 없음,End_Poise1,1,/Game/UI/SkillIcons/T_Skill_End_Poise2.T_Skill_End_Poise2,경직 시간 -20%
-End_Poise3,돌진 자세,End_Poise1,2,/Game/UI/SkillIcons/T_Skill_End_Poise3.T_Skill_End_Poise3,공격 중 강인도 +20
-End_Poise4,바위,End_Poise2,2,/Game/UI/SkillIcons/T_Skill_End_Poise4.T_Skill_End_Poise4,강인도 +20
-End_Poise5,철벽,End_Poise3,3,/Game/UI/SkillIcons/T_Skill_End_Poise5.T_Skill_End_Poise5,공격 모션 중에는 경직되지 않음
-Wis_Mana1,깊은 샘,Wisdom,1,/Game/UI/SkillIcons/T_Skill_Wis_Mana1.T_Skill_Wis_Mana1,최대 마나 +10%
-Wis_Mana2,넓은 그릇,Wis_Mana1,1,/Game/UI/SkillIcons/T_Skill_Wis_Mana2.T_Skill_Wis_Mana2,최대 마나 +10%
-Wis_Mana3,충만,Wis_Mana2,2,/Game/UI/SkillIcons/T_Skill_Wis_Mana3.T_Skill_Wis_Mana3,마나 50% 이상일 때 스킬 피해 +10%
-Wis_Mana4,끝없는 샘,Wis_Mana2,2,/Game/UI/SkillIcons/T_Skill_Wis_Mana4.T_Skill_Wis_Mana4,최대 마나 +15%
-Wis_Mana5,마나 방패,Wis_Mana4,3,/Game/UI/SkillIcons/T_Skill_Wis_Mana5.T_Skill_Wis_Mana5,받는 피해의 15%를 마나가 대신 받음
-Wis_Flow1,맑은 정신,Wisdom,1,/Game/UI/SkillIcons/T_Skill_Wis_Flow1.T_Skill_Wis_Flow1,마나 재생 +10%
-Wis_Flow2,전투의 리듬,Wis_Flow1,1,/Game/UI/SkillIcons/T_Skill_Wis_Flow2.T_Skill_Wis_Flow2,공격이 맞으면 마나 2 회복
-Wis_Flow3,고요한 숨,Wis_Flow1,2,/Game/UI/SkillIcons/T_Skill_Wis_Flow3.T_Skill_Wis_Flow3,마나 재생 +15%
-Wis_Flow4,영혼 수확,Wis_Flow2,2,/Game/UI/SkillIcons/T_Skill_Wis_Flow4.T_Skill_Wis_Flow4,적 처치 시 마나 10% 회복
-Wis_Flow5,명상,Wis_Flow3,3,/Game/UI/SkillIcons/T_Skill_Wis_Flow5.T_Skill_Wis_Flow5,3초 동안 가만히 있으면 마나 재생 3배
-Wis_Thrift1,아끼는 손,Wis_Mana1,1,/Game/UI/SkillIcons/T_Skill_Wis_Thrift1.T_Skill_Wis_Thrift1,스킬 마나 소비 -5%
-Wis_Thrift2,정확한 주문,Wis_Thrift1,1,/Game/UI/SkillIcons/T_Skill_Wis_Thrift2.T_Skill_Wis_Thrift2,스킬 마나 소비 -5%
-Wis_Thrift3,이어지는 기술,Wis_Thrift2,2,/Game/UI/SkillIcons/T_Skill_Wis_Thrift3.T_Skill_Wis_Thrift3,스킬을 연달아 쓰면 두 번째는 소비 -20%
-Wis_Thrift4,숙련된 손,Wis_Thrift2,2,/Game/UI/SkillIcons/T_Skill_Wis_Thrift4.T_Skill_Wis_Thrift4,스킬 마나 소비 -10%
-Wis_Thrift5,공짜 영감,Wis_Thrift4,3,/Game/UI/SkillIcons/T_Skill_Wis_Thrift5.T_Skill_Wis_Thrift5,10% 확률로 마나를 쓰지 않음
-Wis_Cycle1,빠른 손놀림,Wis_Flow1,1,/Game/UI/SkillIcons/T_Skill_Wis_Cycle1.T_Skill_Wis_Cycle1,스킬 재사용 시간 -5%
-Wis_Cycle2,몸에 익음,Wis_Cycle1,1,/Game/UI/SkillIcons/T_Skill_Wis_Cycle2.T_Skill_Wis_Cycle2,스킬 재사용 시간 -5%
-Wis_Cycle3,승리의 여유,Wis_Cycle1,2,/Game/UI/SkillIcons/T_Skill_Wis_Cycle3.T_Skill_Wis_Cycle3,적 처치 시 재사용 시간 1초 감소
-Wis_Cycle4,달인,Wis_Cycle2,2,/Game/UI/SkillIcons/T_Skill_Wis_Cycle4.T_Skill_Wis_Cycle4,스킬 재사용 시간 -10%
-Wis_Cycle5,시간 비틀기,Wis_Cycle4,3,/Game/UI/SkillIcons/T_Skill_Wis_Cycle5.T_Skill_Wis_Cycle5,스킬을 쓰면 15% 확률로 재사용 시간 초기화
-Val_Blade1,날 세우기,Valor,1,/Game/UI/SkillIcons/T_Skill_Val_Blade1.T_Skill_Val_Blade1,기본 공격력 +5%
-Val_Blade2,무게 싣기,Val_Blade1,1,/Game/UI/SkillIcons/T_Skill_Val_Blade2.T_Skill_Val_Blade2,기본 공격력 +5%
-Val_Blade3,결정타,Val_Blade2,2,/Game/UI/SkillIcons/T_Skill_Val_Blade3.T_Skill_Val_Blade3,콤보 마지막 타 피해 +20%
-Val_Blade4,빠른 검,Val_Blade2,2,/Game/UI/SkillIcons/T_Skill_Val_Blade4.T_Skill_Val_Blade4,공격 속도 +10%
-Val_Blade5,검풍,Val_Blade3,3,/Game/UI/SkillIcons/T_Skill_Val_Blade5.T_Skill_Val_Blade5,콤보 마지막 타가 앞으로 충격파를 날림
-Val_Art1,기술 연마,Valor,1,/Game/UI/SkillIcons/T_Skill_Val_Art1.T_Skill_Val_Art1,스킬 공격력 +5%
-Val_Art2,깊은 이해,Val_Art1,1,/Game/UI/SkillIcons/T_Skill_Val_Art2.T_Skill_Val_Art2,스킬 공격력 +5%
-Val_Art3,넓은 베기,Val_Art1,2,/Game/UI/SkillIcons/T_Skill_Val_Art3.T_Skill_Val_Art3,스킬 범위 +10%
-Val_Art4,기술의 정점,Val_Art2,2,/Game/UI/SkillIcons/T_Skill_Val_Art4.T_Skill_Val_Art4,스킬 공격력 +10%
-Val_Art5,마무리 일격,Val_Art4,3,/Game/UI/SkillIcons/T_Skill_Val_Art5.T_Skill_Val_Art5,체력 20% 이하인 적에게 스킬 피해 +30%
-Val_Crit1,날카로운 눈,Valor,1,/Game/UI/SkillIcons/T_Skill_Val_Crit1.T_Skill_Val_Crit1,치명타 확률 +3%
-Val_Crit2,깊은 상처,Val_Crit1,1,/Game/UI/SkillIcons/T_Skill_Val_Crit2.T_Skill_Val_Crit2,치명타 피해 +15%
-Val_Crit3,약점 간파,Val_Crit1,2,/Game/UI/SkillIcons/T_Skill_Val_Crit3.T_Skill_Val_Crit3,치명타 확률 +3%
-Val_Crit4,치명상,Val_Crit2,2,/Game/UI/SkillIcons/T_Skill_Val_Crit4.T_Skill_Val_Crit4,치명타 피해 +20%
-Val_Crit5,연속 급소,Val_Crit3,3,/Game/UI/SkillIcons/T_Skill_Val_Crit5.T_Skill_Val_Crit5,치명타가 터지면 다음 공격도 확정 치명타
-Val_Break1,묵직한 일격,Val_Blade1,1,/Game/UI/SkillIcons/T_Skill_Val_Break1.T_Skill_Val_Break1,적 경직 피해 +10%
-Val_Break2,갑옷 뚫기,Val_Break1,1,/Game/UI/SkillIcons/T_Skill_Val_Break2.T_Skill_Val_Break2,방어 관통 +5
-Val_Break3,무너뜨리기,Val_Break1,2,/Game/UI/SkillIcons/T_Skill_Val_Break3.T_Skill_Val_Break3,적 경직 피해 +15%
-Val_Break4,갑옷 부수기,Val_Break2,2,/Game/UI/SkillIcons/T_Skill_Val_Break4.T_Skill_Val_Break4,방어 관통 +10
-Val_Break5,분쇄,Val_Break4,3,/Game/UI/SkillIcons/T_Skill_Val_Break5.T_Skill_Val_Break5,공격한 적의 방어력을 5초 동안 20% 낮춤
+﻿---,DisplayName,Parent,Cost,Icon,Description,Stat,StatValue,bStatPercent
+Swordsmanship,검사의 길,,1,/Game/UI/SkillIcons/T_Skill_Swordsmanship.T_Skill_Swordsmanship,모든 기술의 시작,None,0,False
+Endurance,인내,Swordsmanship,1,/Game/UI/SkillIcons/T_Skill_Endurance.T_Skill_Endurance,버티는 힘. 최대 체력 +5%,MaxHealth,5,True
+Wisdom,지혜,Swordsmanship,1,/Game/UI/SkillIcons/T_Skill_Wisdom.T_Skill_Wisdom,마나를 다루는 힘. 최대 마나 +5%,MaxMana,5,True
+Valor,용맹,Swordsmanship,1,/Game/UI/SkillIcons/T_Skill_Valor.T_Skill_Valor,베는 힘. 기본 공격력 +5%,AttackPower,5,True
+End_Life1,단련된 몸,Endurance,1,/Game/UI/SkillIcons/T_Skill_End_Life1.T_Skill_End_Life1,최대 체력 +10%,MaxHealth,10,True
+End_Life2,두꺼운 피부,End_Life1,1,/Game/UI/SkillIcons/T_Skill_End_Life2.T_Skill_End_Life2,최대 체력 +10%,MaxHealth,10,True
+End_Life3,버티는 자,End_Life2,2,/Game/UI/SkillIcons/T_Skill_End_Life3.T_Skill_End_Life3,체력 30% 이하일 때 받는 피해 -15%,None,0,False
+End_Life4,거인의 체력,End_Life2,2,/Game/UI/SkillIcons/T_Skill_End_Life4.T_Skill_End_Life4,최대 체력 +15%,MaxHealth,15,True
+End_Life5,불굴,End_Life4,3,/Game/UI/SkillIcons/T_Skill_End_Life5.T_Skill_End_Life5,죽을 피해를 받으면 체력 1로 버팀 (120초에 1번),None,0,False
+End_Regen1,숨 고르기,Endurance,1,/Game/UI/SkillIcons/T_Skill_End_Regen1.T_Skill_End_Regen1,체력 재생 +1/초,HealthRegen,1,False
+End_Regen2,휴식,End_Regen1,1,/Game/UI/SkillIcons/T_Skill_End_Regen2.T_Skill_End_Regen2,전투 밖 체력 재생 2배,None,0,False
+End_Regen3,전리품,End_Regen1,2,/Game/UI/SkillIcons/T_Skill_End_Regen3.T_Skill_End_Regen3,적 처치 시 체력 5% 회복,None,0,False
+End_Regen4,끈질긴 생명,End_Regen1,2,/Game/UI/SkillIcons/T_Skill_End_Regen4.T_Skill_End_Regen4,체력 재생 +2/초,HealthRegen,2,False
+End_Regen5,피의 맹세,End_Regen4,3,/Game/UI/SkillIcons/T_Skill_End_Regen5.T_Skill_End_Regen5,준 피해의 3%만큼 체력 회복,None,0,False
+End_Armor1,가죽 갑옷,Endurance,1,/Game/UI/SkillIcons/T_Skill_End_Armor1.T_Skill_End_Armor1,방어력 +5,Armor,5,False
+End_Armor2,덧댄 갑옷,End_Armor1,1,/Game/UI/SkillIcons/T_Skill_End_Armor2.T_Skill_End_Armor2,방어력 +5,Armor,5,False
+End_Armor3,정면 대응,End_Armor1,2,/Game/UI/SkillIcons/T_Skill_End_Armor3.T_Skill_End_Armor3,앞에서 받는 피해 -10%,None,0,False
+End_Armor4,강철 갑옷,End_Armor2,2,/Game/UI/SkillIcons/T_Skill_End_Armor4.T_Skill_End_Armor4,방어력 +10,Armor,10,False
+End_Armor5,가시 갑옷,End_Armor3,3,/Game/UI/SkillIcons/T_Skill_End_Armor5.T_Skill_End_Armor5,맞을 때 받은 피해의 20%를 되돌려 줌,None,0,False
+End_Poise1,굳은 다리,End_Armor1,1,/Game/UI/SkillIcons/T_Skill_End_Poise1.T_Skill_End_Poise1,강인도 +10,Poise,10,False
+End_Poise2,흔들림 없음,End_Poise1,1,/Game/UI/SkillIcons/T_Skill_End_Poise2.T_Skill_End_Poise2,경직 시간 -20%,None,0,False
+End_Poise3,돌진 자세,End_Poise1,2,/Game/UI/SkillIcons/T_Skill_End_Poise3.T_Skill_End_Poise3,공격 중 강인도 +20,None,0,False
+End_Poise4,바위,End_Poise2,2,/Game/UI/SkillIcons/T_Skill_End_Poise4.T_Skill_End_Poise4,강인도 +20,Poise,20,False
+End_Poise5,철벽,End_Poise3,3,/Game/UI/SkillIcons/T_Skill_End_Poise5.T_Skill_End_Poise5,공격 모션 중에는 경직되지 않음,None,0,False
+Wis_Mana1,깊은 샘,Wisdom,1,/Game/UI/SkillIcons/T_Skill_Wis_Mana1.T_Skill_Wis_Mana1,최대 마나 +10%,MaxMana,10,True
+Wis_Mana2,넓은 그릇,Wis_Mana1,1,/Game/UI/SkillIcons/T_Skill_Wis_Mana2.T_Skill_Wis_Mana2,최대 마나 +10%,MaxMana,10,True
+Wis_Mana3,충만,Wis_Mana2,2,/Game/UI/SkillIcons/T_Skill_Wis_Mana3.T_Skill_Wis_Mana3,마나 50% 이상일 때 스킬 피해 +10%,None,0,False
+Wis_Mana4,끝없는 샘,Wis_Mana2,2,/Game/UI/SkillIcons/T_Skill_Wis_Mana4.T_Skill_Wis_Mana4,최대 마나 +15%,MaxMana,15,True
+Wis_Mana5,마나 방패,Wis_Mana4,3,/Game/UI/SkillIcons/T_Skill_Wis_Mana5.T_Skill_Wis_Mana5,받는 피해의 15%를 마나가 대신 받음,None,0,False
+Wis_Flow1,맑은 정신,Wisdom,1,/Game/UI/SkillIcons/T_Skill_Wis_Flow1.T_Skill_Wis_Flow1,마나 재생 +10%,ManaRegen,10,True
+Wis_Flow2,전투의 리듬,Wis_Flow1,1,/Game/UI/SkillIcons/T_Skill_Wis_Flow2.T_Skill_Wis_Flow2,공격이 맞으면 마나 2 회복,None,0,False
+Wis_Flow3,고요한 숨,Wis_Flow1,2,/Game/UI/SkillIcons/T_Skill_Wis_Flow3.T_Skill_Wis_Flow3,마나 재생 +15%,ManaRegen,15,True
+Wis_Flow4,영혼 수확,Wis_Flow2,2,/Game/UI/SkillIcons/T_Skill_Wis_Flow4.T_Skill_Wis_Flow4,적 처치 시 마나 10% 회복,None,0,False
+Wis_Flow5,명상,Wis_Flow3,3,/Game/UI/SkillIcons/T_Skill_Wis_Flow5.T_Skill_Wis_Flow5,3초 동안 가만히 있으면 마나 재생 3배,None,0,False
+Wis_Thrift1,아끼는 손,Wis_Mana1,1,/Game/UI/SkillIcons/T_Skill_Wis_Thrift1.T_Skill_Wis_Thrift1,스킬 마나 소비 -5%,ManaCostReduction,5,False
+Wis_Thrift2,정확한 주문,Wis_Thrift1,1,/Game/UI/SkillIcons/T_Skill_Wis_Thrift2.T_Skill_Wis_Thrift2,스킬 마나 소비 -5%,ManaCostReduction,5,False
+Wis_Thrift3,이어지는 기술,Wis_Thrift2,2,/Game/UI/SkillIcons/T_Skill_Wis_Thrift3.T_Skill_Wis_Thrift3,스킬을 연달아 쓰면 두 번째는 소비 -20%,None,0,False
+Wis_Thrift4,숙련된 손,Wis_Thrift2,2,/Game/UI/SkillIcons/T_Skill_Wis_Thrift4.T_Skill_Wis_Thrift4,스킬 마나 소비 -10%,ManaCostReduction,10,False
+Wis_Thrift5,공짜 영감,Wis_Thrift4,3,/Game/UI/SkillIcons/T_Skill_Wis_Thrift5.T_Skill_Wis_Thrift5,10% 확률로 마나를 쓰지 않음,None,0,False
+Wis_Cycle1,빠른 손놀림,Wis_Flow1,1,/Game/UI/SkillIcons/T_Skill_Wis_Cycle1.T_Skill_Wis_Cycle1,스킬 재사용 시간 -5%,CooldownReduction,5,False
+Wis_Cycle2,몸에 익음,Wis_Cycle1,1,/Game/UI/SkillIcons/T_Skill_Wis_Cycle2.T_Skill_Wis_Cycle2,스킬 재사용 시간 -5%,CooldownReduction,5,False
+Wis_Cycle3,승리의 여유,Wis_Cycle1,2,/Game/UI/SkillIcons/T_Skill_Wis_Cycle3.T_Skill_Wis_Cycle3,적 처치 시 재사용 시간 1초 감소,None,0,False
+Wis_Cycle4,달인,Wis_Cycle2,2,/Game/UI/SkillIcons/T_Skill_Wis_Cycle4.T_Skill_Wis_Cycle4,스킬 재사용 시간 -10%,CooldownReduction,10,False
+Wis_Cycle5,시간 비틀기,Wis_Cycle4,3,/Game/UI/SkillIcons/T_Skill_Wis_Cycle5.T_Skill_Wis_Cycle5,스킬을 쓰면 15% 확률로 재사용 시간 초기화,None,0,False
+Val_Blade1,날 세우기,Valor,1,/Game/UI/SkillIcons/T_Skill_Val_Blade1.T_Skill_Val_Blade1,기본 공격력 +5%,AttackPower,5,True
+Val_Blade2,무게 싣기,Val_Blade1,1,/Game/UI/SkillIcons/T_Skill_Val_Blade2.T_Skill_Val_Blade2,기본 공격력 +5%,AttackPower,5,True
+Val_Blade3,결정타,Val_Blade2,2,/Game/UI/SkillIcons/T_Skill_Val_Blade3.T_Skill_Val_Blade3,콤보 마지막 타 피해 +20%,None,0,False
+Val_Blade4,빠른 검,Val_Blade2,2,/Game/UI/SkillIcons/T_Skill_Val_Blade4.T_Skill_Val_Blade4,공격 속도 +10%,AttackSpeed,10,False
+Val_Blade5,검풍,Val_Blade3,3,/Game/UI/SkillIcons/T_Skill_Val_Blade5.T_Skill_Val_Blade5,콤보 마지막 타가 앞으로 충격파를 날림,None,0,False
+Val_Art1,기술 연마,Valor,1,/Game/UI/SkillIcons/T_Skill_Val_Art1.T_Skill_Val_Art1,스킬 공격력 +5%,SkillPower,5,True
+Val_Art2,깊은 이해,Val_Art1,1,/Game/UI/SkillIcons/T_Skill_Val_Art2.T_Skill_Val_Art2,스킬 공격력 +5%,SkillPower,5,True
+Val_Art3,넓은 베기,Val_Art1,2,/Game/UI/SkillIcons/T_Skill_Val_Art3.T_Skill_Val_Art3,스킬 범위 +10%,None,0,False
+Val_Art4,기술의 정점,Val_Art2,2,/Game/UI/SkillIcons/T_Skill_Val_Art4.T_Skill_Val_Art4,스킬 공격력 +10%,SkillPower,10,True
+Val_Art5,마무리 일격,Val_Art4,3,/Game/UI/SkillIcons/T_Skill_Val_Art5.T_Skill_Val_Art5,체력 20% 이하인 적에게 스킬 피해 +30%,None,0,False
+Val_Crit1,날카로운 눈,Valor,1,/Game/UI/SkillIcons/T_Skill_Val_Crit1.T_Skill_Val_Crit1,치명타 확률 +3%,CritChance,3,False
+Val_Crit2,깊은 상처,Val_Crit1,1,/Game/UI/SkillIcons/T_Skill_Val_Crit2.T_Skill_Val_Crit2,치명타 피해 +15%,CritDamage,15,False
+Val_Crit3,약점 간파,Val_Crit1,2,/Game/UI/SkillIcons/T_Skill_Val_Crit3.T_Skill_Val_Crit3,치명타 확률 +3%,CritChance,3,False
+Val_Crit4,치명상,Val_Crit2,2,/Game/UI/SkillIcons/T_Skill_Val_Crit4.T_Skill_Val_Crit4,치명타 피해 +20%,CritDamage,20,False
+Val_Crit5,연속 급소,Val_Crit3,3,/Game/UI/SkillIcons/T_Skill_Val_Crit5.T_Skill_Val_Crit5,치명타가 터지면 다음 공격도 확정 치명타,None,0,False
+Val_Break1,묵직한 일격,Val_Blade1,1,/Game/UI/SkillIcons/T_Skill_Val_Break1.T_Skill_Val_Break1,적 경직 피해 +10%,StaggerDamage,10,False
+Val_Break2,갑옷 뚫기,Val_Break1,1,/Game/UI/SkillIcons/T_Skill_Val_Break2.T_Skill_Val_Break2,방어 관통 +5,ArmorPenetration,5,False
+Val_Break3,무너뜨리기,Val_Break1,2,/Game/UI/SkillIcons/T_Skill_Val_Break3.T_Skill_Val_Break3,적 경직 피해 +15%,StaggerDamage,15,False
+Val_Break4,갑옷 부수기,Val_Break2,2,/Game/UI/SkillIcons/T_Skill_Val_Break4.T_Skill_Val_Break4,방어 관통 +10,ArmorPenetration,10,False
+Val_Break5,분쇄,Val_Break4,3,/Game/UI/SkillIcons/T_Skill_Val_Break5.T_Skill_Val_Break5,공격한 적의 방어력을 5초 동안 20% 낮춤,None,0,False

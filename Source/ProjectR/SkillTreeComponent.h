@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Engine/DataTable.h"
+#include "PlayerStatsComponent.h"
 #include "SkillTreeComponent.generated.h"
 
 class UTexture2D;
@@ -30,6 +31,17 @@ struct FSkillTreeRow : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill")
 	FText Description;
+
+	/** 해금하면 올라가는 스탯. None이면 수치 보너스가 없는 특수 스킬(효과는 따로 구현). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill")
+	EPlayerStat Stat = EPlayerStat::None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill")
+	float StatValue = 0.f;
+
+	/** 켜면 StatValue를 %로 곱하고(최대 체력 +10%), 끄면 그대로 더한다(방어력 +5). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill")
+	bool bStatPercent = false;
 };
 
 /** 스킬트리 창의 그림과 배치 수치. */
@@ -146,6 +158,7 @@ public:
 	bool TryUnlock(FName SkillId);
 
 	const FSkillTreeRow* FindSkill(FName SkillId) const;
+	const TSet<FName>& GetUnlockedSkills() const { return UnlockedSkills; }
 
 private:
 	UPROPERTY(VisibleInstanceOnly, Category = "Skill Tree")

@@ -11,6 +11,7 @@ class UInputAction;
 class UInputMappingContext;
 class UAnimMontage;
 class USkillTreeComponent;
+class UPlayerStatsComponent;
 class USkillTreeWidget;
 struct FInputActionValue;
 
@@ -47,6 +48,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual float TakeDamage(float DamageAmount, const FDamageEvent& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	/** 팔 부착 모드 카메라. 캡슐에 붙고 마우스 시점으로 돈다. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -62,6 +64,10 @@ protected:
 	/** 스킬 포인트·해금 상태와 스킬트리 창의 그림·배치 수치 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USkillTreeComponent> SkillTree;
+
+	/** 체력·마나·공격력 등. 기본값 + 해금한 스킬 보너스 */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UPlayerStatsComponent> Stats;
 
 	/** 검을 붙일 스켈레톤 본/소켓 이름. */
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
@@ -161,8 +167,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	float AttackRadius = 40.f;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Combat")
-	float AttackDamage = 10.f;
 
 private:
 	/** CameraMode에 맞게 메시를 붙이고 숨길 본·재질을 적용한다. */

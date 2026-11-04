@@ -78,6 +78,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Camera")
 	bool bPlayLocomotionAnimation = false;
 
+	/** 카메라 시점 기준으로 항상 더하는 위치 오프셋(cm). X = 앞, Y = 오른쪽, Z = 위. 두 카메라 모드 모두 적용된다. */
+	UPROPERTY(EditDefaultsOnly, Category = "Camera")
+	FVector CameraViewOffset = FVector::ZeroVector;
+
 	/** 공격할 때 카메라가 시선 방향으로 나갔다 돌아오는 최대 거리(cm). 0이면 끈다. */
 	UPROPERTY(EditDefaultsOnly, Category = "Camera|Attack Push", meta = (ClampMin = "0.0"))
 	float AttackCameraPushDistance = 15.f;

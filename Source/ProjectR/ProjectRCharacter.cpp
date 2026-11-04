@@ -76,20 +76,21 @@ void AProjectRCharacter::Tick(float DeltaSeconds)
 
 void AProjectRCharacter::UpdateAttackCameraPush(float DeltaSeconds)
 {
-	if (AttackPushElapsed >= AttackCameraPushTime)
-	{
-		return;
-	}
-
-	AttackPushElapsed += DeltaSeconds;
 	// 0 → 1 → 0 로 부드럽게: 나갔다가 원래 자리로 돌아온다.
-	const float Alpha = FMath::Sin(UE_PI * FMath::Clamp(AttackPushElapsed / AttackCameraPushTime, 0.f, 1.f));
-
-	UCameraComponent* Camera = GetActiveCamera();
-	Camera->ClearAdditiveOffset();
+	float PushAlpha = 0.f;
 	if (AttackPushElapsed < AttackCameraPushTime)
 	{
-		Camera->AddAdditiveOffset(FTransform(FVector(AttackCameraPushDistance * Alpha, 0.f, 0.f)), 0.f);
+		AttackPushElapsed += DeltaSeconds;
+		PushAlpha = FMath::Sin(UE_PI * FMath::Clamp(AttackPushElapsed / AttackCameraPushTime, 0.f, 1.f));
+	}
+
+	// 카메라 기준 고정 오프셋 + 공격 전진을 매 프레임 새로 건다.
+	UCameraComponent* Camera = GetActiveCamera();
+	Camera->ClearAdditiveOffset();
+	const FVector Offset = CameraViewOffset + FVector(AttackCameraPushDistance * PushAlpha, 0.f, 0.f);
+	if (!Offset.IsNearlyZero())
+	{
+		Camera->AddAdditiveOffset(FTransform(Offset), 0.f);
 	}
 }
 

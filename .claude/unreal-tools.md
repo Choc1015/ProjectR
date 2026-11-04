@@ -77,3 +77,37 @@ unreal-worker가 `describe_toolset`으로 확인한 도구를 한 줄씩 추가�
 ### editor_toolset.toolsets.programmatic.ProgrammaticToolset (2개)
 - programmatic.ProgrammaticToolset / get_execution_environment() — 스크립트 환경·지침 조회(execute 전에 1회 필수 호출)
 - programmatic.ProgrammaticToolset / execute_tool_script(script) — `run()`이 dict를 반환하는 파이썬 스크립트로 여러 도구 호출 일괄 실행
+  - 허용 모듈: json, math, re, time, datetime, copy. `unreal` 모듈은 못 쓴다(도구 호출만 가능).
+  - 호출: `execute_tool('<toolset>.<tool>', json.dumps(args))['returnValue']`. 도구 이름은 toolset 전체 이름 + `.` + 도구.
+  - 템플릿:
+    ```python
+    import json
+    E = 'editor_toolset.toolsets.'
+    def call(n, a): return execute_tool(n, json.dumps(a))['returnValue']
+    def ref(p): return {'refPath': p}
+    def run(): return {...}
+    ```
+
+### 자주 쓰는 경로·값
+- BP CDO: `/Game/Blueprints/BP_PlayerCharacter.Default__BP_PlayerCharacter_C` (컴포넌트는 `:CharacterMesh0`, `:HeadCamera`, `:SwordMesh`, `:FirstPersonCamera`)
+- 배치된 액터의 컴포넌트: `<액터 refPath>.<컴포넌트 이름>`
+- BP 값 변경 후: `blueprint.BlueprintTools.compile_blueprint(blueprint)` → `asset.AssetTools.save_assets([])`
+- 스켈레톤: `/Game/Characters/Player/SK_Player_Skeleton.SK_Player_Skeleton`
+
+### 그 밖에 확인된 도구
+- `object.ObjectTools / get_properties(instance, properties) / set_properties(instance, values: JSON 문자열)` — 프로퍼티 이름은 camelCase(`relativeLocation`, `attackMontages`). 하나라도 못 읽으면 전체가 실패한다.
+- `blueprint.BlueprintTools / create(folder_path, asset_name, asset_type=클래스 ref)` — 일반 BP만(AnimBP 불가). `compile_blueprint(blueprint)`
+- `skeletal_mesh.SkeletalMeshTools / get_bone_names(mesh), get_bone_children(mesh, bone_name), get_material_slots(mesh), set_material(mesh, slot_name, material)`
+- `static_mesh.StaticMeshTools / import_file(folder_path, asset_name, source_file, import_materials?)`
+- `EditorToolset.EditorAppToolset / StartPIE(options={bSimulate, playMode:'PlayMode_InViewPort', warmupSeconds}), StopPIE(), IsPIERunning()`
+- `EditorToolset.EditorAppToolset / CaptureViewport(captureTransform, annotations)` — 두 인자 모두 필수. 끄려면 annotations에 0과 classFilter None. 결과 이미지는 `r['image']['data']`(base64, 수십만 자) → 직접 받지 말고 `write_file`로 `Saved/<이름>.txt`에 쓴 뒤 `Tools/DecodeCapture.ps1`.
+- `EditorToolset.EditorAppToolset / CaptureEditorImage()` — 에디터 창이 가려져 있으면 실패한다.
+- `EditorToolset.LogsToolset / GetLogEntries(category, pattern, maxEntries)` — pattern은 정규식, 좁게 걸러 쓴다.
+- `AutomationTestToolset.AutomationTestToolset / DiscoverTests(), ListTests(nameFilter, tagFilter), RunTests(testNames)` — 테스트 이름은 전체 경로로 넘긴다(접두사만 넘기면 0개 실행).
+
+### projectr_toolset.toolsets.animation_asset.AnimationAssetTools (프로젝트 전용)
+- `import_skeletal_mesh(folder_path, asset_name, source_file, skeleton?, uniform_scale, import_materials, replace_existing, update_reference_pose)`
+- `import_animation(folder_path, asset_name, source_file, skeleton, uniform_scale, replace_existing)` — 미사모는 `uniform_scale=100`. 교체는 지우고 새로 임포트(replace는 배율 이중 적용 버그).
+- `create_montage(folder_path, asset_name, animation)`, `get_montage_animations(montage)`
+- `set_montage_notify(montage, notify_name, time)`, `get_montage_notify_time(...)`, `remove_montage_notify(...)` — 콤보 타격은 `Hit`
+- `create_anim_blueprint(folder_path, asset_name, skeleton, parent_class)` — AnimGraph는 MCP로 편집 불가, 사용자가 직접 만든다.

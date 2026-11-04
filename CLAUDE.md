@@ -38,17 +38,40 @@
 
 ### 컨텍스트 절약
 - 레벨·액터 전체 덤프 금지. 필요한 범위만 걸러서 조회한다.
-- 스크린샷은 시각 확인이 꼭 필요할 때만, 작은 크기로.
 - 아래 "프로젝트 구조"와 `.claude/unreal-tools.md`(확인된 도구 목록)에 있는 내용은 MCP로 다시 조회하지 않는다.
+  `describe_toolset`은 결과가 수만 자라 금지. 모르는 도구는 엔진 파이썬 소스를 grep한다
+  (`C:\Program Files\Epic Games\UE_5.8\Engine\Plugins\Experimental\Toolsets\**\*.py`).
 - 기능 하나가 끝나면 `/compact` 또는 새 세션을 제안한다.
 
+### 매번 지키는 토큰 규칙
+1. **MCP 호출은 한 번에 묶는다.** 여러 도구 호출은 `ProgrammaticToolset.execute_tool_script` 하나로 실행하고,
+   필요한 값만 dict로 돌려받는다. 실패할 수 있는 단계(PIE 시작 등)는 맨 끝에 둔다.
+2. **확인은 숫자로 먼저.** 크기·위치는 `get_actor_bounds`, 값은 `get_properties`로 본다.
+   이미지는 숫자로 판단이 안 될 때만, `Tools/DecodeCapture.ps1`로 480px 이하로 줄여 한 장에 이어 붙여 본다.
+3. **C++ 빌드는 스크립트 한 줄.** MCP `save_assets([])` 후 `Tools/Rebuild.ps1` 실행. 빌드 로그 전체를 읽지 않는다.
+   BP 값·에셋만 바꾼 경우는 빌드하지 않는다.
+4. **플레이 체감은 사용자에게 맡긴다.** 키·마우스 입력은 MCP로 못 넣는다. PIE는 오류 로그 확인용으로 한 번만 돌리고,
+   화면 판단이 필요하면 사용자 스크린샷을 받는다. 같은 문제를 추측으로 두 번 이상 고치지 않고 먼저 원인을 묻는다.
+5. **파일은 필요한 부분만 읽는다.** 이미 읽은 파일은 다시 읽지 않고, 큰 파일은 `offset/limit` 또는 Grep으로 본다.
+6. **응답은 짧게.** 결과 요약·바뀐 값·조정 위치만 쓴다. 과정 설명과 이미 말한 내용을 반복하지 않는다.
+7. **새로 알게 된 사실은 바로 기록한다.** 도구 사용법은 `.claude/unreal-tools.md`, 에셋·구조 규칙은 이 파일에 한 줄로.
+   같은 조사를 두 번 하지 않기 위해서다.
+
 ## 프로젝트 구조
-<!-- 자주 조회하는 정보를 적어 두면 매번 MCP로 확인할 필요가 없다. 알게 될 때마다 채운다. -->
 - 엔진 버전: UE 5.8 (`C:\Program Files\Epic Games\UE_5.8`), C++ 모듈 `ProjectR`
-- 주요 레벨: `/Game/DevMap`, `/Game/Maps/DevMap` (GameDefaultMap은 아직 템플릿 기본값 `/Engine/Maps/Templates/OpenWorld`)
+- 레벨: `/Game/Maps/DevMap` (월드 세팅 게임모드 `BP_GameMode`, PlayerStart (0,0,92) yaw 0, 허수아비 (250,0,0) yaw 90)
 - Unreal MCP: `http://127.0.0.1:8010/mcp` (Config/DefaultEditorPerProjectUserSettings.ini에서 자동 시작)
-- 주요 C++ 클래스 / 블루프린트 위치:
-- 폴더 규칙:
+- C++ (`Source/ProjectR/`)
+  - `AProjectRCharacter`: 이동·시점(Enhanced Input을 코드에서 생성), 몽타주 콤보, `Hit` 노티파이 타격 판정,
+    카메라 모드(`ArmsOnCamera`/`CameraFollowsBody`), `CameraViewOffset`, 공격 시 카메라 전진, 공격별 검 회전
+  - `ATrainingDummy`: 맞으면 흔들리고 횟수 표시 / `UProjectRAnimInstance`: `Speed`, `bIsInAir`
+- BP (`/Game/Blueprints/`): `BP_PlayerCharacter`(메시 `SK_PlayerArms`, 콤보 `AM_Attack5`→`AM_Attack2`,
+  `CameraFollowsBody` + `bUseHeadSocketRotation`), `BP_TrainingDummy`, `BP_GameMode`
+- 캐릭터 (`/Game/Characters/Player/`): `SK_Player`(전신), `SK_PlayerArms`(튜닉 몸통 재질 분리), 스켈레톤 `SK_Player_Skeleton`,
+  `ABP_Player`(BS_Locomotion → Slot DefaultSlot), `Animations/`, `Montages/`
+- 공격 애니메이션은 미사모 원본(`SourceArt/Mixamo`)에서 팔 본만 남기고 몸은 대기 자세로 고정해 만든다
+  (`SourceArt/Export/A_Attack*_ArmsOnly.fbx`). Hit 노티파이는 오른손 속도가 최대인 프레임에 둔다.
+- 폴더 규칙: 개발용 스크립트는 `Tools/`, 프로젝트 툴셋은 `Content/Python/projectr_toolset/`
 - 네이밍 규칙: UE 표준 접두사(`BP_`, `WBP_`, `M_`, `MI_`, `SM_`, `SK_`, `T_`, `ABP_`, `NS_`)
 
 ## 에셋 규칙 (블렌더 → 언리얼)

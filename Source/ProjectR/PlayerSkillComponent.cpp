@@ -70,45 +70,6 @@ bool UPlayerSkillComponent::TryUseSlot(int32 Slot)
 	// 모션이 없으면 효과가 들어간 뒤 조금 더 묶어 둔다.
 	BusyUntil = Now + FMath::Max(Duration, Row->HitDelay + 0.2f);
 
-	// 돌진은 누르자마자 몸이 나간다. 피해는 지나온 길 전체에 HitDelay 뒤에 준다.
-	if (Row->Effect == ESkillEffect::Dash)
-	{
-		const FVector Start = GetOwner()->GetActorLocation();
-		const FVector Forward = GetAimForward();
-		if (ACharacter* Mover = Cast<ACharacter>(GetOwner()))
-		{
-			const float Gravity = FMath::Max(1.f, -Mover->GetCharacterMovement()->GetGravityZ());
-			const float Lift = 150.f;
-			const float AirTime = 2.f * Lift / Gravity;
-			Mover->LaunchCharacter(Forward * (Row->Range / AirTime) + FVector::UpVector * Lift, true, true);
-			// 땅에 닿으면 미끄러지지 않게 멈춘다.
-			FTimerHandle StopTimer;
-			GetWorld()->GetTimerManager().SetTimer(StopTimer, FTimerDelegate::CreateWeakLambda(Mover, [Mover]()
-			{
-				FVector& Velocity = Mover->GetCharacterMovement()->Velocity;
-				Velocity.X = Velocity.Y = 0.f;
-			}), AirTime, false);
-		}
-		const float Multiplier = Row->DamageMultiplier;
-		const float Radius = 80.f;
-		const FVector End = Start + Forward * Row->Range;
-		GetWorld()->GetTimerManager().SetTimer(EffectTimer, FTimerDelegate::CreateWeakLambda(this, [this, Start, End, Radius, Multiplier]()
-		{
-			FCollisionQueryParams Params(SCENE_QUERY_STAT(ProjectRSkill), false, GetOwner());
-			TArray<FHitResult> Hits;
-			GetWorld()->SweepMultiByChannel(Hits, Start, End, FQuat::Identity, ECC_Visibility, FCollisionShape::MakeSphere(Radius), Params);
-			TArray<AActor*> Targets;
-			for (const FHitResult& Hit : Hits)
-			{
-				if (AActor* Actor = Hit.GetActor())
-				{
-					Targets.AddUnique(Actor);
-				}
-			}
-			DamageActors(Targets, Multiplier);
-		}), FMath::Max(0.01f, Row->HitDelay), false);
-		return true;
-	}
 
 	GetWorld()->GetTimerManager().SetTimer(EffectTimer, FTimerDelegate::CreateWeakLambda(this, [this, SkillId]()
 	{
@@ -128,6 +89,40 @@ void UPlayerSkillComponent::ApplyEffect(FName SkillId)
 	const FVector Center = GetOwner()->GetActorLocation();
 	switch (Row->Effect)
 	{
+	case ESkillEffect::Dash:
+	{
+		// 칼을 휘두르는 순간 앞으로 튀어 나가고, 나아갈 길 위의 적을 벤다.
+		const FVector Forward = GetAimForward();
+		if (ACharacter* Mover = Cast<ACharacter>(GetOwner()))
+		{
+			const float Gravity = FMath::Max(1.f, -Mover->GetCharacterMovement()->GetGravityZ());
+			const float Lift = 150.f;
+			const float AirTime = 2.f * Lift / Gravity;
+			Mover->LaunchCharacter(Forward * (Row->Range / AirTime) + FVector::UpVector * Lift, true, true);
+			// 땅에 닿으면 미끄러지지 않게 멈춘다.
+			FTimerHandle StopTimer;
+			GetWorld()->GetTimerManager().SetTimer(StopTimer, FTimerDelegate::CreateWeakLambda(Mover, [Mover]()
+			{
+				FVector& Velocity = Mover->GetCharacterMovement()->Velocity;
+				Velocity.X = Velocity.Y = 0.f;
+			}), AirTime, false);
+		}
+		FCollisionQueryParams Params(SCENE_QUERY_STAT(ProjectRSkill), false, GetOwner());
+		TArray<FHitResult> Hits;
+		GetWorld()->SweepMultiByChannel(Hits, Center, Center + Forward * Row->Range, FQuat::Identity, ECC_Visibility,
+			FCollisionShape::MakeSphere(80.f), Params);
+		TArray<AActor*> Targets;
+		for (const FHitResult& Hit : Hits)
+		{
+			if (AActor* Actor = Hit.GetActor())
+			{
+				Targets.AddUnique(Actor);
+			}
+		}
+		DamageActors(Targets, Row->DamageMultiplier);
+		break;
+	}
+
 	case ESkillEffect::Spin:
 		DamageActors(FindActorsAround(Center, Row->Range), Row->DamageMultiplier);
 		break;

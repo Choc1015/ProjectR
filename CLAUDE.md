@@ -79,6 +79,8 @@
   - `USkillTreeComponent`(캐릭터의 `SkillTree`): 포인트·해금, 그림·배치 수치(`Style`) / `USkillTreeWidget`: 표를 읽어 원형 트리를 코드로 생성, K로 열기, 드래그 이동·휠 확대(배율은 `Style`의 View 항목), 노드 설명창(`Style`의 Tooltip 항목, 그림 `T_SkillTooltip`을 위·가운데·아래로 잘라 가운데만 세로로 늘림. UI 그림은 표시 크기의 1.5배 정도로 미리 줄여 넣는다)
   - `UPlayerStatsComponent`(캐릭터의 `Stats`): 스탯 `EPlayerStat` 15종, 기본값 `BaseStats`(BP에서 조정) + 해금한 스킬 보너스. 최종 = (기본 + 더하기) × (1 + %/100).
     현재 체력·마나와 재생, 방어 = 피해 × 100/(100+방어력−관통). 기본 공격 피해·치명타·공격 속도(몽타주 재생 속도)는 이미 연결됨. 특수 스킬(Stat=None)은 효과 미구현
+  - `UPlayerSkillComponent`(캐릭터의 `Skills`): 젬 3칸 Q·E·R(`GemSkills`) + 무기 고유 스킬 F(`WeaponSkill`, 무기 액터가 생기면 무기로 옮김). 효과 종류 `ESkillEffect`(Dash/Spin/Slam/Heal), 효과는 `HitDelay` 초 뒤. 스킬 모션 중엔 기본 공격 막힘
+    스킬 표 `SourceArt/Data/Skills.csv` → `/Game/Data/DT_Skills`(바꾸면 지우고 다시 임포트). 스킬 모션 `AM_Skill_<이름>`(미사모 원본 `SourceArt/Mixamo/Anim_Skill_*.fbx`, 팔만 남긴 것 `SourceArt/Export/A_Skill_*_ArmsOnly.fbx`)
   - `UPlayerHUDWidget`: 화면 아래 가운데 1~0 아이템 칸 10개(빈 칸) + 그 위 체력 바(왼쪽 반)·마나 바(오른쪽 반), 숫자 표시. 그림·배치는 캐릭터의 `HUDStyle`(그림 `/Game/UI/HUD/T_HudPanel`(전체를 감싸는 판)·`T_HudBar`·`T_HudSlot`, 판과 바 틀은 양끝 장식 비율 유지하고 가운데만 가로로 늘림)
 - 스킬 표: 원본 `SourceArt/Data/SkillTree.csv`(UTF-8, 열 `---,DisplayName,Parent,Cost,Icon,Description,Stat,StatValue,bStatPercent`) → `/Game/Data/DT_SkillTree`(바꾸면 지우고 다시 임포트). UI 그림 `/Game/UI/SkillTree/`
 - 스킬 아이콘: `SourceArt/UI/SkillIcons/T_Skill_<스킬ID>.png`(256px, 투명) → `/Game/UI/SkillIcons/`. 새 아이콘은 크롬(Claude in Chrome)에서 제미나이로 4x4 시트를 뽑아 `Tools/SliceIconSheet.ps1`로 자른다. 표의 Icon 칸은 `/Game/UI/SkillIcons/T_Skill_<ID>.T_Skill_<ID>`
@@ -109,4 +111,5 @@
 - 블렌더에서 미사모 리그로 애니메이션을 만들 때: 불러온 아마추어에 X 90도 회전이 걸려 있어, 내보내기 전에
   회전 적용(`transform_apply(rotation=True)`)을 해야 언리얼에서 눕지 않는다. 임포트는 `uniform_scale=100`.
   (직접 만든 베기 모션은 품질 문제로 폐기하고 미사모 Attack 1~3을 쓴다. 기록은 커밋 b96adc6.)
+- 블렌더 MCP: `bpy.ops.wm.read_factory_settings`·`read_homefile`·파일 새로 열기는 애드온 서버를 내려 연결이 끊긴다. 씬을 비울 땐 오브젝트·액션·메시를 직접 지운다. 호출은 하나씩 순서대로.
 - 알려진 문제: 애니메이션을 `replace_existing=True`로 재임포트하면 배율이 두 번 곱해진다(x10000). 지우고 새로 임포트한다.

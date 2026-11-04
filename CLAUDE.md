@@ -79,7 +79,7 @@
   - `USkillTreeComponent`(캐릭터의 `SkillTree`): 포인트·해금, 그림·배치 수치(`Style`) / `USkillTreeWidget`: 표를 읽어 원형 트리를 코드로 생성, K로 열기, 드래그 이동·휠 확대(배율은 `Style`의 View 항목), 노드 설명창(`Style`의 Tooltip 항목, 그림 `T_SkillTooltip`을 위·가운데·아래로 잘라 가운데만 세로로 늘림. UI 그림은 표시 크기의 1.5배 정도로 미리 줄여 넣는다)
   - `UPlayerStatsComponent`(캐릭터의 `Stats`): 스탯 `EPlayerStat` 15종, 기본값 `BaseStats`(BP에서 조정) + 해금한 스킬 보너스. 최종 = (기본 + 더하기) × (1 + %/100).
     현재 체력·마나와 재생, 방어 = 피해 × 100/(100+방어력−관통). 기본 공격 피해·치명타·공격 속도(몽타주 재생 속도)는 이미 연결됨. 특수 스킬(Stat=None)은 효과 미구현
-  - `UPlayerHUDWidget`: 화면 아래 가운데 1~0 아이템 칸 10개(빈 칸) + 그 위 체력 바(왼쪽 반)·마나 바(오른쪽 반), 숫자 표시. 그림·배치는 캐릭터의 `HUDStyle`(그림 `/Game/UI/HUD/T_HudBar`·`T_HudSlot`, 바 틀은 양끝 장식 비율 유지하고 가운데만 가로로 늘림)
+  - `UPlayerHUDWidget`: 화면 아래 가운데 1~0 아이템 칸 10개(빈 칸) + 그 위 체력 바(왼쪽 반)·마나 바(오른쪽 반), 숫자 표시. 그림·배치는 캐릭터의 `HUDStyle`(그림 `/Game/UI/HUD/T_HudPanel`(전체를 감싸는 판)·`T_HudBar`·`T_HudSlot`, 판과 바 틀은 양끝 장식 비율 유지하고 가운데만 가로로 늘림)
 - 스킬 표: 원본 `SourceArt/Data/SkillTree.csv`(UTF-8, 열 `---,DisplayName,Parent,Cost,Icon,Description,Stat,StatValue,bStatPercent`) → `/Game/Data/DT_SkillTree`(바꾸면 지우고 다시 임포트). UI 그림 `/Game/UI/SkillTree/`
 - 스킬 아이콘: `SourceArt/UI/SkillIcons/T_Skill_<스킬ID>.png`(256px, 투명) → `/Game/UI/SkillIcons/`. 새 아이콘은 크롬(Claude in Chrome)에서 제미나이로 4x4 시트를 뽑아 `Tools/SliceIconSheet.ps1`로 자른다. 표의 Icon 칸은 `/Game/UI/SkillIcons/T_Skill_<ID>.T_Skill_<ID>`
 - BP (`/Game/Blueprints/`): `BP_PlayerCharacter`(메시 `SK_PlayerArms`, 콤보 `AM_Attack5`→`AM_Attack2`,
@@ -90,7 +90,7 @@
   (`SourceArt/Export/A_Attack*_ArmsOnly.fbx`). Hit 노티파이는 오른손 속도가 최대인 프레임에 둔다.
 - 폴더 규칙: 개발용 스크립트는 `Tools/`, 프로젝트 툴셋은 `Content/Python/projectr_toolset/`
 - 네이밍 규칙: UE 표준 접두사(`BP_`, `WBP_`, `M_`, `MI_`, `SM_`, `SK_`, `T_`, `ABP_`, `NS_`)
-- 글꼴: 상업적 무료(SIL OFL 등)만 쓴다. 원본·라이선스는 `SourceArt/Fonts/`, 에셋은 `/Game/UI/Fonts/FF_<이름>`(FontFace, Inline). 설명창 글꼴은 나눔손글씨 펜(`FF_NanumPenScript`). 이 글꼴엔 `·` 같은 특수기호가 없어 네모로 깨진다(표 설명에도 쓰지 말 것)
+- 글꼴: 상업적 무료(SIL OFL 등)만 쓴다. 원본·라이선스는 `SourceArt/Fonts/`, 에셋은 `/Game/UI/Fonts/FF_<이름>`(FontFace, Inline). 설명창 글꼴은 나눔손글씨 펜(`FF_NanumPenScript`), HUD 숫자는 Cinzel Bold(`FF_Cinzel`, 영문·숫자만 있고 한글 없음). 이 글꼴엔 `·` 같은 특수기호가 없어 네모로 깨진다(표 설명에도 쓰지 말 것)
 
 ## 에셋 규칙 (블렌더 → 언리얼)
 <!-- 첫 에셋을 언리얼로 가져와 방향·크기를 확인한 뒤 확정한 값을 적는다. -->

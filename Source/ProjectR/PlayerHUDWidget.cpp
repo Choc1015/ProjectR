@@ -58,12 +58,22 @@ void UPlayerHUDWidget::Init(UPlayerStatsComponent* InStats, const FPlayerHUDStyl
 	const float RowWidth = Style.SlotSize * 10.f + Style.SlotGap * 9.f;
 	const float BarWidth = (RowWidth - Style.BarGap) * 0.5f;
 
+	// 바탕 판이 바와 아이템 칸을 감싼다.
+	UOverlay* Panel = WidgetTree->ConstructWidget<UOverlay>();
+	UCanvasPanelSlot* PanelSlot = Canvas->AddChildToCanvas(Panel);
+	PanelSlot->SetAnchors(FAnchors(0.5f, 1.f));
+	PanelSlot->SetAlignment(FVector2D(0.5f, 1.f));
+	PanelSlot->SetPosition(FVector2D(0.f, -Style.BottomMargin));
+	PanelSlot->SetAutoSize(true);
+	if (Style.PanelFrame)
+	{
+		const float PanelHeight = Style.BarHeight + Style.RowGap + Style.SlotSize + Style.PanelPadding.Top + Style.PanelPadding.Bottom;
+		AddFilling(Panel, MakeStretchedFrame(Style.PanelFrame, Style.PanelCapFraction, PanelHeight));
+	}
+
 	UVerticalBox* Column = WidgetTree->ConstructWidget<UVerticalBox>();
-	UCanvasPanelSlot* ColumnSlot = Canvas->AddChildToCanvas(Column);
-	ColumnSlot->SetAnchors(FAnchors(0.5f, 1.f));
-	ColumnSlot->SetAlignment(FVector2D(0.5f, 1.f));
-	ColumnSlot->SetPosition(FVector2D(0.f, -Style.BottomMargin));
-	ColumnSlot->SetAutoSize(true);
+	UOverlaySlot* ColumnSlot = Panel->AddChildToOverlay(Column);
+	ColumnSlot->SetPadding(Style.PanelFrame ? Style.PanelPadding : FMargin(0.f));
 
 	UHorizontalBox* Bars = WidgetTree->ConstructWidget<UHorizontalBox>();
 	Bars->AddChildToHorizontalBox(MakeBar(BarWidth, Style.HealthColor, HealthFill, HealthText));
@@ -80,6 +90,27 @@ void UPlayerHUDWidget::Init(UPlayerStatsComponent* InStats, const FPlayerHUDStyl
 	Column->AddChildToVerticalBox(Slots);
 }
 
+UWidget* UPlayerHUDWidget::MakeStretchedFrame(UTexture2D* Texture, float CapFraction, float Height)
+{
+	// 양끝 장식은 그림 비율 그대로, 가운데만 가로로 늘린다.
+	const float Cap = FMath::Clamp(CapFraction, 0.01f, 0.49f);
+	const float CapWidth = Height * Cap * Texture->GetSurfaceWidth() / FMath::Max(1.f, Texture->GetSurfaceHeight());
+	UHorizontalBox* Row = WidgetTree->ConstructWidget<UHorizontalBox>();
+	auto AddPart = [&](float U0, float U1, bool bStretch)
+	{
+		UImage* Part = WidgetTree->ConstructWidget<UImage>();
+		FSlateBrush Brush = MakeHudBrush(Texture, FVector2D(bStretch ? 1.f : CapWidth, Height));
+		Brush.SetUVRegion(FBox2f(FVector2f(U0, 0.f), FVector2f(U1, 1.f)));
+		Part->SetBrush(Brush);
+		UHorizontalBoxSlot* PartSlot = Row->AddChildToHorizontalBox(Part);
+		PartSlot->SetSize(FSlateChildSize(bStretch ? ESlateSizeRule::Fill : ESlateSizeRule::Automatic));
+	};
+	AddPart(0.f, Cap, false);
+	AddPart(Cap, 1.f - Cap, true);
+	AddPart(1.f - Cap, 1.f, false);
+	return Row;
+}
+
 UWidget* UPlayerHUDWidget::MakeBar(float Width, const FLinearColor& Color, TObjectPtr<USizeBox>& OutFill, TObjectPtr<UTextBlock>& OutText)
 {
 	const float Height = Style.BarHeight;
@@ -92,24 +123,9 @@ UWidget* UPlayerHUDWidget::MakeBar(float Width, const FLinearColor& Color, TObje
 	Box->AddChild(Overlay);
 
 	// 틀: 양끝 장식은 그림 비율 그대로, 가운데만 가로로 늘린다.
-	if (UTexture2D* Frame = Style.BarFrame)
+	if (Style.BarFrame)
 	{
-		const float Cap = FMath::Clamp(Style.BarCapFraction, 0.01f, 0.49f);
-		const float CapWidth = Height * Cap * Frame->GetSurfaceWidth() / FMath::Max(1.f, Frame->GetSurfaceHeight());
-		UHorizontalBox* FrameRow = WidgetTree->ConstructWidget<UHorizontalBox>();
-		auto AddPart = [&](float U0, float U1, bool bStretch)
-		{
-			UImage* Part = WidgetTree->ConstructWidget<UImage>();
-			FSlateBrush Brush = MakeHudBrush(Frame, FVector2D(bStretch ? 1.f : CapWidth, Height));
-			Brush.SetUVRegion(FBox2f(FVector2f(U0, 0.f), FVector2f(U1, 1.f)));
-			Part->SetBrush(Brush);
-			UHorizontalBoxSlot* PartSlot = FrameRow->AddChildToHorizontalBox(Part);
-			PartSlot->SetSize(FSlateChildSize(bStretch ? ESlateSizeRule::Fill : ESlateSizeRule::Automatic));
-		};
-		AddPart(0.f, Cap, false);
-		AddPart(Cap, 1.f - Cap, true);
-		AddPart(1.f - Cap, 1.f, false);
-		AddFilling(Overlay, FrameRow);
+		AddFilling(Overlay, MakeStretchedFrame(Style.BarFrame, Style.BarCapFraction, Height));
 	}
 
 	// 채워지는 색 막대: 왼쪽에서부터 현재/최대 비율만큼 폭이 늘어난다.

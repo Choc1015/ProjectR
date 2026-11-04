@@ -51,6 +51,17 @@ struct FPlayerHUDStyle
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Slots")
 	float SlotGap = 6.f;
 
+	/** 바와 아이템 칸을 감싸는 바탕 판. 양끝 장식은 비율 그대로, 가운데만 가로로 늘어난다. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Panel")
+	TObjectPtr<UTexture2D> PanelFrame;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Panel", meta = (ClampMin = "0.0", ClampMax = "0.5"))
+	float PanelCapFraction = 0.07f;
+
+	/** 판 테두리와 안쪽 바·칸 사이 여백 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Panel")
+	FMargin PanelPadding = FMargin(30.f, 18.f, 30.f, 18.f);
+
 	/** 바 줄과 아이템 칸 줄 사이 간격 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Layout")
 	float RowGap = 4.f;
@@ -86,6 +97,7 @@ protected:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 private:
+	UWidget* MakeStretchedFrame(UTexture2D* Texture, float CapFraction, float Height);
 	UWidget* MakeBar(float Width, const FLinearColor& Color, TObjectPtr<USizeBox>& OutFill, TObjectPtr<UTextBlock>& OutText);
 	UWidget* MakeSlot(int32 Index);
 	UTextBlock* MakeText(const FString& Text, int32 Size);

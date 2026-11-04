@@ -16,6 +16,7 @@
 #include "Rendering/SkeletalMeshRenderData.h"
 #include "SkillTreeComponent.h"
 #include "PlayerStatsComponent.h"
+#include "PlayerHUDWidget.h"
 #include "SkillTreeWidget.h"
 #include "TimerManager.h"
 
@@ -264,6 +265,13 @@ void AProjectRCharacter::BeginPlay()
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
+	}
+
+	if (APlayerController* PC = Cast<APlayerController>(GetController()); PC && IsLocallyControlled())
+	{
+		HUDWidget = CreateWidget<UPlayerHUDWidget>(PC, UPlayerHUDWidget::StaticClass());
+		HUDWidget->Init(Stats, HUDStyle);
+		HUDWidget->AddToViewport(0);
 	}
 }
 

@@ -53,3 +53,9 @@ Vintage parchment game UI style matching an old illuminated manuscript or treasu
 - 한 장에 4x4 = 16개. 같은 대화창에서 이어 뽑아야 그림체가 맞는다. 두 번째부터는 앞에 `Generate a new image in exactly the same style, size and layout as the previous icon sheets:`를 붙인다.
 - 틀: `A 4x4 grid sprite sheet of 16 game skill icons, square 1:1 image. Each icon is one simple bold emblem centered in its own equal square cell, no frames, no borders, no boxes around icons, wide empty white gaps between cells, all icons the same size. Order left to right, top to bottom: 1. ..., 16. ...` + UI 공통 스타일 문구 (+ `no numbers`)
 - 순서는 스킬 표 줄 순서. 받은 시트는 `SourceArt/UI/SkillIcons/Sheets/SheetN.png`, 자르기는 `Tools/SliceIconSheet.ps1 -Names <표 순서 ID들>`.
+
+## HUD 조각 (체력·마나 바 틀, 아이템 칸)
+- 설명창과 같은 대화창(https://gemini.google.com/app/273b03221003647f)에서 뽑았다. 그냥 요청하면 **앞 그림을 고쳐 버리므로** 앞에 `Draw a brand-new separate image from scratch (do not reuse or edit the previous card). Only the bar, cropped tightly:`를 붙인다. 새 대화창은 이미지 생성을 거부한 적이 있다.
+- 바 틀: `a single long horizontal health bar frame, very wide and thin (about 10 times wider than tall), the only object in the picture. Thin tidy rectangular border of sepia brown ink with small ornate aged gold leaf caps on the left and right ends. Inside filled with flat solid dark sepia brown (#3a2614), empty bar with no fill. No parchment card, no paper sheet, no panel around it.` + UI 공통 스타일 문구
+- 아이템 칸: `a single square hotbar item slot frame for a game HUD. Thin tidy square border of sepia brown ink with small ornate aged gold leaf corners matching the bar caps. Inside filled with flat solid dark sepia brown (#3a2614) slightly lighter toward the center, an empty slot with no icon.` + UI 공통 스타일 문구 (+ `no numbers`)
+- 원본 `SourceArt/UI/Sheets/HudBar_Source.png`, `HudSlot_Source.png` → 흰색 지우고 줄여서 `SourceArt/UI/T_HudBar.png`(640x103), `T_HudSlot.png`(96x96)

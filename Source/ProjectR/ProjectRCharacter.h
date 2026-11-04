@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
 #include "GameFramework/Character.h"
+#include "PlayerHUDWidget.h"
 #include "ProjectRCharacter.generated.h"
 
 class UCameraComponent;
@@ -12,6 +13,7 @@ class UInputMappingContext;
 class UAnimMontage;
 class USkillTreeComponent;
 class UPlayerStatsComponent;
+class UPlayerHUDWidget;
 class USkillTreeWidget;
 struct FInputActionValue;
 
@@ -68,6 +70,10 @@ protected:
 	/** 체력·마나·공격력 등. 기본값 + 해금한 스킬 보너스 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UPlayerStatsComponent> Stats;
+
+	/** 화면 아래 체력·마나 바와 아이템 칸의 그림·배치 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HUD")
+	FPlayerHUDStyle HUDStyle;
 
 	/** 검을 붙일 스켈레톤 본/소켓 이름. */
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
@@ -220,6 +226,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<USkillTreeWidget> SkillTreeWidget;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UPlayerHUDWidget> HUDWidget;
 
 	/** [몸 따라가기] 대기 자세에서 머리가 바라보는 방향. 시점에는 이 기준 대비 변화량만 더한다. */
 	FRotator CameraBaseline = FRotator::ZeroRotator;

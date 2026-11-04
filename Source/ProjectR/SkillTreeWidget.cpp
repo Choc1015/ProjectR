@@ -48,6 +48,7 @@ void USkillNodeButton::HandleClicked()
 void USkillTreeWidget::Init(USkillTreeComponent* InSkills)
 {
 	Skills = InSkills;
+	SetVisibility(ESlateVisibility::Visible); // 빈 곳의 마우스 입력도 받도록
 	if (Skills)
 	{
 		Skills->OnChanged.AddUniqueDynamic(this, &USkillTreeWidget::Refresh);
@@ -73,6 +74,66 @@ void USkillTreeWidget::OnNodeClicked(FName SkillId)
 	}
 }
 
+void USkillTreeWidget::ApplyView()
+{
+	if (Board)
+	{
+		if (UCanvasPanelSlot* BoardSlot = Cast<UCanvasPanelSlot>(Board->Slot))
+		{
+			BoardSlot->SetPosition(Pan);
+		}
+		Board->SetRenderScale(FVector2D(Zoom));
+	}
+}
+
+FReply USkillTreeWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	const FKey Button = InMouseEvent.GetEffectingButton();
+	if (Button == EKeys::LeftMouseButton || Button == EKeys::RightMouseButton)
+	{
+		bDragging = true;
+		LastMouse = InGeometry.AbsoluteToLocal(InMouseEvent.GetScreenSpacePosition());
+		return FReply::Handled().CaptureMouse(TakeWidget());
+	}
+	return Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+}
+
+FReply USkillTreeWidget::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	if (bDragging)
+	{
+		bDragging = false;
+		return FReply::Handled().ReleaseMouseCapture();
+	}
+	return Super::NativeOnMouseButtonUp(InGeometry, InMouseEvent);
+}
+
+FReply USkillTreeWidget::NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	if (bDragging)
+	{
+		const FVector2D Mouse = InGeometry.AbsoluteToLocal(InMouseEvent.GetScreenSpacePosition());
+		Pan += Mouse - LastMouse;
+		LastMouse = Mouse;
+		ApplyView();
+		return FReply::Handled();
+	}
+	return Super::NativeOnMouseMove(InGeometry, InMouseEvent);
+}
+
+FReply USkillTreeWidget::NativeOnMouseWheel(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	const FSkillTreeStyle Style = Skills ? Skills->Style : FSkillTreeStyle();
+	const float NewZoom = FMath::Clamp(Zoom * FMath::Pow(Style.ZoomStep, InMouseEvent.GetWheelDelta()), Style.MinZoom, Style.MaxZoom);
+
+	// 커서 아래 지점이 확대 뒤에도 커서 아래에 남도록 이동량을 맞춘다.
+	const FVector2D MouseFromCenter = InGeometry.AbsoluteToLocal(InMouseEvent.GetScreenSpacePosition()) - InGeometry.GetLocalSize() * 0.5f;
+	Pan = MouseFromCenter - (MouseFromCenter - Pan) * (NewZoom / Zoom);
+	Zoom = NewZoom;
+	ApplyView();
+	return FReply::Handled();
+}
+
 void USkillTreeWidget::Build()
 {
 	Nodes.Reset();
@@ -92,6 +153,12 @@ void USkillTreeWidget::Build()
 	BackgroundSlot->SetAnchors(FAnchors(0.f, 0.f, 1.f, 1.f));
 	BackgroundSlot->SetOffsets(FMargin(0.f));
 
+	// 화면 가운데에 크기 0인 판을 두고 노드를 그 둘레에 놓는다. 판의 위치·배율이 곧 이동·확대다.
+	Board = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("Board"));
+	PlaceCentered(Canvas, Board, FVector2D::ZeroVector, FVector2D::ZeroVector);
+	Board->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
+	Board->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+
 	auto AddText = [this, &Style](const FText& Text, float AnchorY, float OffsetY, int32 FontSize)
 	{
 		UTextBlock* Block = WidgetTree->ConstructWidget<UTextBlock>();
@@ -105,10 +172,15 @@ void USkillTreeWidget::Build()
 		TextSlot->SetAlignment(FVector2D(0.5f, AnchorY));
 		TextSlot->SetPosition(FVector2D(0.f, OffsetY));
 		TextSlot->SetAutoSize(true);
+		Block->SetVisibility(ESlateVisibility::HitTestInvisible);
 		return Block;
 	};
 	PointsText = AddText(FText::GetEmpty(), 0.f, 48.f, 24);
-	AddText(FText::FromString(TEXT("노드를 눌러 해금  ·  K: 닫기")), 1.f, -40.f, 16);
+	AddText(FText::FromString(TEXT("노드를 눌러 해금  ·  드래그: 이동  ·  휠: 확대/축소  ·  K: 닫기")), 1.f, -40.f, 16);
+
+	Pan = FVector2D::ZeroVector;
+	Zoom = Style.InitialZoom;
+	ApplyView();
 
 	if (!Skills || !Skills->SkillTable)
 	{
@@ -214,7 +286,7 @@ void USkillTreeWidget::AddLine(const FVector2D& From, const FVector2D& To, FName
 {
 	const FVector2D Delta = To - From;
 	UImage* Line = WidgetTree->ConstructWidget<UImage>();
-	PlaceCentered(Canvas, Line, (From + To) * 0.5f, FVector2D(Delta.Size(), Skills->Style.LineThickness));
+	PlaceCentered(Board, Line, (From + To) * 0.5f, FVector2D(Delta.Size(), Skills->Style.LineThickness));
 	Line->SetRenderTransformAngle(FMath::RadiansToDegrees(FMath::Atan2(Delta.Y, Delta.X)));
 	Line->SetVisibility(ESlateVisibility::HitTestInvisible);
 	LineImages.Add(Line);
@@ -258,7 +330,7 @@ void USkillTreeWidget::AddNode(FName Id, const FVector2D& Position)
 		ContentSlot->SetVerticalAlignment(VAlign_Center);
 	}
 
-	PlaceCentered(Canvas, Button, Position, FVector2D(Style.NodeSize));
+	PlaceCentered(Board, Button, Position, FVector2D(Style.NodeSize));
 	Nodes.Add(Id, Button);
 }
 

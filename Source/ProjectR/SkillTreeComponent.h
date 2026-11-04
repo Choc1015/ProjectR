@@ -73,6 +73,20 @@ struct FSkillTreeStyle
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Layout")
 	float StartAngle = -90.f;
 
+	/** 창을 열 때 확대 배율. 1 = 원래 크기 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "View", meta = (ClampMin = "0.1"))
+	float InitialZoom = 0.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "View", meta = (ClampMin = "0.1"))
+	float MinZoom = 0.3f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "View", meta = (ClampMin = "0.1"))
+	float MaxZoom = 1.6f;
+
+	/** 휠 한 칸에 바뀌는 배율 (1.15 = 15%) */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "View", meta = (ClampMin = "1.01"))
+	float ZoomStep = 1.15f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Layout")
 	FLinearColor TextColor = FLinearColor(0.23f, 0.14f, 0.07f);
 };

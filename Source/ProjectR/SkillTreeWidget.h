@@ -44,7 +44,14 @@ public:
 protected:
 	virtual void NativeDestruct() override;
 
+	// 빈 곳을 왼쪽 드래그 또는 어디서나 오른쪽 드래그로 이동, 휠로 커서 기준 확대·축소
+	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnMouseWheel(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+
 private:
+	void ApplyView();
 	void Build();
 	void LayoutBranch(FName Id, int32 Depth, float AngleMin, float AngleMax);
 	int32 CountLeaves(FName Id) const;
@@ -60,8 +67,17 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UCanvasPanel> Canvas;
 
+	/** 노드와 선이 올라가는 판. 이 판을 옮기고 확대한다. */
+	UPROPERTY(Transient)
+	TObjectPtr<UCanvasPanel> Board;
+
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> PointsText;
+
+	FVector2D Pan = FVector2D::ZeroVector;
+	float Zoom = 1.f;
+	bool bDragging = false;
+	FVector2D LastMouse = FVector2D::ZeroVector;
 
 	UPROPERTY(Transient)
 	TMap<FName, TObjectPtr<USkillNodeButton>> Nodes;

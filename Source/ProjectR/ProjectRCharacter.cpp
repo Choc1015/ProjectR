@@ -244,6 +244,7 @@ void AProjectRCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	ApplyCameraMode();
+	SwordBaseRotation = SwordMesh->GetRelativeRotation().Quaternion();
 
 	if (const APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
@@ -370,6 +371,10 @@ void AProjectRCharacter::PlayComboAttack(int32 Index)
 	// 타마다 카메라를 앞으로 살짝 내밀었다가 되돌린다.
 	AttackPushElapsed = 0.f;
 
+	// 이 타에서 칼날이 맞는 면을 향하도록 검을 돌린다.
+	const FRotator SwordOffset = AttackSwordRotationOffsets.IsValidIndex(Index) ? AttackSwordRotationOffsets[Index] : FRotator::ZeroRotator;
+	SwordMesh->SetRelativeRotation(SwordBaseRotation * SwordOffset.Quaternion());
+
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AProjectRCharacter::OnAttackMontageEnded);
 	AnimInstance->Montage_SetEndDelegate(EndDelegate, Montage);
@@ -424,6 +429,7 @@ void AProjectRCharacter::ResetCombo()
 {
 	ComboIndex = INDEX_NONE;
 	bComboQueued = false;
+	SwordMesh->SetRelativeRotation(SwordBaseRotation);
 	GetWorldTimerManager().ClearTimer(HitTimer);
 	GetWorldTimerManager().ClearTimer(ComboTimer);
 }

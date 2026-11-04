@@ -120,6 +120,13 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	TArray<TObjectPtr<UAnimMontage>> AttackMontages;
 
+	/**
+	 * 콤보 타마다 검에 더할 회전(검 로컬 기준, 칼날 축은 Z). 인덱스는 AttackMontages와 같다.
+	 * 비어 있거나 모자라면 회전하지 않는다. 공격이 끝나면 원래 각도로 돌아온다.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	TArray<FRotator> AttackSwordRotationOffsets;
+
 	/** 몽타주 길이 대비 타격 판정 시점(0~1). */
 	UPROPERTY(EditDefaultsOnly, Category = "Combat", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float HitTimeFraction = 0.4f;
@@ -184,6 +191,9 @@ private:
 	bool bHasCameraBaseline = false;
 	/** 기준을 잡기 전 애니메이션이 대기 자세에 자리 잡도록 기다리는 시간(초). */
 	float CameraBaselineDelay = 0.f;
+
+	/** BP에서 정한 검의 기본 상대 회전. 공격별 회전은 이 위에 더한다. */
+	FQuat SwordBaseRotation = FQuat::Identity;
 
 	/** 공격 카메라 전진이 시작된 뒤 지난 시간(초). AttackCameraPushTime 이상이면 쉬는 중. */
 	float AttackPushElapsed = TNumericLimits<float>::Max();

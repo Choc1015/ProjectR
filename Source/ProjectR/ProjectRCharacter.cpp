@@ -14,6 +14,8 @@
 #include "InputModifiers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Rendering/SkeletalMeshRenderData.h"
+#include "SkillTreeComponent.h"
+#include "SkillTreeWidget.h"
 #include "TimerManager.h"
 
 AProjectRCharacter::AProjectRCharacter()
@@ -48,6 +50,7 @@ AProjectRCharacter::AProjectRCharacter()
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -90.f), FRotator(0.f, 180.f, 0.f));
 	GetMesh()->SetCastShadow(false);
 
+	SkillTree = CreateDefaultSubobject<USkillTreeComponent>(TEXT("SkillTree"));
 	SwordMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SwordMesh"));
 	SwordMesh->SetupAttachment(GetMesh(), WeaponSocketName);
 	SwordMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -275,6 +278,7 @@ void AProjectRCharacter::CreateInput()
 	LookAction->ValueType = EInputActionValueType::Axis2D;
 	JumpAction = NewObject<UInputAction>(this, TEXT("IA_Jump"));
 	AttackAction = NewObject<UInputAction>(this, TEXT("IA_Attack"));
+	SkillTreeAction = NewObject<UInputAction>(this, TEXT("IA_SkillTree"));
 
 	DefaultMappingContext = NewObject<UInputMappingContext>(this, TEXT("IMC_Default"));
 
@@ -304,6 +308,7 @@ void AProjectRCharacter::CreateInput()
 
 	DefaultMappingContext->MapKey(JumpAction, EKeys::SpaceBar);
 	DefaultMappingContext->MapKey(AttackAction, EKeys::LeftMouseButton);
+	DefaultMappingContext->MapKey(SkillTreeAction, EKeys::K);
 }
 
 void AProjectRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -319,11 +324,16 @@ void AProjectRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		Input->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		Input->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		Input->BindAction(AttackAction, ETriggerEvent::Started, this, &AProjectRCharacter::Attack);
+		Input->BindAction(SkillTreeAction, ETriggerEvent::Started, this, &AProjectRCharacter::ToggleSkillTree);
 	}
 }
 
 void AProjectRCharacter::Move(const FInputActionValue& Value)
 {
+	if (SkillTreeWidget)
+	{
+		return;
+	}
 	const FVector2D Axis = Value.Get<FVector2D>();
 	const FRotator YawRotation(0.f, GetControlRotation().Yaw, 0.f);
 	AddMovementInput(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X), Axis.Y);
@@ -332,6 +342,10 @@ void AProjectRCharacter::Move(const FInputActionValue& Value)
 
 void AProjectRCharacter::Look(const FInputActionValue& Value)
 {
+	if (SkillTreeWidget)
+	{
+		return;
+	}
 	const FVector2D Axis = Value.Get<FVector2D>();
 	AddControllerYawInput(Axis.X);
 	AddControllerPitchInput(Axis.Y);
@@ -339,7 +353,7 @@ void AProjectRCharacter::Look(const FInputActionValue& Value)
 
 void AProjectRCharacter::Attack()
 {
-	if (AttackMontages.IsEmpty())
+	if (SkillTreeWidget || AttackMontages.IsEmpty())
 	{
 		return;
 	}
@@ -459,4 +473,32 @@ void AProjectRCharacter::ResetCombo()
 	SwordMesh->SetRelativeRotation(SwordBaseRotation);
 	GetWorldTimerManager().ClearTimer(HitTimer);
 	GetWorldTimerManager().ClearTimer(ComboTimer);
+}
+
+void AProjectRCharacter::ToggleSkillTree()
+{
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (!PC)
+	{
+		return;
+	}
+
+	if (SkillTreeWidget)
+	{
+		SkillTreeWidget->RemoveFromParent();
+		SkillTreeWidget = nullptr;
+		PC->SetShowMouseCursor(false);
+		PC->SetInputMode(FInputModeGameOnly());
+		return;
+	}
+
+	// 열 때마다 새로 만들어 표에 추가된 스킬이 바로 배치되게 한다.
+	SkillTreeWidget = CreateWidget<USkillTreeWidget>(PC, USkillTreeWidget::StaticClass());
+	SkillTreeWidget->Init(SkillTree);
+	SkillTreeWidget->AddToViewport(10);
+	PC->SetShowMouseCursor(true);
+	FInputModeGameAndUI Mode;
+	Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	Mode.SetHideCursorDuringCapture(false);
+	PC->SetInputMode(Mode);
 }

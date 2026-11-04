@@ -1,0 +1,307 @@
+#include "SkillTreeWidget.h"
+
+#include "Blueprint/WidgetTree.h"
+#include "Components/ButtonSlot.h"
+#include "Components/CanvasPanel.h"
+#include "Components/CanvasPanelSlot.h"
+#include "Components/Image.h"
+#include "Components/TextBlock.h"
+#include "Engine/Texture2D.h"
+#include "SkillTreeComponent.h"
+
+namespace
+{
+	FSlateBrush MakeBrush(UTexture2D* Texture, const FVector2D& Size)
+	{
+		FSlateBrush Brush;
+		Brush.DrawAs = ESlateBrushDrawType::Image;
+		Brush.SetResourceObject(Texture);
+		Brush.ImageSize = Size;
+		Brush.TintColor = FSlateColor(Texture ? FLinearColor::White : FLinearColor::Transparent);
+		return Brush;
+	}
+
+	UCanvasPanelSlot* PlaceCentered(UCanvasPanel* Canvas, UWidget* Widget, const FVector2D& Position, const FVector2D& Size)
+	{
+		UCanvasPanelSlot* Slot = Canvas->AddChildToCanvas(Widget);
+		Slot->SetAnchors(FAnchors(0.5f, 0.5f));
+		Slot->SetAlignment(FVector2D(0.5f, 0.5f));
+		Slot->SetPosition(Position);
+		Slot->SetSize(Size);
+		return Slot;
+	}
+}
+
+void USkillNodeButton::BindClick()
+{
+	OnClicked.AddUniqueDynamic(this, &USkillNodeButton::HandleClicked);
+}
+
+void USkillNodeButton::HandleClicked()
+{
+	if (USkillTreeWidget* Widget = Owner.Get())
+	{
+		Widget->OnNodeClicked(SkillId);
+	}
+}
+
+void USkillTreeWidget::Init(USkillTreeComponent* InSkills)
+{
+	Skills = InSkills;
+	if (Skills)
+	{
+		Skills->OnChanged.AddUniqueDynamic(this, &USkillTreeWidget::Refresh);
+	}
+	Build();
+	Refresh();
+}
+
+void USkillTreeWidget::NativeDestruct()
+{
+	if (Skills)
+	{
+		Skills->OnChanged.RemoveDynamic(this, &USkillTreeWidget::Refresh);
+	}
+	Super::NativeDestruct();
+}
+
+void USkillTreeWidget::OnNodeClicked(FName SkillId)
+{
+	if (Skills)
+	{
+		Skills->TryUnlock(SkillId);
+	}
+}
+
+void USkillTreeWidget::Build()
+{
+	Nodes.Reset();
+	LineImages.Reset();
+	LineChildIds.Reset();
+	Children.Reset();
+	Positions.Reset();
+
+	Canvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("Canvas"));
+	WidgetTree->RootWidget = Canvas;
+
+	const FSkillTreeStyle Style = Skills ? Skills->Style : FSkillTreeStyle();
+
+	UImage* Background = WidgetTree->ConstructWidget<UImage>();
+	Background->SetBrush(MakeBrush(Style.Background, FVector2D(32.f, 32.f)));
+	UCanvasPanelSlot* BackgroundSlot = Canvas->AddChildToCanvas(Background);
+	BackgroundSlot->SetAnchors(FAnchors(0.f, 0.f, 1.f, 1.f));
+	BackgroundSlot->SetOffsets(FMargin(0.f));
+
+	auto AddText = [this, &Style](const FText& Text, float AnchorY, float OffsetY, int32 FontSize)
+	{
+		UTextBlock* Block = WidgetTree->ConstructWidget<UTextBlock>();
+		Block->SetText(Text);
+		Block->SetColorAndOpacity(FSlateColor(Style.TextColor));
+		FSlateFontInfo Font = Block->GetFont();
+		Font.Size = FontSize;
+		Block->SetFont(Font);
+		UCanvasPanelSlot* TextSlot = Canvas->AddChildToCanvas(Block);
+		TextSlot->SetAnchors(FAnchors(0.5f, AnchorY));
+		TextSlot->SetAlignment(FVector2D(0.5f, AnchorY));
+		TextSlot->SetPosition(FVector2D(0.f, OffsetY));
+		TextSlot->SetAutoSize(true);
+		return Block;
+	};
+	PointsText = AddText(FText::GetEmpty(), 0.f, 48.f, 24);
+	AddText(FText::FromString(TEXT("노드를 눌러 해금  ·  K: 닫기")), 1.f, -40.f, 16);
+
+	if (!Skills || !Skills->SkillTable)
+	{
+		return;
+	}
+
+	// 부모 → 자식 목록. 부모가 없거나 표에 없는 스킬은 뿌리.
+	TArray<FName> Roots;
+	for (const FName& Id : Skills->SkillTable->GetRowNames())
+	{
+		const FSkillTreeRow* Row = Skills->FindSkill(Id);
+		if (Row->Parent.IsNone() || !Skills->FindSkill(Row->Parent))
+		{
+			Roots.Add(Id);
+		}
+		else
+		{
+			Children.FindOrAdd(Row->Parent).Add(Id);
+		}
+	}
+
+	const float Start = FMath::DegreesToRadians(Style.StartAngle);
+	if (Roots.Num() == 1)
+	{
+		// 뿌리 하나는 화면 가운데, 자식들이 한 바퀴를 나눠 갖는다.
+		LayoutBranch(Roots[0], 0, Start - PI, Start + PI);
+	}
+	else
+	{
+		// 뿌리가 여럿이면 첫 고리에 둘러 세우고 잎 개수만큼 각도를 나눈다.
+		int32 Total = 0;
+		for (const FName& Root : Roots)
+		{
+			Total += CountLeaves(Root);
+		}
+		float Angle = Start - PI;
+		for (const FName& Root : Roots)
+		{
+			const float Span = 2.f * PI * CountLeaves(Root) / FMath::Max(Total, 1);
+			LayoutBranch(Root, 1, Angle, Angle + Span);
+			Angle += Span;
+		}
+	}
+
+	// 선을 먼저 넣어야 노드 아래에 깔린다.
+	for (const TPair<FName, TArray<FName>>& Pair : Children)
+	{
+		for (const FName& Child : Pair.Value)
+		{
+			if (Positions.Contains(Pair.Key) && Positions.Contains(Child))
+			{
+				AddLine(Positions[Pair.Key], Positions[Child], Child);
+			}
+		}
+	}
+	for (const TPair<FName, FVector2D>& Pair : Positions)
+	{
+		AddNode(Pair.Key, Pair.Value);
+	}
+}
+
+int32 USkillTreeWidget::CountLeaves(FName Id) const
+{
+	const TArray<FName>* Kids = Children.Find(Id);
+	if (!Kids || Kids->IsEmpty())
+	{
+		return 1;
+	}
+	int32 Count = 0;
+	for (const FName& Kid : *Kids)
+	{
+		Count += CountLeaves(Kid);
+	}
+	return Count;
+}
+
+void USkillTreeWidget::LayoutBranch(FName Id, int32 Depth, float AngleMin, float AngleMax)
+{
+	if (Positions.Contains(Id))
+	{
+		return; // 표에 순환 참조가 있어도 멈추게
+	}
+	const float Angle = (AngleMin + AngleMax) * 0.5f;
+	const float Radius = Depth * Skills->Style.RingSpacing;
+	Positions.Add(Id, FVector2D(FMath::Cos(Angle), FMath::Sin(Angle)) * Radius);
+
+	const TArray<FName>* Kids = Children.Find(Id);
+	if (!Kids)
+	{
+		return;
+	}
+	const int32 Total = CountLeaves(Id);
+	float AngleCursor = AngleMin;
+	for (const FName& Kid : *Kids)
+	{
+		const float Span = (AngleMax - AngleMin) * CountLeaves(Kid) / Total;
+		LayoutBranch(Kid, Depth + 1, AngleCursor, AngleCursor + Span);
+		AngleCursor += Span;
+	}
+}
+
+void USkillTreeWidget::AddLine(const FVector2D& From, const FVector2D& To, FName ChildId)
+{
+	const FVector2D Delta = To - From;
+	UImage* Line = WidgetTree->ConstructWidget<UImage>();
+	PlaceCentered(Canvas, Line, (From + To) * 0.5f, FVector2D(Delta.Size(), Skills->Style.LineThickness));
+	Line->SetRenderTransformAngle(FMath::RadiansToDegrees(FMath::Atan2(Delta.Y, Delta.X)));
+	Line->SetVisibility(ESlateVisibility::HitTestInvisible);
+	LineImages.Add(Line);
+	LineChildIds.Add(ChildId);
+}
+
+void USkillTreeWidget::AddNode(FName Id, const FVector2D& Position)
+{
+	const FSkillTreeStyle& Style = Skills->Style;
+	const FSkillTreeRow* Row = Skills->FindSkill(Id);
+
+	USkillNodeButton* Button = WidgetTree->ConstructWidget<USkillNodeButton>();
+	Button->SkillId = Id;
+	Button->Owner = this;
+	Button->BindClick();
+	Button->SetToolTipText(FText::Format(FText::FromString(TEXT("{0}  (비용 {1})\n{2}")),
+		Row->DisplayName, FText::AsNumber(Row->Cost), Row->Description));
+
+	if (UTexture2D* Icon = Row->Icon.LoadSynchronous())
+	{
+		UImage* Image = WidgetTree->ConstructWidget<UImage>();
+		Image->SetBrush(MakeBrush(Icon, FVector2D(Style.NodeSize * 0.62f)));
+		Button->SetContent(Image);
+	}
+	else
+	{
+		UTextBlock* Label = WidgetTree->ConstructWidget<UTextBlock>();
+		Label->SetText(Row->DisplayName);
+		Label->SetColorAndOpacity(FSlateColor(Style.TextColor));
+		Label->SetJustification(ETextJustify::Center);
+		Label->SetAutoWrapText(true);
+		FSlateFontInfo Font = Label->GetFont();
+		Font.Size = FMath::Max(8, FMath::RoundToInt(Style.NodeSize * 0.15f));
+		Label->SetFont(Font);
+		Button->SetContent(Label);
+	}
+	if (UButtonSlot* ContentSlot = Cast<UButtonSlot>(Button->GetContent()->Slot))
+	{
+		ContentSlot->SetPadding(FMargin(Style.NodeSize * 0.14f));
+		ContentSlot->SetHorizontalAlignment(HAlign_Center);
+		ContentSlot->SetVerticalAlignment(VAlign_Center);
+	}
+
+	PlaceCentered(Canvas, Button, Position, FVector2D(Style.NodeSize));
+	Nodes.Add(Id, Button);
+}
+
+void USkillTreeWidget::Refresh()
+{
+	if (!Skills)
+	{
+		return;
+	}
+	const FSkillTreeStyle& Style = Skills->Style;
+
+	if (PointsText)
+	{
+		PointsText->SetText(FText::Format(FText::FromString(TEXT("스킬 포인트  {0}")), FText::AsNumber(Skills->SkillPoints)));
+	}
+
+	const FVector2D NodeSize(Style.NodeSize);
+	for (const TPair<FName, TObjectPtr<USkillNodeButton>>& Pair : Nodes)
+	{
+		const bool bUnlocked = Skills->IsUnlocked(Pair.Key);
+		const bool bAvailable = !bUnlocked && Skills->CanUnlock(Pair.Key);
+		UTexture2D* Normal = bUnlocked ? Style.NodeUnlocked : (bAvailable ? Style.NodeAvailable : Style.NodeLocked);
+		UTexture2D* Hover = (bUnlocked || bAvailable) ? Style.NodeSelected : Style.NodeLocked;
+
+		FButtonStyle ButtonStyle;
+		ButtonStyle.SetNormal(MakeBrush(Normal, NodeSize));
+		ButtonStyle.SetHovered(MakeBrush(Hover, NodeSize));
+		ButtonStyle.SetPressed(MakeBrush(Hover, NodeSize));
+		ButtonStyle.SetDisabled(MakeBrush(Normal, NodeSize));
+		ButtonStyle.SetNormalPadding(FMargin(0.f));
+		ButtonStyle.SetPressedPadding(FMargin(0.f));
+		Pair.Value->SetStyle(ButtonStyle);
+		Pair.Value->SetRenderOpacity(bUnlocked || bAvailable ? 1.f : 0.75f);
+	}
+
+	for (int32 i = 0; i < LineImages.Num(); ++i)
+	{
+		UTexture2D* Texture = Skills->IsUnlocked(LineChildIds[i]) ? Style.LineActive : Style.LineInactive;
+		// 선 그림의 높이를 선 두께에 맞추고 가로로 반복해 늘어나도 무늬가 유지되게 한다.
+		const float Height = Texture ? FMath::Max(1.f, Texture->GetSurfaceHeight()) : 1.f;
+		const float Width = Texture ? Texture->GetSurfaceWidth() * Style.LineThickness / Height : 1.f;
+		FSlateBrush Brush = MakeBrush(Texture, FVector2D(Width, Style.LineThickness));
+		Brush.Tiling = ESlateBrushTileType::Horizontal;
+		LineImages[i]->SetBrush(Brush);
+	}
+}

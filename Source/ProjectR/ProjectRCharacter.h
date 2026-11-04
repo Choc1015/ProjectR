@@ -10,6 +10,8 @@ class UStaticMeshComponent;
 class UInputAction;
 class UInputMappingContext;
 class UAnimMontage;
+class USkillTreeComponent;
+class USkillTreeWidget;
 struct FInputActionValue;
 
 /** 1인칭 카메라와 메시를 붙이는 방식. */
@@ -56,6 +58,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> SwordMesh;
+
+	/** 스킬 포인트·해금 상태와 스킬트리 창의 그림·배치 수치 */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<USkillTreeComponent> SkillTree;
 
 	/** 검을 붙일 스켈레톤 본/소켓 이름. */
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
@@ -177,6 +183,9 @@ private:
 	void Look(const FInputActionValue& Value);
 	void Attack();
 
+	/** K: 스킬트리 창을 열고 닫는다. 열려 있는 동안 이동·시점·공격을 막고 커서를 보인다. */
+	void ToggleSkillTree();
+
 	void PlayComboAttack(int32 Index);
 	bool HasHitNotify(const UAnimMontage* Montage) const;
 
@@ -201,6 +210,12 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UInputAction> AttackAction;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UInputAction> SkillTreeAction;
+
+	UPROPERTY(Transient)
+	TObjectPtr<USkillTreeWidget> SkillTreeWidget;
 
 	/** [몸 따라가기] 대기 자세에서 머리가 바라보는 방향. 시점에는 이 기준 대비 변화량만 더한다. */
 	FRotator CameraBaseline = FRotator::ZeroRotator;

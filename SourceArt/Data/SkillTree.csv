@@ -1,0 +1,12 @@
+﻿---,DisplayName,Parent,Cost,Icon,Description
+Swordsmanship,기본 검술,,1,,모든 검 기술의 시작
+PowerStrike,강타,Swordsmanship,1,,(예시) 공격 피해 증가
+HeavySlash,내려찍기,PowerStrike,2,,(예시) 강한 한 방
+Whirlwind,회전 베기,HeavySlash,3,,(예시) 주변 적을 벤다
+QuickSlash,빠른 베기,Swordsmanship,1,,(예시) 공격 속도 증가
+DoubleCombo,연속 베기,QuickSlash,2,,(예시) 콤보 한 타 추가
+Guard,방어 자세,Swordsmanship,1,,(예시) 받는 피해 감소
+Parry,받아치기,Guard,2,,(예시) 타이밍 맞춰 막으면 반격
+Footwork,발놀림,Swordsmanship,1,,(예시) 이동 속도 증가
+Dash,돌진,Footwork,2,,(예시) 앞으로 빠르게 이동
+Evade,회피,Footwork,2,,(예시) 짧은 무적 구르기

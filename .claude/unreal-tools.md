@@ -111,3 +111,10 @@ unreal-worker가 `describe_toolset`으로 확인한 도구를 한 줄씩 추가�
 - `create_montage(folder_path, asset_name, animation)`, `get_montage_animations(montage)`
 - `set_montage_notify(montage, notify_name, time)`, `get_montage_notify_time(...)`, `remove_montage_notify(...)` — 콤보 타격은 `Hit`
 - `create_anim_blueprint(folder_path, asset_name, skeleton, parent_class)` — AnimGraph는 MCP로 편집 불가, 사용자가 직접 만든다.
+
+### 스킬트리 작업에서 확인
+- `texture.TextureTools / import_file(folder_path, asset_name, source_file)` — PNG → Texture2D. UI용은 `set_properties`로 `compressionSettings: TC_EditorIcon`, `lODGroup: TEXTUREGROUP_UI`.
+- `data_table.DataTableTools / import_file(folder_path, asset_name, source_file, schema=ref('/Script/ProjectR.<구조체>'))`, `list_rows`, `get_rows(data_table, row_names)`.
+  행 구조체에 `Name` 필드를 두지 않는다(JSON 행 이름 키와 겹쳐 도구에서 사라짐). 열 바꾸면 DT 지우고 다시 임포트.
+- BP CDO의 C++ 컴포넌트: `<CDO>:SkillTree`. 구조체·에셋 참조는 `set_properties`에 `{"style": {"background": "/Game/..T.T"}}`처럼 경로 문자열로 넣으면 된다.
+- MCP 커넥터가 끊긴 세션(ECONNREFUSED 후 에디터 재시작)에서는 `Tools/McpRun.ps1 -ScriptFile x.py`로 HTTP 직접 실행.

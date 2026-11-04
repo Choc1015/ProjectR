@@ -35,9 +35,9 @@ AProjectRCharacter::AProjectRCharacter()
 	FirstPersonCamera->bUsePawnControlRotation = true;
 	FirstPersonCamera->SetFieldOfView(90.f);
 
-	// 기본은 팔 부착 모드: 1인칭 템플릿처럼 메시를 카메라에 붙인다. 위치는 BP에서 눈높이에 맞춘다.
-	GetMesh()->SetupAttachment(FirstPersonCamera);
-	GetMesh()->SetRelativeLocationAndRotation(FVector(-5.f, 0.f, -160.f), FRotator(0.f, 180.f, 0.f));
+	// 메시 원점은 발바닥, 미사모 임포트 결과 정면이 -X라 180도 돌린다.
+	// 팔 부착 모드에서는 ApplyCameraMode가 카메라에 다시 붙이며, 이 값은 그때 카메라 기준 위치가 된다.
+	GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -90.f), FRotator(0.f, 180.f, 0.f));
 	GetMesh()->SetCastShadow(false);
 
 	SwordMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SwordMesh"));
@@ -116,10 +116,10 @@ void AProjectRCharacter::ApplyCameraMode()
 	// 몸 따라가기에서는 Tick이 마우스 시점과 머리 회전을 합쳐 직접 회전시킨다.
 	FirstPersonCamera->bUsePawnControlRotation = CameraMode == EFirstPersonCameraMode::ArmsOnCamera;
 
+	// 부모만 바꾼다. 위치·회전은 BP에서 CharacterMesh0에 정한 값을 그대로 쓴다.
 	if (CameraMode == EFirstPersonCameraMode::CameraFollowsBody)
 	{
 		GetMesh()->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::KeepRelativeTransform);
-		GetMesh()->SetRelativeTransform(BodyMeshTransform);
 		bHasCameraBaseline = false;
 		CameraBaselineDelay = 0.3f;
 		SetActorTickEnabled(true);
@@ -127,6 +127,7 @@ void AProjectRCharacter::ApplyCameraMode()
 	}
 	else
 	{
+		GetMesh()->AttachToComponent(FirstPersonCamera, FAttachmentTransformRules::KeepRelativeTransform);
 		SetActorTickEnabled(false);
 		ApplyFirstPersonVisibility(HiddenBoneNames, HiddenMaterialSlotNames);
 	}

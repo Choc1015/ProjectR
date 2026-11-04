@@ -56,9 +56,9 @@ protected:
 	FName WeaponSocketName = TEXT("RightHand");
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
-	EFirstPersonCameraMode CameraMode = EFirstPersonCameraMode::ArmsOnCamera;
+	EFirstPersonCameraMode CameraMode = EFirstPersonCameraMode::CameraFollowsBody;
 
-	/** [팔 부착] 숨길 본(하위 본 포함). 팔만 남기도록 목과 다리를 숨긴다. 메시 위치는 CharacterMesh0의 Transform(카메라 기준). */
+	/** [팔 부착] 숨길 본(하위 본 포함). 팔만 남기도록 목과 다리를 숨긴다. 이 모드에서 CharacterMesh0의 Transform은 카메라 기준이다. */
 	UPROPERTY(EditDefaultsOnly, Category = "Camera|Arms On Camera")
 	TArray<FName> HiddenBoneNames = { TEXT("Neck"), TEXT("LeftUpLeg"), TEXT("RightUpLeg") };
 
@@ -71,10 +71,6 @@ protected:
 	/** [팔 부착] 켜면 팔도 걷기·달리기 모션을 따른다. 끄면 이동 중에도 대기 자세라 몸이 카메라에 들어오지 않는다. */
 	UPROPERTY(EditDefaultsOnly, Category = "Camera|Arms On Camera")
 	bool bArmsFollowLocomotion = false;
-
-	/** [몸 따라가기] 캡슐 기준 메시 위치. 메시 원점은 발바닥, 미사모 임포트 결과 정면이 -X라 180도 돌린다. */
-	UPROPERTY(EditDefaultsOnly, Category = "Camera|Camera Follows Body")
-	FTransform BodyMeshTransform = FTransform(FRotator(0.f, 180.f, 0.f), FVector(0.f, 0.f, -90.f));
 
 	/** [몸 따라가기] 카메라가 따라갈 본. */
 	UPROPERTY(EditDefaultsOnly, Category = "Camera|Camera Follows Body")

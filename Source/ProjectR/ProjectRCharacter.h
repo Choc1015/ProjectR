@@ -27,6 +27,8 @@ public:
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 
+	virtual void Tick(float DeltaSeconds) override;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -43,6 +45,14 @@ protected:
 	/** 1인칭 카메라에 걸리지 않도록 숨길 본(하위 본 포함). None이면 숨기지 않는다. */
 	UPROPERTY(EditDefaultsOnly, Category = "Camera")
 	FName HiddenHeadBoneName = TEXT("Head");
+
+	/** 카메라가 매 프레임 따라갈 본(눈 위치 기준). None이면 캡슐에 고정된 위치를 쓴다. */
+	UPROPERTY(EditDefaultsOnly, Category = "Camera")
+	FName CameraBoneName = TEXT("Head");
+
+	/** 따라갈 본에서 카메라까지의 오프셋(cm). X = 시선 앞, Y = 오른쪽, Z = 위. 시선 좌우 회전만 반영한다. */
+	UPROPERTY(EditDefaultsOnly, Category = "Camera")
+	FVector CameraBoneOffset = FVector(10.f, 0.f, 8.f);
 
 	/** 콤보 순서대로 재생할 공격 몽타주. */
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")

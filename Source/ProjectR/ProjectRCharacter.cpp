@@ -16,6 +16,10 @@
 
 AProjectRCharacter::AProjectRCharacter()
 {
+	PrimaryActorTick.bCanEverTick = true;
+	// 애니메이션이 머리 위치를 갱신한 뒤 카메라를 옮긴다.
+	PrimaryActorTick.TickGroup = TG_PostUpdateWork;
+
 	GetCapsuleComponent()->InitCapsuleSize(35.f, 90.f);
 
 	bUseControllerRotationYaw = true;
@@ -34,6 +38,8 @@ AProjectRCharacter::AProjectRCharacter()
 	SwordMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SwordMesh"));
 	SwordMesh->SetupAttachment(GetMesh(), WeaponSocketName);
 	SwordMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// 미사모 손 본에는 x100 스케일이 들어 있어 상속하면 검이 거대해진다.
+	SwordMesh->SetUsingAbsoluteScale(true);
 }
 
 void AProjectRCharacter::OnConstruction(const FTransform& Transform)
@@ -42,6 +48,19 @@ void AProjectRCharacter::OnConstruction(const FTransform& Transform)
 
 	// 블루프린트에서 소켓 이름을 바꿨을 수 있으니 다시 붙인다. 에디터 배치 시에도 손에 보이게 여기서 한다.
 	SwordMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, WeaponSocketName);
+}
+
+void AProjectRCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	// 자세가 몸을 비트는 애니메이션이라 캡슐 기준 카메라는 눈과 어긋난다. 머리 본을 따라간다.
+	if (!CameraBoneName.IsNone() && GetMesh()->GetBoneIndex(CameraBoneName) != INDEX_NONE)
+	{
+		const FRotator YawRotation(0.f, GetControlRotation().Yaw, 0.f);
+		FirstPersonCamera->SetWorldLocation(
+			GetMesh()->GetBoneLocation(CameraBoneName) + YawRotation.RotateVector(CameraBoneOffset));
+	}
 }
 
 void AProjectRCharacter::BeginPlay()

@@ -85,8 +85,8 @@ protected:
 	FVector CameraBoneOffset = FVector(10.f, 0.f, 8.f);
 
 	/**
-	 * [몸 따라가기] 애니메이션의 머리 회전을 시점에 얼마나 싣는지. 1 = 머리 그대로, 0 = 마우스 시점만.
-	 * 머리 회전은 기준 포즈(T포즈) 머리 대비 변화량으로, 마우스 시점 위에 더해진다.
+	 * [몸 따라가기] 애니메이션의 머리 움직임을 시점에 얼마나 싣는지. 1 = 머리 그대로, 0 = 마우스 시점만.
+	 * 시작 직후 대기 자세의 머리 방향 대비 좌우·위아래 변화량만 더하고, 기울기(롤)는 쓰지 않는다.
 	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Camera|Camera Follows Body", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float CameraRotationFollowAlpha = 1.f;
@@ -153,6 +153,12 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UInputAction> AttackAction;
+
+	/** [몸 따라가기] 대기 자세에서 머리가 바라보는 방향. 시점에는 이 기준 대비 변화량만 더한다. */
+	FRotator CameraBaseline = FRotator::ZeroRotator;
+	bool bHasCameraBaseline = false;
+	/** 기준을 잡기 전 애니메이션이 대기 자세에 자리 잡도록 기다리는 시간(초). */
+	float CameraBaselineDelay = 0.f;
 
 	/** 현재 재생 중인 콤보 인덱스. 공격 중이 아니면 INDEX_NONE. */
 	int32 ComboIndex = INDEX_NONE;

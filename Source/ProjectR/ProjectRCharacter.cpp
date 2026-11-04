@@ -69,16 +69,37 @@ void AProjectRCharacter::Tick(float DeltaSeconds)
 		return;
 	}
 
-	// 기준 포즈 대비 머리가 애니메이션으로 얼마나 돌았는지(메시 공간) → 캡슐 공간으로 옮긴다.
+	// 머리가 바라보는 방향(캡슐 공간). T포즈에서 머리가 정면(+X)을 본다고 보고, 그 대비 회전으로 구한다.
 	const FQuat RefHead = FAnimationRuntime::GetComponentSpaceTransformRefPose(
 		BodyMesh->GetSkeletalMeshAsset()->GetRefSkeleton(), BoneIndex).GetRotation();
 	const FQuat AnimHead = BodyMesh->GetComponentSpaceTransforms()[BoneIndex].GetRotation();
 	const FQuat MeshToActor = BodyMesh->GetRelativeRotation().Quaternion();
 	const FQuat HeadDelta = MeshToActor * (AnimHead * RefHead.Inverse()) * MeshToActor.Inverse();
+	// 롤은 버린다. 화면이 기울면 안 된다.
+	const FRotator HeadDirection = HeadDelta.RotateVector(FVector::ForwardVector).Rotation();
 
-	// 마우스 시점 위에 머리 회전을 더한다.
-	const FQuat ViewRotation = GetControlRotation().Quaternion()
-		* FQuat::Slerp(FQuat::Identity, HeadDelta, CameraRotationFollowAlpha);
+	// 스탠스 때문에 대기 자세에서도 머리가 정면과 어긋나 있으니, 시작 직후 대기 자세 머리 방향을 기준(0)으로 삼는다.
+	if (!bHasCameraBaseline)
+	{
+		CameraBaselineDelay -= DeltaSeconds;
+		if (CameraBaselineDelay <= 0.f && ComboIndex == INDEX_NONE)
+		{
+			CameraBaseline = HeadDirection;
+			bHasCameraBaseline = true;
+		}
+	}
+
+	FRotator HeadOffset = FRotator::ZeroRotator;
+	if (bHasCameraBaseline)
+	{
+		HeadOffset = (HeadDirection - CameraBaseline).GetNormalized() * CameraRotationFollowAlpha;
+		HeadOffset.Roll = 0.f;
+	}
+
+	// 마우스 시점 위에 머리 움직임을 더한다.
+	FRotator ViewRotation = GetControlRotation() + HeadOffset;
+	ViewRotation.Pitch = FMath::ClampAngle(ViewRotation.Pitch, -89.f, 89.f);
+	ViewRotation.Roll = 0.f;
 	FirstPersonCamera->SetWorldLocationAndRotation(
 		BodyMesh->GetBoneLocation(CameraBoneName) + ViewRotation.RotateVector(CameraBoneOffset), ViewRotation);
 }
@@ -99,6 +120,8 @@ void AProjectRCharacter::ApplyCameraMode()
 	{
 		GetMesh()->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		GetMesh()->SetRelativeTransform(BodyMeshTransform);
+		bHasCameraBaseline = false;
+		CameraBaselineDelay = 0.3f;
 		SetActorTickEnabled(true);
 		ApplyFirstPersonVisibility(BodyHiddenBoneNames, BodyHiddenMaterialSlotNames);
 	}

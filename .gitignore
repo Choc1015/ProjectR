@@ -44,3 +44,7 @@ Desktop.ini
 # Local MCP / Claude config
 .mcp.json
 .claude/settings.local.json
+
+# Python
+__pycache__/
+*.pyc

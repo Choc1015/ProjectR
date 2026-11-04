@@ -119,3 +119,4 @@ unreal-worker가 `describe_toolset`으로 확인한 도구를 한 줄씩 추가�
 - BP CDO의 C++ 컴포넌트: `<CDO>:SkillTree`. 구조체·에셋 참조는 `set_properties`에 `{"style": {"background": "/Game/..T.T"}}`처럼 경로 문자열로 넣으면 된다.
 - MCP 커넥터가 끊긴 세션(ECONNREFUSED 후 에디터 재시작)에서는 `Tools/McpRun.ps1 -ScriptFile x.py`로 HTTP 직접 실행.
 - `execute_tool_script` 안에서 import 가능한 모듈은 json, datetime, math, re, copy, time뿐이다(`os` 불가). 파일 목록은 밖에서 만들어 스크립트에 넣는다.
+- 텍스처는 같은 이름으로 다시 import_file 하면 'already exists' 오류. 지우고(AssetTools.delete) 새로 임포트한 뒤 참조(BP 값)를 다시 넣는다.

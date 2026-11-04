@@ -59,11 +59,11 @@ struct FSkillTreeStyle
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Style")
 	TObjectPtr<UTexture2D> LineActive;
 
-	/** 노드에 마우스를 올리면 뜨는 설명창 바탕(9-슬라이스로 늘어난다) */
+	/** 노드에 마우스를 올리면 뜨는 설명창 바탕. 위·아래 조각은 비율 그대로, 가운데만 세로로 늘어난다. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tooltip")
 	TObjectPtr<UTexture2D> Tooltip;
 
-	/** 늘어나지 않는 테두리 비율(0~0.5). 모서리 장식이 찌그러지면 키운다. */
+	/** 위·아래 조각이 그림 높이에서 차지하는 비율(0~0.5). 장식·도장이 잘리면 키운다. 글이 짧아도 설명창은 이 두 조각보다 작아지지 않는다. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tooltip", meta = (ClampMin = "0.0", ClampMax = "0.5"))
 	float TooltipSliceMargin = 0.14f;
 

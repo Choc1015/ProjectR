@@ -1,7 +1,8 @@
 #include "SkillTreeWidget.h"
 
 #include "Blueprint/WidgetTree.h"
-#include "Components/Border.h"
+#include "Components/Overlay.h"
+#include "Components/OverlaySlot.h"
 #include "Components/ButtonSlot.h"
 #include "Components/SizeBox.h"
 #include "Components/VerticalBox.h"
@@ -341,28 +342,50 @@ void USkillTreeWidget::AddNode(FName Id, const FVector2D& Position)
 UWidget* USkillTreeWidget::MakeTooltip(FName Id, const FSkillTreeRow& Row)
 {
 	const FSkillTreeStyle& Style = Skills->Style;
+	const float Width = Style.TooltipWidth;
 
-	UBorder* Panel = WidgetTree->ConstructWidget<UBorder>();
-	FSlateBrush Brush;
+	// 바탕: 그림을 위·가운데·아래로 잘라 위아래(장식·도장)는 원래 비율 그대로, 가운데만 세로로 늘린다.
+	UOverlay* Panel = WidgetTree->ConstructWidget<UOverlay>();
 	if (Style.Tooltip)
 	{
-		// 그림 폭을 설명창 폭에 맞춰야 모서리 장식이 원래 비율로 그려진다(위아래로만 늘어남).
 		const float Aspect = Style.Tooltip->GetSurfaceHeight() / FMath::Max(1.f, Style.Tooltip->GetSurfaceWidth());
-		Brush = MakeBrush(Style.Tooltip, FVector2D(Style.TooltipWidth, Style.TooltipWidth * Aspect));
-		Brush.DrawAs = ESlateBrushDrawType::Box;
-		Brush.Margin = FMargin(Style.TooltipSliceMargin);
+		const float Cap = FMath::Clamp(Style.TooltipSliceMargin, 0.01f, 0.49f);
+		UVerticalBox* Frame = WidgetTree->ConstructWidget<UVerticalBox>();
+		auto AddPart = [&](float V0, float V1, bool bStretch)
+		{
+			UImage* Part = WidgetTree->ConstructWidget<UImage>();
+			// 가운데 조각은 원하는 높이를 1로 둬서 글이 짧으면 줄어들 수 있게 한다.
+			FSlateBrush PartBrush = MakeBrush(Style.Tooltip, FVector2D(Width, bStretch ? 1.f : Width * Aspect * (V1 - V0)));
+			PartBrush.SetUVRegion(FBox2f(FVector2f(0.f, V0), FVector2f(1.f, V1)));
+			Part->SetBrush(PartBrush);
+			if (UVerticalBoxSlot* PartSlot = Frame->AddChildToVerticalBox(Part))
+			{
+				PartSlot->SetSize(FSlateChildSize(bStretch ? ESlateSizeRule::Fill : ESlateSizeRule::Automatic));
+			}
+		};
+		AddPart(0.f, Cap, false);
+		AddPart(Cap, 1.f - Cap, true);
+		AddPart(1.f - Cap, 1.f, false);
+		UOverlaySlot* FrameSlot = Panel->AddChildToOverlay(Frame);
+		FrameSlot->SetHorizontalAlignment(HAlign_Fill);
+		FrameSlot->SetVerticalAlignment(VAlign_Fill);
 	}
 	else
 	{
-		Brush.TintColor = FSlateColor(FLinearColor(0.93f, 0.86f, 0.72f));
+		UImage* Plain = WidgetTree->ConstructWidget<UImage>();
+		Plain->SetColorAndOpacity(FLinearColor(0.93f, 0.86f, 0.72f));
+		UOverlaySlot* PlainSlot = Panel->AddChildToOverlay(Plain);
+		PlainSlot->SetHorizontalAlignment(HAlign_Fill);
+		PlainSlot->SetVerticalAlignment(VAlign_Fill);
 	}
-	Panel->SetBrush(Brush);
-	Panel->SetPadding(Style.TooltipPadding);
 
 	UVerticalBox* Lines = WidgetTree->ConstructWidget<UVerticalBox>();
-	Panel->SetContent(Lines);
+	UOverlaySlot* LinesSlot = Panel->AddChildToOverlay(Lines);
+	LinesSlot->SetPadding(Style.TooltipPadding);
+	LinesSlot->SetHorizontalAlignment(HAlign_Fill);
+	LinesSlot->SetVerticalAlignment(VAlign_Center);
 
-	const float TextWidth = Style.TooltipWidth - Style.TooltipPadding.Left - Style.TooltipPadding.Right;
+	const float TextWidth = Width - Style.TooltipPadding.Left - Style.TooltipPadding.Right;
 	auto AddText = [&](const FText& Text, int32 FontSize, float Gap) -> UTextBlock*
 	{
 		UTextBlock* Block = WidgetTree->ConstructWidget<UTextBlock>();
@@ -384,12 +407,7 @@ UWidget* USkillTreeWidget::MakeTooltip(FName Id, const FSkillTreeRow& Row)
 	AddText(Row.Description, Style.TooltipFontSizes.Z, 0.f);
 
 	USizeBox* Box = WidgetTree->ConstructWidget<USizeBox>();
-	Box->SetWidthOverride(Style.TooltipWidth);
-	if (Style.Tooltip)
-	{
-		// 위아래 모서리 장식이 서로 겹치지 않을 만큼은 높이를 확보한다.
-		Box->SetMinDesiredHeight(Brush.ImageSize.Y * Style.TooltipSliceMargin * 2.f + 16.f);
-	}
+	Box->SetWidthOverride(Width);
 	Box->SetContent(Panel);
 	return Box;
 }

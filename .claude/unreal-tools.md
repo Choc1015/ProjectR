@@ -118,3 +118,4 @@ unreal-worker가 `describe_toolset`으로 확인한 도구를 한 줄씩 추가�
   행 구조체에 `Name` 필드를 두지 않는다(JSON 행 이름 키와 겹쳐 도구에서 사라짐). 열 바꾸면 DT 지우고 다시 임포트.
 - BP CDO의 C++ 컴포넌트: `<CDO>:SkillTree`. 구조체·에셋 참조는 `set_properties`에 `{"style": {"background": "/Game/..T.T"}}`처럼 경로 문자열로 넣으면 된다.
 - MCP 커넥터가 끊긴 세션(ECONNREFUSED 후 에디터 재시작)에서는 `Tools/McpRun.ps1 -ScriptFile x.py`로 HTTP 직접 실행.
+- `execute_tool_script` 안에서 import 가능한 모듈은 json, datetime, math, re, copy, time뿐이다(`os` 불가). 파일 목록은 밖에서 만들어 스크립트에 넣는다.

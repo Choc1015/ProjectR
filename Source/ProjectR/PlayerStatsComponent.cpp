@@ -106,6 +106,15 @@ float UPlayerStatsComponent::ApplyIncomingDamage(float Damage, float AttackerPen
 	return Taken;
 }
 
+void UPlayerStatsComponent::Heal(float Amount)
+{
+	if (Health > 0.f && Amount > 0.f)
+	{
+		Health = FMath::Min(Health + Amount, GetStat(EPlayerStat::MaxHealth));
+		OnChanged.Broadcast();
+	}
+}
+
 bool UPlayerStatsComponent::TrySpendMana(float BaseCost)
 {
 	const float Cost = BaseCost * FMath::Max(0.f, 1.f - GetStat(EPlayerStat::ManaCostReduction) / 100.f);

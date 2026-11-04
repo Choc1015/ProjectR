@@ -72,6 +72,10 @@ public:
 	/** 받은 피해에 방어력을 적용해 체력을 깎고, 실제로 깎인 양을 돌려준다. */
 	float ApplyIncomingDamage(float Damage, float AttackerPenetration = 0.f);
 
+	/** 최대 체력을 넘지 않게 회복 */
+	UFUNCTION(BlueprintCallable, Category = "Stats")
+	void Heal(float Amount);
+
 	/** 마나 소비 감소를 적용한 비용을 낼 수 있으면 깎고 true */
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	bool TrySpendMana(float BaseCost);

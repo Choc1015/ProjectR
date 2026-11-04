@@ -14,6 +14,7 @@ class UAnimMontage;
 class USkillTreeComponent;
 class UPlayerStatsComponent;
 class UPlayerHUDWidget;
+class UPlayerSkillComponent;
 class USkillTreeWidget;
 struct FInputActionValue;
 
@@ -70,6 +71,10 @@ protected:
 	/** 체력·마나·공격력 등. 기본값 + 해금한 스킬 보너스 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UPlayerStatsComponent> Stats;
+
+	/** 스킬 4칸: 젬 Q·E·R + 무기 F */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UPlayerSkillComponent> Skills;
 
 	/** 화면 아래 체력·마나 바와 아이템 칸의 그림·배치 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HUD")
@@ -196,6 +201,9 @@ private:
 	/** K: 스킬트리 창을 열고 닫는다. 열려 있는 동안 이동·시점·공격을 막고 커서를 보인다. */
 	void ToggleSkillTree();
 
+	/** 0~2 = 젬 칸(Q·E·R), 3 = 무기 칸(F) */
+	void UseSkillSlot(int32 Slot);
+
 	void PlayComboAttack(int32 Index);
 	bool HasHitNotify(const UAnimMontage* Montage) const;
 
@@ -223,6 +231,10 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UInputAction> SkillTreeAction;
+
+	/** Q·E·R·F 순서 (젬 3칸, 무기 칸) */
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UInputAction>> SkillSlotActions;
 
 	UPROPERTY(Transient)
 	TObjectPtr<USkillTreeWidget> SkillTreeWidget;

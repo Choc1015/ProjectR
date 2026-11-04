@@ -17,6 +17,7 @@
 #include "SkillTreeComponent.h"
 #include "PlayerStatsComponent.h"
 #include "PlayerHUDWidget.h"
+#include "PlayerSkillComponent.h"
 #include "SkillTreeWidget.h"
 #include "TimerManager.h"
 
@@ -54,6 +55,7 @@ AProjectRCharacter::AProjectRCharacter()
 
 	SkillTree = CreateDefaultSubobject<USkillTreeComponent>(TEXT("SkillTree"));
 	Stats = CreateDefaultSubobject<UPlayerStatsComponent>(TEXT("Stats"));
+	Skills = CreateDefaultSubobject<UPlayerSkillComponent>(TEXT("Skills"));
 	SwordMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SwordMesh"));
 	SwordMesh->SetupAttachment(GetMesh(), WeaponSocketName);
 	SwordMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -319,6 +321,14 @@ void AProjectRCharacter::CreateInput()
 	DefaultMappingContext->MapKey(JumpAction, EKeys::SpaceBar);
 	DefaultMappingContext->MapKey(AttackAction, EKeys::LeftMouseButton);
 	DefaultMappingContext->MapKey(SkillTreeAction, EKeys::K);
+
+	const FKey SkillKeys[] = { EKeys::Q, EKeys::E, EKeys::R, EKeys::F };
+	for (int32 Slot = 0; Slot < UE_ARRAY_COUNT(SkillKeys); ++Slot)
+	{
+		UInputAction* Action = NewObject<UInputAction>(this, *FString::Printf(TEXT("IA_SkillSlot%d"), Slot));
+		SkillSlotActions.Add(Action);
+		DefaultMappingContext->MapKey(Action, SkillKeys[Slot]);
+	}
 }
 
 void AProjectRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -335,6 +345,10 @@ void AProjectRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		Input->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		Input->BindAction(AttackAction, ETriggerEvent::Started, this, &AProjectRCharacter::Attack);
 		Input->BindAction(SkillTreeAction, ETriggerEvent::Started, this, &AProjectRCharacter::ToggleSkillTree);
+		for (int32 Slot = 0; Slot < SkillSlotActions.Num(); ++Slot)
+		{
+			Input->BindAction(SkillSlotActions[Slot], ETriggerEvent::Started, this, &AProjectRCharacter::UseSkillSlot, Slot);
+		}
 	}
 }
 
@@ -363,7 +377,7 @@ void AProjectRCharacter::Look(const FInputActionValue& Value)
 
 void AProjectRCharacter::Attack()
 {
-	if (SkillTreeWidget || AttackMontages.IsEmpty())
+	if (SkillTreeWidget || AttackMontages.IsEmpty() || Skills->IsBusy())
 	{
 		return;
 	}
@@ -494,6 +508,19 @@ void AProjectRCharacter::ResetCombo()
 	SwordMesh->SetRelativeRotation(SwordBaseRotation);
 	GetWorldTimerManager().ClearTimer(HitTimer);
 	GetWorldTimerManager().ClearTimer(ComboTimer);
+}
+
+void AProjectRCharacter::UseSkillSlot(int32 Slot)
+{
+	if (SkillTreeWidget)
+	{
+		return;
+	}
+	// 기본 공격 중이면 콤보를 끊고 스킬을 쓴다(몽타주가 바뀌며 콤보 정리는 끝 이벤트가 한다).
+	if (Skills->TryUseSlot(Slot))
+	{
+		ResetCombo();
+	}
 }
 
 void AProjectRCharacter::ToggleSkillTree()

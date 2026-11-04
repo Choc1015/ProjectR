@@ -18,9 +18,8 @@
 
 AProjectRCharacter::AProjectRCharacter()
 {
-	// 몸 따라가기 모드에서만 켠다. 애니메이션이 본 위치를 갱신한 뒤 카메라를 옮긴다.
+	// 카메라 회전·공격 전진을 처리한다. 애니메이션이 본 위치를 갱신한 뒤에 돈다.
 	PrimaryActorTick.bCanEverTick = true;
-	PrimaryActorTick.bStartWithTickEnabled = false;
 	PrimaryActorTick.TickGroup = TG_PostUpdateWork;
 
 	GetCapsuleComponent()->InitCapsuleSize(35.f, 90.f);
@@ -71,6 +70,31 @@ void AProjectRCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	UpdateHeadCameraRotation(DeltaSeconds);
+	UpdateAttackCameraPush(DeltaSeconds);
+}
+
+void AProjectRCharacter::UpdateAttackCameraPush(float DeltaSeconds)
+{
+	if (AttackPushElapsed >= AttackCameraPushTime)
+	{
+		return;
+	}
+
+	AttackPushElapsed += DeltaSeconds;
+	// 0 → 1 → 0 로 부드럽게: 나갔다가 원래 자리로 돌아온다.
+	const float Alpha = FMath::Sin(UE_PI * FMath::Clamp(AttackPushElapsed / AttackCameraPushTime, 0.f, 1.f));
+
+	UCameraComponent* Camera = GetActiveCamera();
+	Camera->ClearAdditiveOffset();
+	if (AttackPushElapsed < AttackCameraPushTime)
+	{
+		Camera->AddAdditiveOffset(FTransform(FVector(AttackCameraPushDistance * Alpha, 0.f, 0.f)), 0.f);
+	}
+}
+
+void AProjectRCharacter::UpdateHeadCameraRotation(float DeltaSeconds)
+{
 	USkeletalMeshComponent* BodyMesh = GetMesh();
 	const int32 BoneIndex = BodyMesh->GetBoneIndex(CameraBoneName);
 	if (CameraMode != EFirstPersonCameraMode::CameraFollowsBody || BoneIndex == INDEX_NONE
@@ -121,7 +145,7 @@ UCameraComponent* AProjectRCharacter::GetActiveCamera() const
 
 bool AProjectRCharacter::ShouldUseLocomotionAnimation() const
 {
-	return CameraMode == EFirstPersonCameraMode::CameraFollowsBody || bArmsFollowLocomotion;
+	return bPlayLocomotionAnimation;
 }
 
 void AProjectRCharacter::ApplyCameraMode()
@@ -138,13 +162,11 @@ void AProjectRCharacter::ApplyCameraMode()
 		GetMesh()->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		bHasCameraBaseline = false;
 		CameraBaselineDelay = 0.3f;
-		SetActorTickEnabled(true);
 		ApplyFirstPersonVisibility(BodyHiddenBoneNames, BodyHiddenMaterialSlotNames);
 	}
 	else
 	{
 		GetMesh()->AttachToComponent(FirstPersonCamera, FAttachmentTransformRules::KeepRelativeTransform);
-		SetActorTickEnabled(false);
 		ApplyFirstPersonVisibility(HiddenBoneNames, HiddenMaterialSlotNames);
 	}
 }
@@ -314,6 +336,9 @@ void AProjectRCharacter::PlayComboAttack(int32 Index)
 		ResetCombo();
 		return;
 	}
+
+	// 타마다 카메라를 앞으로 살짝 내밀었다가 되돌린다.
+	AttackPushElapsed = 0.f;
 
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AProjectRCharacter::OnAttackMontageEnded);

@@ -39,7 +39,7 @@ public:
 
 	virtual void Tick(float DeltaSeconds) override;
 
-	/** 애님 블루프린트가 걷기·달리기 블렌드를 쓸지. 팔 부착 모드에서 꺼 두면 팔이 대기 자세를 유지한다. */
+	/** 애님 블루프린트가 걷기·달리기 블렌드를 쓸지. bPlayLocomotionAnimation을 그대로 돌려준다. */
 	bool ShouldUseLocomotionAnimation() const;
 
 protected:
@@ -73,9 +73,17 @@ protected:
 		TEXT("M_Player_Hair"), TEXT("M_Player_Eye"), TEXT("M_Player_Leather"),
 		TEXT("M_Player_Pants"), TEXT("M_Player_Boots"), TEXT("M_Player_Metal") };
 
-	/** [팔 부착] 켜면 팔도 걷기·달리기 모션을 따른다. 끄면 이동 중에도 대기 자세라 몸이 카메라에 들어오지 않는다. */
-	UPROPERTY(EditDefaultsOnly, Category = "Camera|Arms On Camera")
-	bool bArmsFollowLocomotion = false;
+	/** 켜면 이동할 때 걷기·달리기 모션을 재생한다. 끄면 이동 중에도 대기 자세라 몸을 숙이며 팔이 화면 앞으로 튀어나오지 않는다. */
+	UPROPERTY(EditDefaultsOnly, Category = "Camera")
+	bool bPlayLocomotionAnimation = false;
+
+	/** 공격할 때 카메라가 시선 방향으로 나갔다 돌아오는 최대 거리(cm). 0이면 끈다. */
+	UPROPERTY(EditDefaultsOnly, Category = "Camera|Attack Push", meta = (ClampMin = "0.0"))
+	float AttackCameraPushDistance = 15.f;
+
+	/** 공격 시작부터 카메라가 나갔다가 완전히 돌아올 때까지 걸리는 시간(초). 절반 지점에서 가장 멀리 나간다. */
+	UPROPERTY(EditDefaultsOnly, Category = "Camera|Attack Push", meta = (ClampMin = "0.05"))
+	float AttackCameraPushTime = 0.4f;
 
 	/** [몸 따라가기] HeadCamera를 붙일 본/소켓. */
 	UPROPERTY(EditDefaultsOnly, Category = "Camera|Camera Follows Body")
@@ -127,6 +135,9 @@ private:
 	/** 현재 모드에서 시점으로 쓰는 카메라. */
 	UCameraComponent* GetActiveCamera() const;
 
+	void UpdateHeadCameraRotation(float DeltaSeconds);
+	void UpdateAttackCameraPush(float DeltaSeconds);
+
 	void CreateInput();
 
 	void Move(const FInputActionValue& Value);
@@ -159,6 +170,9 @@ private:
 	bool bHasCameraBaseline = false;
 	/** 기준을 잡기 전 애니메이션이 대기 자세에 자리 잡도록 기다리는 시간(초). */
 	float CameraBaselineDelay = 0.f;
+
+	/** 공격 카메라 전진이 시작된 뒤 지난 시간(초). AttackCameraPushTime 이상이면 쉬는 중. */
+	float AttackPushElapsed = TNumericLimits<float>::Max();
 
 	/** 현재 재생 중인 콤보 인덱스. 공격 중이 아니면 INDEX_NONE. */
 	int32 ComboIndex = INDEX_NONE;

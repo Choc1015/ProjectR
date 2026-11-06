@@ -56,6 +56,9 @@ public:
 	int32 GetCurrentNode() const { return CurrentNode; }
 	bool IsReachable(int32 NodeIndex) const;
 
+	/** 런 동안 들고 있는 무기(무기 표 행 이름). 방을 옮겨 캐릭터가 새로 생겨도 이어서 든다. */
+	FName CurrentWeapon;
+
 private:
 	void Generate();
 	void OpenRoomLevel(int32 RoomIndex);

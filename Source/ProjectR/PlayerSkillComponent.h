@@ -7,6 +7,8 @@
 
 class UAnimMontage;
 class UTexture2D;
+class UNiagaraSystem;
+class UStaticMesh;
 class UPlayerStatsComponent;
 
 /** 스킬이 끼워지는 곳. 젬은 갈아 끼우고, 무기 스킬은 무기에 붙어 있다. */
@@ -25,6 +27,7 @@ enum class ESkillEffect : uint8
 	Spin	UMETA(DisplayName = "회전: 내 주변 Range 안 모두 타격"),
 	Slam	UMETA(DisplayName = "내려찍기: 앞쪽 Range, Angle 부채꼴 타격"),
 	Heal	UMETA(DisplayName = "회복: 최대 체력의 HealPercent% 회복"),
+	Projectile	UMETA(DisplayName = "투사체: 보는 방향으로 탄을 쏴 맞은 곳 Range 반지름 폭발"),
 };
 
 /** 스킬 표(CSV) 한 줄. 행 이름이 스킬 ID. */
@@ -76,6 +79,16 @@ struct FSkillRow : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill")
 	FText Description;
+
+	/** Projectile만: 날아가는 메시, 속도(cm/s), 터질 때 이펙트 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|Projectile")
+	TSoftObjectPtr<UStaticMesh> ProjectileMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|Projectile")
+	float ProjectileSpeed = 1500.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|Projectile")
+	TSoftObjectPtr<UNiagaraSystem> ImpactEffect;
 };
 
 /**

@@ -15,7 +15,7 @@
 
 namespace
 {
-	FSlateBrush MakeBrush(UTexture2D* Texture, const FVector2D& Size)
+	FSlateBrush MakeMapBrush(UTexture2D* Texture, const FVector2D& Size)
 	{
 		FSlateBrush Brush;
 		Brush.DrawAs = ESlateBrushDrawType::Image;
@@ -173,7 +173,7 @@ void URoomMapWidget::Build()
 	BoardBox->AddChild(Board);
 
 	UImage* Backdrop = WidgetTree->ConstructWidget<UImage>();
-	Backdrop->SetBrush(MakeBrush(Settings->Backdrop.LoadSynchronous(), Settings->BoardSize));
+	Backdrop->SetBrush(MakeMapBrush(Settings->Backdrop.LoadSynchronous(), Settings->BoardSize));
 	UCanvasPanelSlot* BackdropSlot = Board->AddChildToCanvas(Backdrop);
 	BackdropSlot->SetAnchors(FAnchors(0.f, 0.f, 1.f, 1.f));
 	BackdropSlot->SetOffsets(FMargin(0.f));
@@ -224,7 +224,7 @@ void URoomMapWidget::Build()
 		Button->Owner = this;
 		Button->BindClick();
 		FButtonStyle Style;
-		const FSlateBrush Brush = MakeBrush(Texture, NodeSize);
+		const FSlateBrush Brush = MakeMapBrush(Texture, NodeSize);
 		Style.SetNormal(Brush);
 		Style.SetHovered(Brush);
 		Style.SetPressed(Brush);
@@ -252,7 +252,7 @@ void URoomMapWidget::Build()
 		if (Node.bVisited && CrossTexture)
 		{
 			UImage* Cross = WidgetTree->ConstructWidget<UImage>();
-			Cross->SetBrush(MakeBrush(CrossTexture, NodeSize * 0.9));
+			Cross->SetBrush(MakeMapBrush(CrossTexture, NodeSize * 0.9));
 			Cross->SetVisibility(ESlateVisibility::HitTestInvisible);
 			UCanvasPanelSlot* CrossSlot = Board->AddChildToCanvas(Cross);
 			CrossSlot->SetAlignment(FVector2D(0.5, 0.5));

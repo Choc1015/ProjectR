@@ -93,6 +93,9 @@ class PROJECTR_API UPlayerHUDWidget : public UUserWidget
 public:
 	void Init(UPlayerStatsComponent* InStats, const FPlayerHUDStyle& InStyle);
 
+	/** 화면 가운데 아래 안내 글(예: "E   스태프 줍기"). 빈 글이면 숨긴다. */
+	void SetPrompt(const FText& Text);
+
 protected:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
@@ -125,4 +128,13 @@ private:
 	float FillWidth = 0.f;
 
 	TSharedPtr<const FCompositeFont> FontComposite;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> PromptText;
+
+	/** 안내 글은 한글이라 나눔손글씨 펜(HUD 숫자 글꼴 Cinzel엔 한글이 없다) */
+	UPROPERTY(Transient)
+	TObjectPtr<UObject> PromptFontAsset;
+
+	TSharedPtr<const FCompositeFont> PromptComposite;
 };

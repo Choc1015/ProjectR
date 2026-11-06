@@ -19,6 +19,12 @@
 #include "PlayerSkillComponent.h"
 #include "SkillTreeWidget.h"
 #include "TimerManager.h"
+#include "Engine/DataTable.h"
+#include "Engine/StaticMesh.h"
+#include "ProjectRProjectile.h"
+#include "RunSubsystem.h"
+#include "WeaponPickup.h"
+#include "WeaponTypes.h"
 
 AProjectRCharacter::AProjectRCharacter()
 {
@@ -130,6 +136,9 @@ void AProjectRCharacter::BeginPlay()
 
 	ApplyFirstPersonVisibility();
 	SwordBaseRotation = SwordMesh->GetRelativeRotation().Quaternion();
+	WeaponBaseTransform = SwordMesh->GetRelativeTransform();
+	DefaultWeaponMesh = SwordMesh->GetStaticMesh();
+	ActiveAttackMontages = AttackMontages;
 
 	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
 	{
@@ -151,6 +160,145 @@ void AProjectRCharacter::BeginPlay()
 		HUDWidget->Init(Stats, HUDStyle);
 		HUDWidget->AddToViewport(0);
 	}
+
+	// 방을 옮겨 새로 태어나도 런에서 들고 있던 무기를 다시 든다.
+	FName StartWeapon = DefaultWeapon;
+	if (const URunSubsystem* Run = GetGameInstance() ? GetGameInstance()->GetSubsystem<URunSubsystem>() : nullptr; Run && !Run->CurrentWeapon.IsNone())
+	{
+		StartWeapon = Run->CurrentWeapon;
+	}
+	EquipWeapon(StartWeapon);
+}
+
+const FWeaponRow* AProjectRCharacter::FindWeaponRow(FName WeaponId) const
+{
+	const UDataTable* Table = WeaponTable.LoadSynchronous();
+	return Table && !WeaponId.IsNone() ? Table->FindRow<FWeaponRow>(WeaponId, TEXT("EquipWeapon")) : nullptr;
+}
+
+void AProjectRCharacter::EquipWeapon(FName WeaponId)
+{
+	const FWeaponRow* Row = FindWeaponRow(WeaponId);
+	if (!Row)
+	{
+		return;
+	}
+	ResetCombo();
+	CurrentWeapon = WeaponId;
+
+	// 손 메시: BP에서 맞춘 손잡이 위치 위에 무기별 오프셋을 더한다.
+	// 손 본에 x100 스케일이 있어 상대 위치는 그만큼 나눠야 cm 단위가 된다(스케일은 절대값이라 그대로).
+	UStaticMesh* HeldMesh = Row->Mesh.IsNull() ? DefaultWeaponMesh.Get() : Row->Mesh.LoadSynchronous();
+	SwordMesh->SetStaticMesh(HeldMesh);
+	const FQuat BaseRotation = WeaponBaseTransform.GetRotation();
+	const double ParentScale = FMath::Max(KINDA_SMALL_NUMBER, SwordMesh->GetAttachParent()
+		? SwordMesh->GetAttachParent()->GetSocketTransform(SwordMesh->GetAttachSocketName()).GetScale3D().X : 1.0);
+	SwordBaseRotation = BaseRotation * Row->MeshOffsetRotation.Quaternion();
+	SwordMesh->SetRelativeLocationAndRotation(
+		WeaponBaseTransform.GetLocation() + BaseRotation.RotateVector(Row->MeshOffsetLocation) / ParentScale,
+		SwordBaseRotation);
+	SwordMesh->SetRelativeScale3D(WeaponBaseTransform.GetScale3D() * Row->MeshScale);
+
+	// 공격 몽타주: 표에 없으면 BP의 검 콤보(공격별 검 회전 포함)
+	ActiveAttackMontages.Reset();
+	bUseSwordComboRotations = Row->AttackMontages.IsEmpty();
+	if (bUseSwordComboRotations)
+	{
+		ActiveAttackMontages = AttackMontages;
+	}
+	else
+	{
+		for (const TSoftObjectPtr<UAnimMontage>& Montage : Row->AttackMontages)
+		{
+			if (UAnimMontage* Loaded = Montage.LoadSynchronous())
+			{
+				ActiveAttackMontages.Add(Loaded);
+			}
+		}
+	}
+
+	if (!Row->WeaponSkill.IsNone())
+	{
+		Skills->WeaponSkill = Row->WeaponSkill;
+	}
+
+	if (URunSubsystem* Run = GetGameInstance() ? GetGameInstance()->GetSubsystem<URunSubsystem>() : nullptr)
+	{
+		Run->CurrentWeapon = WeaponId;
+	}
+}
+
+void AProjectRCharacter::SetNearbyPickup(AWeaponPickup* Pickup)
+{
+	NearbyPickup = Pickup;
+	const FWeaponRow* Row = Pickup ? Pickup->FindRow() : nullptr;
+	if (HUDWidget && Row)
+	{
+		HUDWidget->SetPrompt(FText::Format(FText::FromString(TEXT("E   {0} 줍기")), Row->DisplayName));
+	}
+}
+
+void AProjectRCharacter::ClearNearbyPickup(AWeaponPickup* Pickup)
+{
+	if (NearbyPickup.Get() == Pickup)
+	{
+		NearbyPickup = nullptr;
+		if (HUDWidget)
+		{
+			HUDWidget->SetPrompt(FText::GetEmpty());
+		}
+	}
+}
+
+void AProjectRCharacter::PickUpNearbyWeapon()
+{
+	AWeaponPickup* Pickup = NearbyPickup.Get();
+	if (!Pickup || Pickup->WeaponId == CurrentWeapon)
+	{
+		return;
+	}
+	const FName Dropped = CurrentWeapon;
+	EquipWeapon(Pickup->WeaponId);
+	// 내려놓은 무기가 그 자리에 남는다. 안내 글도 바뀐 무기로 갱신한다.
+	Pickup->SetWeapon(Dropped);
+	if (IsValid(Pickup) && !Pickup->IsActorBeingDestroyed())
+	{
+		SetNearbyPickup(Pickup);
+	}
+	else
+	{
+		ClearNearbyPickup(Pickup);
+	}
+}
+
+void AProjectRCharacter::FireWeaponProjectile(const FWeaponRow& Row)
+{
+	// 화면 가운데가 겨눈 곳: 카메라에서 앞으로 쏜 선이 닿는 점을 향해 무기 끝에서 쏜다.
+	const FVector CameraLocation = FirstPersonCamera->GetComponentLocation();
+	const FVector Forward = FirstPersonCamera->GetForwardVector();
+	FVector Target = CameraLocation + Forward * 5000.f;
+	FHitResult AimHit;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(ProjectRAim), false, this);
+	if (GetWorld()->LineTraceSingleByChannel(AimHit, CameraLocation + Forward * 50.f, Target, ECC_Visibility, Params))
+	{
+		Target = AimHit.ImpactPoint;
+	}
+
+	FVector Muzzle = SwordMesh->GetComponentTransform().TransformPosition(Row.ProjectileMuzzle);
+	// 무기 끝이 카메라 뒤에 있으면 벽 안에서 나올 수 있어 카메라 앞으로 당긴다.
+	if (FVector::DotProduct(Muzzle - CameraLocation, Forward) < 30.f)
+	{
+		Muzzle = CameraLocation + Forward * 60.f;
+	}
+
+	bool bCrit = false;
+	FProjectileLaunch Launch;
+	Launch.Location = Muzzle;
+	Launch.Direction = Target - Muzzle;
+	Launch.Mesh = Row.ProjectileMesh.LoadSynchronous();
+	Launch.Speed = Row.ProjectileSpeed;
+	Launch.Damage = Stats->RollOutgoingDamage(false, bCrit) * Row.ProjectileDamageMultiplier;
+	AProjectRProjectile::Launch(this, Launch);
 }
 
 void AProjectRCharacter::CreateInput()
@@ -253,7 +401,7 @@ void AProjectRCharacter::Look(const FInputActionValue& Value)
 
 void AProjectRCharacter::Attack()
 {
-	if (SkillTreeWidget || AttackMontages.IsEmpty() || Skills->IsBusy())
+	if (SkillTreeWidget || ActiveAttackMontages.IsEmpty() || Skills->IsBusy())
 	{
 		return;
 	}
@@ -270,7 +418,7 @@ void AProjectRCharacter::Attack()
 
 void AProjectRCharacter::PlayComboAttack(int32 Index)
 {
-	UAnimMontage* Montage = AttackMontages[Index];
+	UAnimMontage* Montage = ActiveAttackMontages[Index];
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (!Montage || !AnimInstance)
 	{
@@ -294,7 +442,7 @@ void AProjectRCharacter::PlayComboAttack(int32 Index)
 	AttackPushElapsed = 0.f;
 
 	// 이 타에서 칼날이 맞는 면을 향하도록 검을 돌린다.
-	const FRotator SwordOffset = AttackSwordRotationOffsets.IsValidIndex(Index) ? AttackSwordRotationOffsets[Index] : FRotator::ZeroRotator;
+	const FRotator SwordOffset = bUseSwordComboRotations && AttackSwordRotationOffsets.IsValidIndex(Index) ? AttackSwordRotationOffsets[Index] : FRotator::ZeroRotator;
 	SwordMesh->SetRelativeRotation(SwordBaseRotation * SwordOffset.Quaternion());
 
 	FOnMontageEnded EndDelegate;
@@ -329,6 +477,12 @@ void AProjectRCharacter::OnMontageNotifyBegin(FName NotifyName, const FBranching
 
 void AProjectRCharacter::PerformHitTrace()
 {
+	if (const FWeaponRow* Row = FindWeaponRow(CurrentWeapon); Row && Row->bProjectileAttack)
+	{
+		FireWeaponProjectile(*Row);
+		return;
+	}
+
 	const UCameraComponent* Camera = FirstPersonCamera;
 	const FVector Start = Camera->GetComponentLocation();
 	const FVector End = Start + Camera->GetForwardVector() * AttackRange;
@@ -362,7 +516,7 @@ float AProjectRCharacter::TakeDamage(float DamageAmount, const FDamageEvent& Dam
 
 void AProjectRCharacter::OnComboTime()
 {
-	if (bComboQueued && AttackMontages.IsValidIndex(ComboIndex + 1))
+	if (bComboQueued && ActiveAttackMontages.IsValidIndex(ComboIndex + 1))
 	{
 		PlayComboAttack(ComboIndex + 1);
 	}
@@ -371,7 +525,7 @@ void AProjectRCharacter::OnComboTime()
 void AProjectRCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	// 다음 타로 넘어가며 끊긴 경우는 콤보가 이어지는 중이다.
-	if (AttackMontages.IsValidIndex(ComboIndex) && Montage == AttackMontages[ComboIndex])
+	if (ActiveAttackMontages.IsValidIndex(ComboIndex) && Montage == ActiveAttackMontages[ComboIndex])
 	{
 		ResetCombo();
 	}
@@ -390,6 +544,12 @@ void AProjectRCharacter::UseSkillSlot(int32 Slot)
 {
 	if (SkillTreeWidget)
 	{
+		return;
+	}
+	// 바닥 무기 근처에서는 E(젬 두 번째 칸)가 줍기다.
+	if (Slot == 1 && NearbyPickup.IsValid())
+	{
+		PickUpNearbyWeapon();
 		return;
 	}
 	// 기본 공격 중이면 콤보를 끊고 스킬을 쓴다(몽타주가 바뀌며 콤보 정리는 끝 이벤트가 한다).

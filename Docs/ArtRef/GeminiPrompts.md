@@ -78,3 +78,6 @@ Vintage parchment game UI style matching an old illuminated manuscript or treasu
 - 배경: `A single empty game map backdrop page in the style of concept 6 of the previous image: one wide torn aged parchment journal page, 16:9, with ragged torn edges ..., a few faint small sepia ink sketches only in the four corners ... The large center area is completely empty plain parchment: no paths, no nodes, no icons, no legend, no scroll, no wax seal.` + UI 공통 스타일 문구 → `SourceArt/UI/Map/T_MapBackdrop.png`
 - 칸 조각(2x2): 칼 두 자루 칸 / 돌 아치 시작 칸 / 붉은 X 표시 / 금 테두리 + 밀랍 봉인(지금 칸) + UI 공통 스타일 문구(+ `no numbers`) → `Tools/SliceIconSheet.ps1 -Cols 2 -Rows 2 -Size 192 -Prefix T_Map`
 - 제미나이 원본 다운로드 버튼이 안 먹을 때: 페이지에서 마지막 큰 `img`를 캔버스에 그려 `toDataURL`로 내려받는다.
+
+## 무기: 스태프
+- 비교 4안: `Reference sheet of four different simple wooden magic staffs for a first-person action roguelike, each shown standing upright in front view, evenly spaced side by side in one row ... 1: a gnarled oak staff with a glowing amber crystal held in twisted roots at the top. 2: ... pale blue orb. 3: ... hanging small brass lantern. 4: ... iron ring holding a floating straw-yellow rune stone ... about chest height of a human, plain and practical.` + 3D 공통 스타일 문구 → `Docs/ArtRef/staff_concepts.png`(사용자 선택: 1번 뿌리+호박 수정)

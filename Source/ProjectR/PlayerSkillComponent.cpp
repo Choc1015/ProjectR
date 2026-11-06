@@ -9,6 +9,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "PlayerStatsComponent.h"
+#include "NiagaraSystem.h"
+#include "ProjectRProjectile.h"
 #include "TimerManager.h"
 
 UPlayerSkillComponent::UPlayerSkillComponent()
@@ -147,6 +149,26 @@ void UPlayerSkillComponent::ApplyEffect(FName SkillId)
 			Stats->Heal(Stats->GetStat(EPlayerStat::MaxHealth) * Row->HealPercent / 100.f);
 		}
 		break;
+
+	case ESkillEffect::Projectile:
+	{
+		// 눈(카메라) 바로 앞에서 보는 방향(위아래 포함)으로 쏜다.
+		const UCameraComponent* Camera = GetOwner()->FindComponentByClass<UCameraComponent>();
+		const FVector Eye = Camera ? Camera->GetComponentLocation() : Center;
+		const FVector Aim = Camera ? Camera->GetForwardVector() : GetAimForward();
+		bool bCrit = false;
+		FProjectileLaunch Launch;
+		Launch.Location = Eye + Aim * 80.f;
+		Launch.Direction = Aim;
+		Launch.Mesh = Row->ProjectileMesh.LoadSynchronous();
+		Launch.Speed = Row->ProjectileSpeed;
+		Launch.Damage = Stats ? Stats->RollOutgoingDamage(true, bCrit) * Row->DamageMultiplier : 0.f;
+		Launch.ExplosionRadius = Row->Range;
+		Launch.ImpactEffect = Row->ImpactEffect.LoadSynchronous();
+		Launch.LightColor = FLinearColor(1.f, 0.4f, 0.1f);
+		AProjectRProjectile::Launch(GetOwner(), Launch);
+		break;
+	}
 
 	default:
 		break;

@@ -127,3 +127,6 @@ unreal-worker가 `describe_toolset`으로 확인한 도구를 한 줄씩 추가�
 ### 방 지도 작업에서 확인
 - PIE 중에도 `scene.SceneTools.find_actors`는 게임 월드를 찾고, `actor.ActorTools.set_actor_transform`으로 플레이어를 옮길 수 있다(트리거 확인용). 스크립트 안 `time.sleep` 동안은 게임이 틱하지 않는다.
 - `EditorAppToolset.CaptureViewport`는 `captureTransform`이 필수이고 UI는 안 찍힌다. 콘솔 명령 도구는 없다.
+- `scene.SceneTools.add_to_scene_from_class(actor_type, name, xform)` — `name` 필수.
+- 미사모 로그인이 풀리면 크롬 탭이 Adobe 로그인(auth.services.adobe.com)으로 가므로 사용자에게 로그인을 부탁한다. 다운로드 창 기본값(FBX Binary)으로 받으면 된다.
+- 언리얼 유니티 빌드라 .cpp의 익명 namespace 함수 이름이 다른 파일과 겹치면 C2084 오류가 난다(파일마다 다른 이름을 쓴다).

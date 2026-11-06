@@ -1,5 +1,6 @@
-﻿---,DisplayName,Type,Effect,ManaCost,Cooldown,DamageMultiplier,Range,Angle,HealPercent,HitDelay,Montage,Icon,Description
-Sword_Dash,돌진 베기,Weapon,Dash,20,6,2.0,600,0,0,0.9,/Game/Characters/Player/Montages/AM_Skill_Dash.AM_Skill_Dash,,앞으로 6m 돌진하며 지나간 길의 적에게 스킬 공격력 x2.0 피해
-Gem_Spin,회전 베기,Gem,Spin,25,5,1.5,300,360,0,0.6,/Game/Characters/Player/Montages/AM_Skill_Spin.AM_Skill_Spin,,내 주변 3m 안의 모든 적에게 스킬 공격력 x1.5 피해
-Gem_Slam,내려찍기,Gem,Slam,30,8,2.5,400,90,0,0.5,/Game/Characters/Player/Montages/AM_Skill_Slam.AM_Skill_Slam,,앞쪽 4m 부채꼴의 적에게 스킬 공격력 x2.5 피해
-Gem_Breath,숨 고르기,Gem,Heal,40,20,0,0,0,25,1.5,/Game/Characters/Player/Montages/AM_Skill_Breath.AM_Skill_Breath,,최대 체력의 25% 회복
+﻿---,DisplayName,Type,Effect,ManaCost,Cooldown,DamageMultiplier,Range,Angle,HealPercent,HitDelay,Montage,Icon,Description,ProjectileMesh,ProjectileSpeed,ImpactEffect
+Sword_Dash,돌진 베기,Weapon,Dash,20,6,2.0,600,0,0,0.9,/Game/Characters/Player/Montages/AM_Skill_Dash.AM_Skill_Dash,,앞으로 6m 돌진하며 지나간 길의 적에게 스킬 공격력 x2.0 피해,,1500,
+Gem_Spin,회전 베기,Gem,Spin,25,5,1.5,300,360,0,0.6,/Game/Characters/Player/Montages/AM_Skill_Spin.AM_Skill_Spin,,내 주변 3m 안의 모든 적에게 스킬 공격력 x1.5 피해,,1500,
+Gem_Slam,내려찍기,Gem,Slam,30,8,2.5,400,90,0,0.5,/Game/Characters/Player/Montages/AM_Skill_Slam.AM_Skill_Slam,,앞쪽 4m 부채꼴의 적에게 스킬 공격력 x2.5 피해,,1500,
+Gem_Breath,숨 고르기,Gem,Heal,40,20,0,0,0,25,1.5,/Game/Characters/Player/Montages/AM_Skill_Breath.AM_Skill_Breath,,최대 체력의 25% 회복,,1500,
+Staff_Fireball,화염구,Weapon,Projectile,25,6,2.5,300,0,0,1.13,/Game/Characters/Player/Montages/AM_Skill_Fireball.AM_Skill_Fireball,,보는 방향으로 화염구를 던져 맞은 곳 3m 안의 적에게 스킬 공격력 x2.5 피해,/Game/Weapons/Staff/SM_Fireball.SM_Fireball,1500,/Game/Weapons/Staff/NS_FireballExplosion.NS_FireballExplosion

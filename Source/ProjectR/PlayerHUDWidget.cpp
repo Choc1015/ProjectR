@@ -88,6 +88,38 @@ void UPlayerHUDWidget::Init(UPlayerStatsComponent* InStats, const FPlayerHUDStyl
 		SlotSlot->SetPadding(FMargin(Index > 0 ? Style.SlotGap : 0.f, 0.f, 0.f, 0.f));
 	}
 	Column->AddChildToVerticalBox(Slots);
+
+	// 화면 가운데 조금 아래 안내 글(무기 줍기 등)
+	if (UFontFace* PromptFace = LoadObject<UFontFace>(nullptr, TEXT("/Game/UI/Fonts/FF_NanumPenScript.FF_NanumPenScript")))
+	{
+		TSharedRef<FCompositeFont> Composite = MakeShared<FCompositeFont>();
+		FTypefaceEntry& Entry = Composite->DefaultTypeface.Fonts.Add_GetRef(FTypefaceEntry(TEXT("Regular")));
+		Entry.Font = FFontData(PromptFace);
+		PromptComposite = Composite;
+		PromptFontAsset = PromptFace;
+	}
+	PromptText = WidgetTree->ConstructWidget<UTextBlock>();
+	PromptText->SetColorAndOpacity(FSlateColor(FLinearColor(1.f, 0.93f, 0.8f)));
+	PromptText->SetShadowOffset(FVector2D(1.5f, 1.5f));
+	PromptText->SetShadowColorAndOpacity(FLinearColor(0.f, 0.f, 0.f, 0.8f));
+	PromptText->SetJustification(ETextJustify::Center);
+	FSlateFontInfo PromptFont = PromptComposite.IsValid() ? FSlateFontInfo(PromptComposite, 30) : PromptText->GetFont();
+	PromptFont.Size = 30;
+	PromptText->SetFont(PromptFont);
+	PromptText->SetVisibility(ESlateVisibility::Collapsed);
+	UCanvasPanelSlot* PromptSlot = Canvas->AddChildToCanvas(PromptText);
+	PromptSlot->SetAnchors(FAnchors(0.5f, 0.62f));
+	PromptSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+	PromptSlot->SetAutoSize(true);
+}
+
+void UPlayerHUDWidget::SetPrompt(const FText& Text)
+{
+	if (PromptText)
+	{
+		PromptText->SetText(Text);
+		PromptText->SetVisibility(Text.IsEmpty() ? ESlateVisibility::Collapsed : ESlateVisibility::HitTestInvisible);
+	}
 }
 
 UWidget* UPlayerHUDWidget::MakeStretchedFrame(UTexture2D* Texture, float CapFraction, float Height)

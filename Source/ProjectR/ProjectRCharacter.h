@@ -16,7 +16,11 @@ class UPlayerStatsComponent;
 class UPlayerHUDWidget;
 class UPlayerSkillComponent;
 class USkillTreeWidget;
+class UDataTable;
+class UStaticMesh;
+class AWeaponPickup;
 struct FInputActionValue;
+struct FWeaponRow;
 
 /**
  * 1인칭 검사 플레이어. 이동·시점·점프 입력, 몽타주 콤보 공격, 스킬 입력을 처리한다.
@@ -36,6 +40,14 @@ public:
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 	virtual void Tick(float DeltaSeconds) override;
+
+	/** 무기 표(DT_Weapons) 행으로 무기를 바꾼다: 손 메시, 공격 몽타주, 근접/탄, 고유 스킬(F). */
+	void EquipWeapon(FName WeaponId);
+	FName GetCurrentWeapon() const { return CurrentWeapon; }
+
+	/** 바닥 무기 근처에 들어가고 나올 때 무기가 알려 준다. 근처에 있으면 E가 스킬 대신 줍기가 된다. */
+	void SetNearbyPickup(AWeaponPickup* Pickup);
+	void ClearNearbyPickup(AWeaponPickup* Pickup);
 
 protected:
 	virtual void BeginPlay() override;
@@ -63,6 +75,14 @@ protected:
 	/** 화면 아래 체력·마나 바와 아이템 칸의 그림·배치 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HUD")
 	FPlayerHUDStyle HUDStyle;
+
+	/** 무기 표. 원본 SourceArt/Data/Weapons.csv */
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSoftObjectPtr<UDataTable> WeaponTable = TSoftObjectPtr<UDataTable>(FSoftObjectPath(TEXT("/Game/Data/DT_Weapons.DT_Weapons")));
+
+	/** 런을 처음 시작할 때 드는 무기(무기 표 행 이름). 방을 옮기면 들고 있던 무기를 이어서 든다. */
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	FName DefaultWeapon = TEXT("Sword");
 
 	/** 검을 붙일 스켈레톤 본/소켓 이름. */
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
@@ -140,6 +160,10 @@ private:
 	/** 0~2 = 젬 칸(Q·E·R), 3 = 무기 칸(F) */
 	void UseSkillSlot(int32 Slot);
 
+	const FWeaponRow* FindWeaponRow(FName WeaponId) const;
+	void FireWeaponProjectile(const FWeaponRow& Row);
+	void PickUpNearbyWeapon();
+
 	void PlayComboAttack(int32 Index);
 	bool HasHitNotify(const UAnimMontage* Montage) const;
 
@@ -178,8 +202,25 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UPlayerHUDWidget> HUDWidget;
 
-	/** BP에서 정한 검의 기본 상대 회전. 공격별 회전은 이 위에 더한다. */
+	/** 든 무기의 기본 상대 회전. 공격별 검 회전은 이 위에 더한다. */
 	FQuat SwordBaseRotation = FQuat::Identity;
+
+	/** BP에서 맞춘 SwordMesh 상대 Transform·메시. 무기별 오프셋은 이 위에 더한다. */
+	FTransform WeaponBaseTransform = FTransform::Identity;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UStaticMesh> DefaultWeaponMesh;
+
+	FName CurrentWeapon;
+
+	/** 지금 무기의 콤보 몽타주. 무기 표에 없으면 BP의 AttackMontages */
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UAnimMontage>> ActiveAttackMontages;
+
+	/** BP 검 콤보를 쓸 때만 공격별 검 회전을 건다. */
+	bool bUseSwordComboRotations = true;
+
+	TWeakObjectPtr<AWeaponPickup> NearbyPickup;
 
 	/** 공격 카메라 전진이 시작된 뒤 지난 시간(초). AttackCameraPushTime 이상이면 쉬는 중. */
 	float AttackPushElapsed = TNumericLimits<float>::Max();

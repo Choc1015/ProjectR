@@ -100,3 +100,11 @@ Tools/McpRun.ps1 -ScriptFile Tools/Rooms/<테마>/<번호>_<이름>.py
 
 원본 `SourceArt/Vineyard_Props.blend`, FBX `SourceArt/Export/Vineyard/`, 에셋 `/Game/Props/Vineyard/`. Oasis 스크립트를 바탕으로 천 차양을 포도 덩굴 차양(`VineCanopy`, 성긴 `VineCanopySparse`)으로 바꾸고 돌 기둥 `PIERS`를 더했다. 상세 레퍼런스 없이 `room_themes_8.png` 포도원 그림만 보고 만들었다.
 - 03: 흙 타일(`FloorTileB`)은 대비가 커서 해시로 1/5만 흩어 놓는다(나머지 방이 쓰는 `(gx*5+gy*3+gx*gy)%3` 식은 여기서 계단 무늬가 됐다).
+
+## Mill (안개 낀 강가 물레방앗간, `L_Room_Mill`, 약자 ML, 아침) — 밤샘 자동 제작
+
+원본 `SourceArt/Mill_Props.blend`, FBX `SourceArt/Export/Mill/`, 에셋 `/Game/Props/Mill/`. Harbor 구조(기둥·서까래·지붕 판)를 바탕으로 했다. 상세 레퍼런스 없이 `room_themes_8.png` 방앗간 그림만 보고 만들었다.
+- 03: 북쪽 벽 옆 바닥 한 줄(`STREAM_GY`=11)을 물길 `Stream` 12조각으로 바꿨다(1.2 m 단면을 2 m 줄에 맞게 Y 1.667배). 북쪽 벽에는 기둥 없음.
+- 04: 물레바퀴는 북쪽 벽(1180, yaw 180)에 걸려 물길에 잠긴다.
+- 06: 해 pitch -35 yaw 120·30 lux, 안개 0.07, 스카이라이트 1.6, EV 3.8.
+- **주의(2026-11-07 사고):** 06을 다른 방 것에서 복사하면 `LV`의 레벨 이름을 꼭 바꾼다. 06이 처음에 그 레벨을 열기 때문에, 이름이 틀리면 뒤이어 돌린 03~05가 엉뚱한 방(이때는 온실)에 놓인다. 온실에서 ML_ 액터 308개를 지우고 온실 06을 다시 돌려 복구했다.

@@ -2,7 +2,7 @@ import json
 E = 'editor_toolset.toolsets.'
 def call(n, a): return execute_tool(E + n, json.dumps(a))['returnValue']
 def ref(p): return {'refPath': p}
-LV = '/Game/Maps/Rooms/L_Room_Greenhouse.L_Room_Greenhouse:PersistentLevel.'
+LV = '/Game/Maps/Rooms/L_Room_Mill.L_Room_Mill:PersistentLevel.'
 def setp(path, vals):
     call('object.ObjectTools.set_properties', {'instance': ref(LV + path), 'values': json.dumps(vals)})
 

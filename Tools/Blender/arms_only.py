@@ -4,8 +4,10 @@
 # - 오른손이 가장 빠른 프레임(Hit 노티파이 자리)을 같이 알려 준다
 # 쓰는 법: JOBS에 (미사모 원본 파일, 내보낼 이름)을 넣고 코드 전체를 실행한다.
 import bpy, re
-# (원본, 이름, 끝 프레임 또는 None). 스태프 공격은 내려치기만 쓰려고 24프레임에서 자른다(그 뒤는 옆으로 휘두르기).
-JOBS = [("Anim_Staff_Attack.fbx", "A_Staff_Attack_ArmsOnly", 24), ("Anim_Skill_Fireball.fbx", "A_Skill_Fireball_ArmsOnly", None)]
+# (원본, 이름, 끝 프레임 또는 None, 돌아오기 프레임 수 또는 None).
+# 끝 프레임에서 자르고, 돌아오기 프레임 수가 있으면 그 뒤에 팔을 대기 자세(Anim_Idle 첫 프레임)로 부드럽게 되돌리는 구간을 붙인다.
+# 스태프 공격은 내려치기만 쓰려고 22프레임에서 자르고(그 뒤는 옆으로 휘두르기) 12프레임에 걸쳐 돌아온다.
+JOBS = [("Anim_Staff_Attack.fbx", "A_Staff_Attack_ArmsOnly", 22, 12), ("Anim_Skill_Fireball.fbx", "A_Skill_Fireball_ArmsOnly", None, None)]
 SRC = r"C:\UnrealProject\ProjectR\SourceArt\Mixamo"
 OUT = r"C:\UnrealProject\ProjectR\SourceArt\Export"
 
@@ -40,11 +42,33 @@ ARM_KEYS = ("Shoulder", "Arm", "Hand")
 def is_arm(n): return any(k in n.split(":")[-1] for k in ARM_KEYS)
 
 report = {}
-for src, name, end in JOBS:
+for src, name, end, back in JOBS:
     arm, objs = import_arm(src)
     act = arm.animation_data.action
     fr = (act.frame_range[0], float(end) if end else act.frame_range[1])
+    hit_range = fr
     pairs = all_fcurves(act)
+    if end and back:
+        # 끝 프레임 자세를 키로 박고 그 뒤 키는 지운 다음, back 프레임 뒤에 대기 자세 키를 넣는다(베지어라 감속·가속이 붙는다).
+        arm_bones = [b for b in arm.pose.bones if is_arm(b.name)]
+        scn.frame_set(int(end))
+        held = {b.name: (b.location.copy(), b.rotation_quaternion.copy(), b.scale.copy()) for b in arm_bones}
+        for _, fc in pairs:
+            m = re.match(r'pose\.bones\["(.+?)"\]', fc.data_path)
+            if m and is_arm(m.group(1)):
+                for kp in reversed(list(fc.keyframe_points)):
+                    if kp.co.x > end:
+                        fc.keyframe_points.remove(kp)
+        for b in arm_bones:
+            b.location, b.rotation_quaternion, b.scale = held[b.name]
+            for p in ("location", "rotation_quaternion", "scale"): b.keyframe_insert(p, frame=end)
+            loc, rot, scl = idle_pose[b.name]
+            if rot.dot(held[b.name][1]) < 0:
+                rot = -rot
+            b.location, b.rotation_quaternion, b.scale = loc, rot, scl
+            for p in ("location", "rotation_quaternion", "scale"): b.keyframe_insert(p, frame=end + back)
+        fr = (fr[0], float(end + back))
+        pairs = all_fcurves(act)
     frozen = set()
     for _, fc in pairs:
         m = re.match(r'pose\.bones\["(.+?)"\]', fc.data_path)
@@ -65,7 +89,7 @@ for src, name, end in JOBS:
     # 오른손이 가장 빠른 프레임
     hand = next(b for b in arm.pose.bones if b.name.split(":")[-1] == "RightHand")
     prev, best, best_f = None, -1.0, int(fr[0])
-    for f in range(int(fr[0]), int(fr[1]) + 1):
+    for f in range(int(hit_range[0]), int(hit_range[1]) + 1):
         scn.frame_set(f)
         p = arm.matrix_world @ hand.head
         if prev is not None and (p - prev).length > best:

@@ -130,3 +130,4 @@ unreal-worker가 `describe_toolset`으로 확인한 도구를 한 줄씩 추가�
 - `scene.SceneTools.add_to_scene_from_class(actor_type, name, xform)` — `name` 필수.
 - 미사모 로그인이 풀리면 크롬 탭이 Adobe 로그인(auth.services.adobe.com)으로 가므로 사용자에게 로그인을 부탁한다. 다운로드 창 기본값(FBX Binary)으로 받으면 된다.
 - 언리얼 유니티 빌드라 .cpp의 익명 namespace 함수 이름이 다른 파일과 겹치면 C2084 오류가 난다(파일마다 다른 이름을 쓴다).
+- 애니메이션 본 값 확인: `projectr_toolset...AnimationAssetTools.get_bone_pose_at_time(animation, bone_name_suffix, time)` → [스케일xyz, 위치xyz](컴포넌트 공간). execute_tool_script 안에서는 `import unreal` 불가(math·json·re 등만 허용)라 이런 건 툴셋에 함수를 추가하고 `reload_remote.py projectr_toolset`로 불러온다.

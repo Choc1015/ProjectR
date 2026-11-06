@@ -171,6 +171,28 @@ class AnimationAssetTools(unreal.ToolsetDefinition):
 
     @toolset_registry.tool_call
     @staticmethod
+    def get_bone_pose_at_time(animation: unreal.AnimSequence, bone_name_suffix: str, time: float) -> list[float]:
+        """Evaluates one bone of an animation at a time, in component space.
+
+        Args:
+            animation: The animation sequence to evaluate.
+            bone_name_suffix: End of the bone name, e.g. "RightHand" (matches "mixamorig:RightHand").
+            time: Seconds from the animation start.
+
+        Returns:
+            [scale x, scale y, scale z, location x, location y, location z] in component space (cm).
+        """
+        ext = unreal.AnimPoseExtensions
+        pose = ext.get_anim_pose_at_time(animation, time, unreal.AnimPoseEvaluationOptions())
+        bones = [b for b in ext.get_bone_names(pose) if str(b).endswith(bone_name_suffix)]
+        if not bones:
+            raise ValueError(f'{animation.get_name()} has no bone ending with "{bone_name_suffix}".')
+        tr = ext.get_bone_pose(pose, bones[0], unreal.AnimPoseSpaces.WORLD)
+        s, l = tr.scale3d, tr.translation
+        return [s.x, s.y, s.z, l.x, l.y, l.z]
+
+    @toolset_registry.tool_call
+    @staticmethod
     def remove_montage_notify(montage: unreal.AnimMontage, notify_name: str) -> None:
         """Removes a notify placed with set_montage_notify, along with its track.
 

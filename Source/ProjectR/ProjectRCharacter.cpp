@@ -2,7 +2,6 @@
 
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
-#include "AnimationRuntime.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -23,7 +22,7 @@
 
 AProjectRCharacter::AProjectRCharacter()
 {
-	// 카메라 회전·공격 전진을 처리한다. 애니메이션이 본 위치를 갱신한 뒤에 돈다.
+	// 공격 카메라 전진을 처리한다. 애니메이션이 본 위치를 갱신한 뒤에 돈다.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.TickGroup = TG_PostUpdateWork;
 
@@ -33,25 +32,15 @@ AProjectRCharacter::AProjectRCharacter()
 	GetCharacterMovement()->MaxWalkSpeed = 450.f;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 
+	// 눈 카메라: 캡슐에 붙고 마우스 시점(좌우·위아래)으로 돈다. 위치는 BP에서 눈 높이로 맞춘다.
 	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
 	FirstPersonCamera->SetupAttachment(GetCapsuleComponent());
 	FirstPersonCamera->SetRelativeLocation(FVector(0.f, 0.f, 70.f));
 	FirstPersonCamera->bUsePawnControlRotation = true;
 	FirstPersonCamera->SetFieldOfView(90.f);
 
-	// 몸 따라가기 모드의 카메라. 머리 본에 붙어 위치를 따라가고, 회전은 Tick이 정한다.
-	// 위치는 BP 뷰포트에서 눈 위치로 끌어 맞춘다(미사모 본 스케일 때문에 숫자는 작게 보인다).
-	HeadCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("HeadCamera"));
-	HeadCamera->SetupAttachment(GetMesh(), CameraBoneName);
-	HeadCamera->SetUsingAbsoluteRotation(true);
-	HeadCamera->SetUsingAbsoluteScale(true);
-	HeadCamera->bUsePawnControlRotation = false;
-	HeadCamera->SetFieldOfView(90.f);
-
-	// 메시 원점은 발바닥, 미사모 임포트 결과 정면이 -X라 180도 돌린다.
-	// 팔 부착 모드에서는 ApplyCameraMode가 카메라에 다시 붙이며, 이 값은 그때 카메라 기준 위치가 된다.
+	// 메시 원점은 발바닥, 미사모 임포트 결과 정면이 -X라 180도 돌린다. 캡슐 기준 위치·회전은 BP에서 맞춘다.
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -90.f), FRotator(0.f, 180.f, 0.f));
-	GetMesh()->SetCastShadow(false);
 
 	SkillTree = CreateDefaultSubobject<USkillTreeComponent>(TEXT("SkillTree"));
 	Stats = CreateDefaultSubobject<UPlayerStatsComponent>(TEXT("Stats"));
@@ -67,18 +56,14 @@ void AProjectRCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	// 블루프린트에서 소켓 이름을 바꿨을 수 있으니 다시 붙인다. 에디터 배치 시에도 손에 보이게 여기서 한다.
+	// 블루프린트에서 소켓 이름을 바꿨을 수 있으니 다시 붙인다. 위치·회전은 BP 값 그대로.
 	SwordMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, WeaponSocketName);
-	HeadCamera->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, CameraBoneName);
-
-	ApplyCameraMode();
 }
 
 void AProjectRCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	UpdateHeadCameraRotation(DeltaSeconds);
 	UpdateAttackCameraPush(DeltaSeconds);
 }
 
@@ -92,125 +77,16 @@ void AProjectRCharacter::UpdateAttackCameraPush(float DeltaSeconds)
 		PushAlpha = FMath::Sin(UE_PI * FMath::Clamp(AttackPushElapsed / AttackCameraPushTime, 0.f, 1.f));
 	}
 
-	// 카메라 기준 고정 오프셋 + 공격 전진을 매 프레임 새로 건다.
-	UCameraComponent* Camera = GetActiveCamera();
-	Camera->ClearAdditiveOffset();
+	// 카메라 기준 고정 오프셋 + 공격 전진을 매 프레임 새로 건다(카메라 Transform 자체는 건드리지 않는다).
+	FirstPersonCamera->ClearAdditiveOffset();
 	const FVector Offset = CameraViewOffset + FVector(AttackCameraPushDistance * PushAlpha, 0.f, 0.f);
 	if (!Offset.IsNearlyZero())
 	{
-		Camera->AddAdditiveOffset(FTransform(Offset), 0.f);
+		FirstPersonCamera->AddAdditiveOffset(FTransform(Offset), 0.f);
 	}
 }
 
-void AProjectRCharacter::UpdateHeadCameraRotation(float DeltaSeconds)
-{
-	if (bUseHeadSocketRotation)
-	{
-		return;
-	}
-
-	USkeletalMeshComponent* BodyMesh = GetMesh();
-	const int32 BoneIndex = BodyMesh->GetBoneIndex(CameraBoneName);
-	if (CameraMode != EFirstPersonCameraMode::CameraFollowsBody || BoneIndex == INDEX_NONE
-		|| !BodyMesh->GetComponentSpaceTransforms().IsValidIndex(BoneIndex))
-	{
-		return;
-	}
-
-	// 머리가 바라보는 방향(캡슐 공간). T포즈에서 머리가 정면(+X)을 본다고 보고, 그 대비 회전으로 구한다.
-	const FQuat RefHead = FAnimationRuntime::GetComponentSpaceTransformRefPose(
-		BodyMesh->GetSkeletalMeshAsset()->GetRefSkeleton(), BoneIndex).GetRotation();
-	const FQuat AnimHead = BodyMesh->GetComponentSpaceTransforms()[BoneIndex].GetRotation();
-	const FQuat MeshToActor = BodyMesh->GetRelativeRotation().Quaternion();
-	const FQuat HeadDelta = MeshToActor * (AnimHead * RefHead.Inverse()) * MeshToActor.Inverse();
-	// 롤은 버린다. 화면이 기울면 안 된다.
-	const FRotator HeadDirection = HeadDelta.RotateVector(FVector::ForwardVector).Rotation();
-
-	// 스탠스 때문에 대기 자세에서도 머리가 정면과 어긋나 있으니, 시작 직후 대기 자세 머리 방향을 기준(0)으로 삼는다.
-	if (!bHasCameraBaseline)
-	{
-		CameraBaselineDelay -= DeltaSeconds;
-		if (CameraBaselineDelay <= 0.f && ComboIndex == INDEX_NONE)
-		{
-			CameraBaseline = HeadDirection;
-			bHasCameraBaseline = true;
-		}
-	}
-
-	FRotator HeadOffset = FRotator::ZeroRotator;
-	if (bHasCameraBaseline)
-	{
-		HeadOffset = (HeadDirection - CameraBaseline).GetNormalized() * CameraRotationFollowAlpha;
-		HeadOffset.Roll = 0.f;
-	}
-
-	// 마우스 시점 위에 머리 움직임을 더한다.
-	// 위치는 머리 본에 붙은 HeadCamera가 따라가므로 회전만 정한다.
-	FRotator ViewRotation = GetControlRotation() + HeadOffset;
-	ViewRotation.Pitch = FMath::ClampAngle(ViewRotation.Pitch, -89.f, 89.f);
-	ViewRotation.Roll = 0.f;
-	HeadCamera->SetWorldRotation(ViewRotation);
-}
-
-void AProjectRCharacter::AlignHeadCameraToSocket()
-{
-	HeadCamera->SetUsingAbsoluteRotation(!bUseHeadSocketRotation);
-	if (!bUseHeadSocketRotation)
-	{
-		return;
-	}
-
-	USkeletalMeshComponent* BodyMesh = GetMesh();
-	const USkeletalMesh* MeshAsset = BodyMesh->GetSkeletalMeshAsset();
-	const int32 BoneIndex = MeshAsset ? MeshAsset->GetRefSkeleton().FindBoneIndex(CameraBoneName) : INDEX_NONE;
-	if (BoneIndex == INDEX_NONE)
-	{
-		return;
-	}
-
-	// 기준 포즈에서 카메라가 캐릭터 정면(캡슐 +X)을 보고 위가 +Z가 되도록, 머리 본 기준 회전을 구한다.
-	const FQuat RefHead = FAnimationRuntime::GetComponentSpaceTransformRefPose(MeshAsset->GetRefSkeleton(), BoneIndex).GetRotation();
-	const FQuat ActorToMesh = BodyMesh->GetRelativeRotation().Quaternion().Inverse();
-	const FQuat CameraInMesh = FRotationMatrix::MakeFromXZ(
-		ActorToMesh.RotateVector(FVector::ForwardVector), ActorToMesh.RotateVector(FVector::UpVector)).ToQuat();
-	HeadCamera->SetRelativeRotation(RefHead.Inverse() * CameraInMesh * HeadSocketRotationOffset.Quaternion());
-}
-
-UCameraComponent* AProjectRCharacter::GetActiveCamera() const
-{
-	return CameraMode == EFirstPersonCameraMode::CameraFollowsBody ? HeadCamera : FirstPersonCamera;
-}
-
-bool AProjectRCharacter::ShouldUseLocomotionAnimation() const
-{
-	return bPlayLocomotionAnimation;
-}
-
-void AProjectRCharacter::ApplyCameraMode()
-{
-	// 몸 전체가 보이는 모드에서만 그림자를 드리운다. 팔만 있을 때 그림자는 어색하다.
-	GetMesh()->SetCastShadow(CameraMode == EFirstPersonCameraMode::CameraFollowsBody);
-	// 뷰 타깃은 활성화된 첫 카메라를 쓰므로 모드에 맞는 카메라 하나만 켠다.
-	FirstPersonCamera->SetActive(CameraMode == EFirstPersonCameraMode::ArmsOnCamera);
-	HeadCamera->SetActive(CameraMode == EFirstPersonCameraMode::CameraFollowsBody);
-
-	// 부모만 바꾼다. 위치·회전은 BP에서 CharacterMesh0에 정한 값을 그대로 쓴다.
-	if (CameraMode == EFirstPersonCameraMode::CameraFollowsBody)
-	{
-		GetMesh()->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::KeepRelativeTransform);
-		AlignHeadCameraToSocket();
-		bHasCameraBaseline = false;
-		CameraBaselineDelay = 0.3f;
-		ApplyFirstPersonVisibility(BodyHiddenBoneNames, BodyHiddenMaterialSlotNames);
-	}
-	else
-	{
-		GetMesh()->AttachToComponent(FirstPersonCamera, FAttachmentTransformRules::KeepRelativeTransform);
-		ApplyFirstPersonVisibility(HiddenBoneNames, HiddenMaterialSlotNames);
-	}
-}
-
-void AProjectRCharacter::ApplyFirstPersonVisibility(const TArray<FName>& BoneNames, const TArray<FName>& MaterialSlotNames)
+void AProjectRCharacter::ApplyFirstPersonVisibility()
 {
 	USkeletalMeshComponent* BodyMesh = GetMesh();
 	USkeletalMesh* MeshAsset = BodyMesh->GetSkeletalMeshAsset();
@@ -219,7 +95,7 @@ void AProjectRCharacter::ApplyFirstPersonVisibility(const TArray<FName>& BoneNam
 		return;
 	}
 
-	for (const FName& BoneName : BoneNames)
+	for (const FName& BoneName : BodyHiddenBoneNames)
 	{
 		if (BodyMesh->GetBoneIndex(BoneName) != INDEX_NONE)
 		{
@@ -240,7 +116,7 @@ void AProjectRCharacter::ApplyFirstPersonVisibility(const TArray<FName>& BoneNam
 		{
 			const int32 MaterialIndex = Sections[SectionIndex].MaterialIndex;
 			const TArray<FSkeletalMaterial>& Materials = MeshAsset->GetMaterials();
-			if (Materials.IsValidIndex(MaterialIndex) && MaterialSlotNames.Contains(Materials[MaterialIndex].MaterialSlotName))
+			if (Materials.IsValidIndex(MaterialIndex) && BodyHiddenMaterialSlotNames.Contains(Materials[MaterialIndex].MaterialSlotName))
 			{
 				BodyMesh->ShowMaterialSection(MaterialIndex, SectionIndex, false, LODIndex);
 			}
@@ -252,7 +128,7 @@ void AProjectRCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ApplyCameraMode();
+	ApplyFirstPersonVisibility();
 	SwordBaseRotation = SwordMesh->GetRelativeRotation().Quaternion();
 
 	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
@@ -453,7 +329,7 @@ void AProjectRCharacter::OnMontageNotifyBegin(FName NotifyName, const FBranching
 
 void AProjectRCharacter::PerformHitTrace()
 {
-	const UCameraComponent* Camera = GetActiveCamera();
+	const UCameraComponent* Camera = FirstPersonCamera;
 	const FVector Start = Camera->GetComponentLocation();
 	const FVector End = Start + Camera->GetForwardVector() * AttackRange;
 

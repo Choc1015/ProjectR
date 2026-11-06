@@ -1,7 +1,6 @@
 #include "ProjectRAnimInstance.h"
 
 #include "GameFramework/Character.h"
-#include "ProjectRCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 void UProjectRAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -14,7 +13,7 @@ void UProjectRAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		return;
 	}
 
-	const AProjectRCharacter* Player = Cast<AProjectRCharacter>(Character);
-	Speed = Player && !Player->ShouldUseLocomotionAnimation() ? 0.f : Character->GetVelocity().Size2D();
+	// 걷기·달리기 모션은 팔만 움직이게 만든 것이라 몸은 제자리에 서 있다.
+	Speed = Character->GetVelocity().Size2D();
 	bIsInAir = Character->GetCharacterMovement()->IsFalling();
 }

@@ -74,7 +74,7 @@
 - Unreal MCP: `http://127.0.0.1:8010/mcp` (Config/DefaultEditorPerProjectUserSettings.ini에서 자동 시작)
 - C++ (`Source/ProjectR/`)
   - `AProjectRCharacter`: 이동·시점(Enhanced Input을 코드에서 생성), 몽타주 콤보, `Hit` 노티파이 타격 판정,
-    카메라 모드(`ArmsOnCamera`/`CameraFollowsBody`), `CameraViewOffset`, 공격 시 카메라 전진, 공격별 검 회전
+    카메라 `FirstPersonCamera` 하나(캡슐에 붙음, 마우스 좌우·위아래, 코드는 카메라·메시 Transform을 덮어쓰지 않음 → BP 뷰포트 값 그대로), `CameraViewOffset`, 공격 시 카메라 전진, 공격별 검 회전
   - `ATrainingDummy`: 맞으면 흔들리고 횟수 표시 / `UProjectRAnimInstance`: `Speed`, `bIsInAir`
   - `USkillTreeComponent`(캐릭터의 `SkillTree`): 포인트·해금, 그림·배치 수치(`Style`) / `USkillTreeWidget`: 표를 읽어 원형 트리를 코드로 생성, K로 열기, 드래그 이동·휠 확대(배율은 `Style`의 View 항목), 노드 설명창(`Style`의 Tooltip 항목, 그림 `T_SkillTooltip`을 위·가운데·아래로 잘라 가운데만 세로로 늘림. UI 그림은 표시 크기의 1.5배 정도로 미리 줄여 넣는다)
   - `UPlayerStatsComponent`(캐릭터의 `Stats`): 스탯 `EPlayerStat` 15종, 기본값 `BaseStats`(BP에서 조정) + 해금한 스킬 보너스. 최종 = (기본 + 더하기) × (1 + %/100).
@@ -85,9 +85,9 @@
 - 스킬 표: 원본 `SourceArt/Data/SkillTree.csv`(UTF-8, 열 `---,DisplayName,Parent,Cost,Icon,Description,Stat,StatValue,bStatPercent`) → `/Game/Data/DT_SkillTree`(바꾸면 지우고 다시 임포트). UI 그림 `/Game/UI/SkillTree/`
 - 스킬 아이콘: `SourceArt/UI/SkillIcons/T_Skill_<스킬ID>.png`(256px, 투명) → `/Game/UI/SkillIcons/`. 새 아이콘은 크롬(Claude in Chrome)에서 제미나이로 4x4 시트를 뽑아 `Tools/SliceIconSheet.ps1`로 자른다. 표의 Icon 칸은 `/Game/UI/SkillIcons/T_Skill_<ID>.T_Skill_<ID>`
 - BP (`/Game/Blueprints/`): `BP_PlayerCharacter`(메시 `SK_PlayerArms`, 콤보 `AM_Attack5`→`AM_Attack2`,
-  `CameraFollowsBody` + `bUseHeadSocketRotation`), `BP_TrainingDummy`, `BP_GameMode`
+  카메라 위치는 BP에서 눈 높이로), `BP_TrainingDummy`, `BP_GameMode`
 - 캐릭터 (`/Game/Characters/Player/`): `SK_Player`(전신), `SK_PlayerArms`(튜닉 몸통 재질 분리), 스켈레톤 `SK_Player_Skeleton`,
-  `ABP_Player`(BS_Locomotion → Slot DefaultSlot), `Animations/`, `Montages/`
+  `ABP_Player`(BS_Locomotion: A_Idle·A_Walk_ArmsOnly·A_Run_ArmsOnly → Slot DefaultSlot. 걷기·달리기도 팔만 움직이고 몸은 제자리), `Animations/`, `Montages/`
 - 공격 애니메이션은 미사모 원본(`SourceArt/Mixamo`)에서 팔 본만 남기고 몸은 대기 자세로 고정해 만든다
   (`SourceArt/Export/A_Attack*_ArmsOnly.fbx`). Hit 노티파이는 오른손 속도가 최대인 프레임에 둔다.
 - 폴더 규칙: 개발용 스크립트는 `Tools/`, 프로젝트 툴셋은 `Content/Python/projectr_toolset/`

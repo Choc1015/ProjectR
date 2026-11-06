@@ -17,12 +17,12 @@ CEILING = [(-450, -300), (500, -300), (-100, 700)]
 # small fills at the lit glass of the workbench / shelf lanterns (x, y, z)
 SMALL = [(1120, -400, 130), (400, -1140, 200), (1140, 800, 190)]
 
-# v2 (user: v1 12 cd / 13 m was too strong, white hot spots on the walls): weak, short, deep orange pools so the
-# glowing lantern models lead. Wall lights sit 25 cm in front of the lantern to soften the spot on the rock.
-WALL = {'cd': 2.5, 'radius': 650, 'forward': 25}
-CEIL = {'cd': 3.0, 'radius': 750}          # ceiling lanterns hang ~6 m up: radius must still reach the floor
-LAMP = {'color': {'r': 255, 'g': 130, 'b': 50, 'a': 255}, 'scatter': 1.0}
-FILL = {'cd': 0.8, 'radius': 250}
+# v1 values (user tried a weak 2.5 cd / 6.5 m deep-orange version and preferred this one). Each light sits exactly
+# at its lantern's flame.
+WALL = {'cd': 12.0, 'radius': 1300, 'forward': 0}
+CEIL = {'cd': 12.0, 'radius': 1300}
+LAMP = {'color': {'r': 255, 'g': 160, 'b': 80, 'a': 255}, 'scatter': 3.0}
+FILL = {'cd': 3.0, 'radius': 350}
 REIMPORT_MESHES = False  # True only when the lantern / workbench / shelf FBX changed (then re-run 04, 05, 09)
 
 def xf(x, y, z, yaw=0):

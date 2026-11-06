@@ -53,3 +53,10 @@ Tools/McpRun.ps1 -ScriptFile Tools/Rooms/<테마>/<번호>_<이름>.py
 - 03: 천장은 판 대신 **보 격자 + 천 차양**. X 보는 z=800, Y 보는 그 밑 z=760, 차양 모서리 z=720(가운데 35cm 처짐). 빠진 칸 `MISSING` 4곳, 찢어진 칸 `TORN` 4곳으로 해가 든다. 색은 칸마다 파랑·노랑·빨강 섞기.
 - 06: 해 pitch -55 yaw 40·40 lux·산란 12, 안개 0.04, 스카이라이트 2.0(따뜻한 색 255,232,205, 아래 반구 모래색), 노출 EV 4.4(3.6은 모래가 하얗게 날아감).
 - 입구는 모래가 반쯤 쌓인 아치(`EntranceArch`), 출구는 검은 판 사암 아치.
+
+## SnowShrine (눈 덮인 산길 사당, `L_Room_SnowShrine`, 약자 SN, 낮) — 밤샘 자동 제작
+
+레퍼런스 `Docs/ArtRef/Rooms/snow_*.png`, 원본 `SourceArt/SnowShrine_Props.blend`, FBX `SourceArt/Export/SnowShrine/`, 에셋 `/Game/Props/SnowShrine/`. 번호는 Oasis와 같다(07 빛 먼지는 아직 없음).
+
+- 03: 벽 앞 나무 기둥 `POSTS`(이음매 일부만, 불규칙), 천장은 서까래 격자(X·Y 둘 다 윗면 z=800, Y쪽은 z 1.1배로 밑면을 어긋나게) + 지붕 판 6x6(1.1배로 키워 서까래 위에서 맞닿음), 부서진 판 `BROKEN` 5곳. 바닥 판석이 바둑판처럼 보여서 큰 눈 덮개 `SNOW` 16개로 덮었다.
+- 06: 해 pitch -52 yaw 25·35 lux(차가운 흰색), 안개 0.05, 스카이라이트 2.0, 아래 반구 눈색, EV 4.4.

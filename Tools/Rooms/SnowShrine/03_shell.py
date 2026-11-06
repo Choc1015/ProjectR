@@ -10,7 +10,10 @@ MIRROR = {('S', -200), ('S', 1000), ('N', 600), ('N', -600), ('W', 1000), ('W', 
 # timber posts in front of the walls, on some module seams only (irregular on purpose)
 POSTS = [('S', -800), ('S', 400), ('N', -400), ('N', 800), ('W', -400), ('W', 800), ('E', -800), ('E', 400)]
 SNOW = [('SnowPatch', -420, -360, 25), ('SnowPatch', 520, 480, 160), ('SnowPatchSmall', 100, -660, 80),
-        ('SnowPatchSmall', -720, 320, 210), ('SnowPatch', 800, -460, 300), ('SnowPatchSmall', -140, 760, 340)]
+        ('SnowPatchSmall', -720, 320, 210), ('SnowPatch', 800, -460, 300), ('SnowPatchSmall', -140, 760, 340),
+        ('SnowPatch', -760, -720, 110), ('SnowPatch', 120, 120, 75), ('SnowPatch', -300, 450, 250), ('SnowPatch', 700, 900, 20),
+        ('SnowPatch', 380, -880, 140), ('SnowPatch', -900, 900, 320), ('SnowPatchSmall', 900, 150, 45), ('SnowPatchSmall', -950, -150, 190),
+        ('SnowPatch', 600, -150, 205), ('SnowPatchSmall', -500, -1000, 15)]
 
 # roof: rafter grid on the interior lines (both directions, tops at 800; the Y set is 10% deeper so their undersides differ),
 # plank panels 6x6 scaled 1.1 so they meet over the rafters; broken panels let pale daylight in
@@ -31,6 +34,7 @@ def run():
     i = 0
     for gx in range(12):
         for gy in range(12):
+            # tile mix; the flagstone grid still shows, so SNOW below covers a lot of it with big soft patches
             m = 'FloorTileB' if (gx * 5 + gy * 3 + gx * gy) % 3 == 0 else 'FloorTile'
             add(m, 'SN_Floor_%03d' % i, -1100 + gx * 200, -1100 + gy * 200, 0, ((gx * 7 + gy * 11) % 4) * 90); i += 1
     for k, (m, x, y, yaw) in enumerate(SNOW):

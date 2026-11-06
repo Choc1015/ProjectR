@@ -72,3 +72,11 @@ Tools/McpRun.ps1 -ScriptFile Tools/Rooms/<테마>/<번호>_<이름>.py
 - 05: 벽 아래 1.2 m는 돌 받침이 25cm 튀어나와서 높이 1.25 m 아래 장식은 1172, 위는 1192에 붙인다(`face(z)`).
 - 07: 지붕 유리 `M_GH_GlassRoof`를 반투명(불투명도 0.25, 양면)으로 바꿔 햇빛과 철골 그림자가 들게 한다. 벽 유리는 불투명.
 - 06: 해 pitch -58 yaw 35·40 lux, 스카이라이트 1.5(아래 반구 풀색), EV 4.4.
+
+## Harbor (해 질 녘 잠긴 항구 창고, `L_Room_Harbor`, 약자 HB, 노을) — 밤샘 자동 제작
+
+원본 `SourceArt/Harbor_Props.blend`, FBX `SourceArt/Export/Harbor/`, 에셋 `/Game/Props/Harbor/`. SnowShrine 구조(기둥·서까래·지붕 판)를 바탕으로 했다.
+- 03: 남서쪽 3x3 바닥 칸(`FLOOD`)을 비우고 6x6 m `WaterBasin`(윗변 z=0.1, 수면 -0.3)을 놓는다. 바닥 판자는 한 방향만(0/180도). 서쪽 벽은 틈 많은 B형 위주.
+- 04: 부두(판자 윗면 바닥 높이)·뜬 배(원점 = 수면, z -30)·계류 기둥.
+- 06: 해 pitch -14 yaw 8(서쪽에서 +X로), 20 lux, 산란 4, 안개 0.03, 스카이라이트 0.8(차가운 색), EV 3.4. 처음 값(30 lux·산란 14·안개 0.06·EV 2.6)은 방 전체가 주황 안개로 찼다.
+- 09: 벽 틈 장식 `M_HB_Glow` 발광(언릿).

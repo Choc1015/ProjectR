@@ -8,10 +8,10 @@ def setp(path, vals):
 
 # tunables - SUNSET: a low orange sun from the west (yaw 0 points it +X) shining through the gaps in the west planks,
 # warm stripes on the floor; dim violet-grey sky fill. Exposure lower than the day rooms.
-SUN = {'pitch': -14, 'yaw': 8, 'lux': 30.0, 'scatter': 14.0, 'color': {'r': 1.0, 'g': 0.55, 'b': 0.25, 'a': 1.0}}
-FOG = {'density': 0.06, 'scatter_dist': 0.9}
-SKY = {'intensity': 0.8, 'lower': {'r': 0.25, 'g': 0.18, 'b': 0.14, 'a': 1}, 'color': {'r': 0.85, 'g': 0.75, 'b': 0.9, 'a': 1.0}}
-EV = 2.6
+SUN = {'pitch': -14, 'yaw': 8, 'lux': 20.0, 'scatter': 4.0, 'color': {'r': 1.0, 'g': 0.75, 'b': 0.5, 'a': 1.0}}   # planks are already warm; first try 30 lux / scatter 14 / fog 0.06 / EV 2.6 filled the room with orange haze
+FOG = {'density': 0.03, 'scatter_dist': 0.85}
+SKY = {'intensity': 0.8, 'lower': {'r': 0.2, 'g': 0.18, 'b': 0.18, 'a': 1}, 'color': {'r': 0.75, 'g': 0.8, 'b': 1.0, 'a': 1.0}}   # cool dusk fill against the warm sun
+EV = 3.4
 
 def ppv():
     # DevMap has no post process volume: make one (unbound) the first time and use its real object path

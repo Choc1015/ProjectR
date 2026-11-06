@@ -8,9 +8,9 @@ def setp(path, vals):
 
 # tunables - DUSK chapel graveyard: candles and warm windows (08_lights, 09_glow) carry the light, violet dusk sky through the roof gaps.
 # sky fill only keeps the corners from going pitch black. (day version was sun 40 lux / sky 1.2 / EV 3.6)
-SUN = {'pitch': -10, 'yaw': 200, 'lux': 3.0, 'scatter': 3.0, 'color': {'r': 0.85, 'g': 0.6, 'b': 0.9, 'a': 1.0}}
+SUN = {'pitch': -10, 'yaw': 200, 'lux': 1.0, 'scatter': 3.0, 'color': {'r': 0.85, 'g': 0.6, 'b': 0.9, 'a': 1.0}}   # 3 lux turned the walls salmon pink
 FOG = {'density': 0.03, 'scatter_dist': 0.6}
-SKY = {'intensity': 0.3, 'lower': {'r': 0.08, 'g': 0.07, 'b': 0.08, 'a': 1}, 'color': {'r': 0.75, 'g': 0.7, 'b': 1.0, 'a': 1.0}}
+SKY = {'intensity': 0.5, 'lower': {'r': 0.08, 'g': 0.07, 'b': 0.08, 'a': 1}, 'color': {'r': 0.75, 'g': 0.7, 'b': 1.0, 'a': 1.0}}
 EV = 1.0
 
 def ppv():

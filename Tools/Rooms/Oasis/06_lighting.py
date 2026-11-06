@@ -10,8 +10,8 @@ def setp(path, vals):
 # (forest temple: sun 40 lux scatter 20, fog 0.08, sky 1.2, EV 3.6)
 SUN = {'pitch': -55, 'yaw': 40, 'lux': 40.0, 'scatter': 12.0, 'color': {'r': 255, 'g': 226, 'b': 180, 'a': 255}}
 FOG = {'density': 0.04, 'scatter_dist': 0.85}
-SKY = {'intensity': 1.2, 'lower': {'r': 0.45, 'g': 0.38, 'b': 0.28, 'a': 1}}
-EV = 3.6
+SKY = {'intensity': 2.0, 'lower': {'r': 0.45, 'g': 0.38, 'b': 0.28, 'a': 1}, 'color': {'r': 255, 'g': 232, 'b': 205, 'a': 255}}  # warm tint: shade read blue; 1.2 left the shaded walls ~60-70 grey
+EV = 4.4   # 3.6 washed the sand floor out to ~230 grey in the capture
 
 def ppv():
     # DevMap has no post process volume: make one (unbound) the first time and use its real object path
@@ -31,7 +31,7 @@ def run():
          'xform': {'location': {'x': 0, 'y': 0, 'z': 0}, 'rotation': {'pitch': 0, 'yaw': 0, 'roll': 0}, 'scale': {'x': 1, 'y': 1, 'z': 1}}})
     setp('ExponentialHeightFog_0.HeightFogComponent0', {'fogDensity': FOG['density'], 'fogHeightFalloff': 0.2, 'bEnableVolumetricFog': True,
          'volumetricFogScatteringDistribution': FOG['scatter_dist'], 'volumetricFogExtinctionScale': 1.0, 'volumetricFogDistance': 3000})
-    setp('SkyLight_0.SkyLightComponent0', {'intensity': SKY['intensity'], 'volumetricScatteringIntensity': 0.2,
+    setp('SkyLight_0.SkyLightComponent0', {'intensity': SKY['intensity'], 'volumetricScatteringIntensity': 0.2, 'lightColor': SKY.get('color', {'r': 255, 'g': 255, 'b': 255, 'a': 255}),
          'bLowerHemisphereIsBlack': False, 'lowerHemisphereColor': SKY['lower']})
     setp(pp, {'bUnbound': True, 'settings': {
         'bOverride_AutoExposureMinBrightness': True, 'autoExposureMinBrightness': EV,

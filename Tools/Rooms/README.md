@@ -45,3 +45,11 @@ Tools/McpRun.ps1 -ScriptFile Tools/Rooms/<테마>/<번호>_<이름>.py
 
 - 벽·벽 장식의 위치 t는 그 벽 메시의 로컬 X 기준이다(남 t=x, 북 t=-x, 서 t=-y, 동 t=y).
 - 블렌더 좌표 → 언리얼은 Y만 뒤집힌다(천장 구멍 위치·곡선 레일 방향 계산에 씀).
+
+## Oasis (사막 오아시스 폐허, `L_Room_Oasis`, 약자 OA, 낮) — 밤샘 자동 제작
+
+레퍼런스 `Docs/ArtRef/Rooms/oasis_*.png`, 원본 `SourceArt/Oasis_Props.blend`, FBX `SourceArt/Export/Oasis/`, 에셋 `/Game/Props/Oasis/`. 번호는 Mine과 같다(01 임포트, 02 레벨, 03 껍데기, 04 소품, 05 벽 장식, 06 라이팅, 07 빛 먼지).
+
+- 03: 천장은 판 대신 **보 격자 + 천 차양**. X 보는 z=800, Y 보는 그 밑 z=760, 차양 모서리 z=720(가운데 35cm 처짐). 빠진 칸 `MISSING` 4곳, 찢어진 칸 `TORN` 4곳으로 해가 든다. 색은 칸마다 파랑·노랑·빨강 섞기.
+- 06: 해 pitch -55 yaw 40·40 lux·산란 12, 안개 0.04, 스카이라이트 2.0(따뜻한 색 255,232,205, 아래 반구 모래색), 노출 EV 4.4(3.6은 모래가 하얗게 날아감).
+- 입구는 모래가 반쯤 쌓인 아치(`EntranceArch`), 출구는 검은 판 사암 아치.

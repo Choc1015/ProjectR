@@ -6,11 +6,12 @@ LV = '/Game/Maps/Rooms/L_Room_Mine.L_Room_Mine:PersistentLevel.'
 def setp(path, vals):
     call('object.ObjectTools.set_properties', {'instance': ref(LV + path), 'values': json.dumps(vals)})
 
-# tunables (start = forest temple final values; the mine has only three ceiling cracks, so sky fill / exposure carry more)
-SUN = {'pitch': -62, 'yaw': 30, 'lux': 40.0, 'scatter': 20.0}
-FOG = {'density': 0.08, 'scatter_dist': 0.9}
-SKY = {'intensity': 1.2, 'lower': {'r': 0.35, 'g': 0.3, 'b': 0.24, 'a': 1}}
-EV = 3.6
+# tunables - NIGHT: lanterns (08_lamps) carry the light, faint cool moonlight through the three ceiling cracks,
+# sky fill only keeps the corners from going pitch black. (day version was sun 40 lux / sky 1.2 / EV 3.6)
+SUN = {'pitch': -62, 'yaw': 30, 'lux': 0.6, 'scatter': 4.0, 'color': {'r': 170, 'g': 190, 'b': 255, 'a': 255}}
+FOG = {'density': 0.03, 'scatter_dist': 0.6}
+SKY = {'intensity': 0.03,'lower': {'r': 0.02, 'g': 0.018, 'b': 0.015, 'a': 1}}
+EV = 0.6
 
 def ppv():
     # DevMap has no post process volume: make one (unbound) the first time and use its real object path
@@ -24,7 +25,7 @@ def run():
     pp = ppv()
     call('actor.ActorTools.set_actor_transform', {'actor': ref(LV + 'DirectionalLight_0'),
          'xform': {'location': {'x': 0, 'y': 0, 'z': 1500}, 'rotation': {'pitch': SUN['pitch'], 'yaw': SUN['yaw'], 'roll': 0}, 'scale': {'x': 1, 'y': 1, 'z': 1}}})
-    setp('DirectionalLight_0.LightComponent0', {'intensity': SUN['lux'], 'lightColor': {'r': 255, 'g': 228, 'b': 186, 'a': 255},
+    setp('DirectionalLight_0.LightComponent0', {'intensity': SUN['lux'], 'lightColor': SUN['color'],
          'volumetricScatteringIntensity': SUN['scatter'], 'bCastVolumetricShadow': True, 'bEnableLightShaftBloom': True})
     call('actor.ActorTools.set_actor_transform', {'actor': ref(LV + 'ExponentialHeightFog_0'),
          'xform': {'location': {'x': 0, 'y': 0, 'z': 0}, 'rotation': {'pitch': 0, 'yaw': 0, 'roll': 0}, 'scale': {'x': 1, 'y': 1, 'z': 1}}})

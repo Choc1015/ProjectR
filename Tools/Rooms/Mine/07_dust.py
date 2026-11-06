@@ -5,9 +5,13 @@ def call(n, a): return execute_tool(E + n, json.dumps(a))['returnValue']
 CRACKS = {(-200, 200): 'A', (600, -600): 'B', (-600, -1000): 'B'}   # same as 03_shell
 HOLE = {'A': (0, -110), 'B': (120, -120)}                            # hole centre in blender cm; y flips on import
 SUN_PITCH, SUN_YAW = -62, 30
+ENABLED = False  # night mine: no sunbeams, so no dust. True puts it back under the cracks.
 def run():
     for a in call('scene.SceneTools.find_actors', {'name': 'MN_LightDust_', 'tag': '', 'collision_channels': []}):
         call('scene.SceneTools.remove_from_scene', {'actor': a})
+    if not ENABLED:
+        call('asset.AssetTools.save_assets', {'asset_paths': []})
+        return {'placed': 0}
     run_h = (820 - 400) / math.tan(math.radians(-SUN_PITCH))
     dx, dy = run_h * math.cos(math.radians(SUN_YAW)), run_h * math.sin(math.radians(SUN_YAW))
     n = 0

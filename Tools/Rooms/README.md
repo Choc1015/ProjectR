@@ -65,3 +65,10 @@ Tools/McpRun.ps1 -ScriptFile Tools/Rooms/<테마>/<번호>_<이름>.py
 
 원본 `SourceArt/Forge_Props.blend`, FBX `SourceArt/Export/Forge/`, 에셋 `/Game/Props/Forge/`. 01 임포트, 02 레벨, 03 껍데기(돌벽·돌 기둥 `PILASTERS`·돌 천장 6x6 + 환기구 2곳 `VENTS`·철띠 보), 04 소품(쇳물 도랑 `CHANNELS` 서쪽·남쪽), 05 벽 장식, 06 밤 라이팅(광산과 같은 값), 08 라이트(용광로 20 cd·바닥 화로 8 cd·벽 화로 6 cd·도랑 4 cd, 주황 1.0/0.5/0.2), 09 발광(쇳물·불·숯·환기 빛, 전부 언릿).
 - 06은 처음에 `load_level`을 한다(다른 방이 열려 있어도 그 방 라이팅만 바뀐다). 03~05·08은 열린 레벨에 놓으니 02(또는 레벨 열기) 뒤에 돌린다.
+
+## Greenhouse (왕실 온실 폐허, `L_Room_Greenhouse`, 약자 GH, 낮) — 밤샘 자동 제작
+
+원본 `SourceArt/Greenhouse_Props.blend`, FBX `SourceArt/Export/Greenhouse/`, 에셋 `/Game/Props/Greenhouse/`. SnowShrine 스크립트를 바탕으로 했다(철 기둥 `POSTS`, 철 갈비 격자, 유리 지붕 판 6x6 1.05배, 깨진 판 `BROKEN` 4곳).
+- 05: 벽 아래 1.2 m는 돌 받침이 25cm 튀어나와서 높이 1.25 m 아래 장식은 1172, 위는 1192에 붙인다(`face(z)`).
+- 07: 지붕 유리 `M_GH_GlassRoof`를 반투명(불투명도 0.25, 양면)으로 바꿔 햇빛과 철골 그림자가 들게 한다. 벽 유리는 불투명.
+- 06: 해 pitch -58 yaw 35·40 lux, 스카이라이트 1.5(아래 반구 풀색), EV 4.4.

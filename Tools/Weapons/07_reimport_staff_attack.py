@@ -5,6 +5,7 @@ def call(n, a): return execute_tool(n, json.dumps(a))['returnValue']
 # 스태프 기본 공격 모션만 다시 임포트한다(arms_only.py로 다시 내보낸 뒤). 몽타주 경로는 무기 표가 쓰는 그대로.
 ANIM, MONT = '/Game/Characters/Player/Animations', '/Game/Characters/Player/Montages'
 HIT = 0.633  # arms_only.py가 알려 준 hit_sec_30fps
+RATE = 0.5   # 몽타주 재생 배율(1 = 원래 속도). 공격 속도 스탯과 곱해진다
 
 def delete(path):
     try:
@@ -21,6 +22,8 @@ def run():
              'uniform_scale': 100.0, 'replace_existing': False})
     m = call(P + 'create_montage', {'folder_path': MONT, 'asset_name': 'AM_Staff_Attack', 'animation': a})
     call(P + 'set_montage_notify', {'montage': m, 'notify_name': 'Hit', 'time': HIT})
+    call(E + 'object.ObjectTools.set_properties', {'instance': m, 'values': json.dumps({'rateScale': RATE})})
+    rate = call(E + 'object.ObjectTools.get_properties', {'instance': m, 'properties': ['rateScale']})
     length = call(E + 'object.ObjectTools.get_properties', {'instance': {'refPath': '/Game/Characters/Player/Animations/A_Staff_Attack.A_Staff_Attack'}, 'properties': ['sequenceLength']})
     call(E + 'asset.AssetTools.save_assets', {'asset_paths': []})
-    return {'montage': str(m)[:120], 'length': str(length)[:80]}
+    return {'length': str(length)[:80], 'rate': str(rate)[:80]}

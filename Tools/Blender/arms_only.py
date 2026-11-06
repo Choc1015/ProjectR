@@ -4,8 +4,8 @@
 # - 오른손이 가장 빠른 프레임(Hit 노티파이 자리)을 같이 알려 준다
 # 쓰는 법: JOBS에 (미사모 원본 파일, 내보낼 이름)을 넣고 코드 전체를 실행한다.
 import bpy, re
-# (원본, 이름, 끝 프레임 또는 None). 스태프 공격은 내려치기만 쓰려고 26프레임에서 자른다(그 뒤는 옆으로 휘두르기).
-JOBS = [("Anim_Staff_Attack.fbx", "A_Staff_Attack_ArmsOnly", 26), ("Anim_Skill_Fireball.fbx", "A_Skill_Fireball_ArmsOnly", None)]
+# (원본, 이름, 끝 프레임 또는 None). 스태프 공격은 내려치기만 쓰려고 24프레임에서 자른다(그 뒤는 옆으로 휘두르기).
+JOBS = [("Anim_Staff_Attack.fbx", "A_Staff_Attack_ArmsOnly", 24), ("Anim_Skill_Fireball.fbx", "A_Skill_Fireball_ArmsOnly", None)]
 SRC = r"C:\UnrealProject\ProjectR\SourceArt\Mixamo"
 OUT = r"C:\UnrealProject\ProjectR\SourceArt\Export"
 

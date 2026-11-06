@@ -1,11 +1,11 @@
-import json
+﻿import json
 E = 'editor_toolset.toolsets.'
 P = 'projectr_toolset.toolsets.animation_asset.AnimationAssetTools.'
 def call(n, a): return execute_tool(n, json.dumps(a))['returnValue']
 # 스태프 기본 공격 모션만 다시 임포트한다(arms_only.py로 다시 내보낸 뒤). 몽타주 경로는 무기 표가 쓰는 그대로.
 ANIM, MONT = '/Game/Characters/Player/Animations', '/Game/Characters/Player/Montages'
-HIT = 0.6    # arms_only.py가 알려 준 hit_sec_30fps
-RATE = 0.5   # 몽타주 재생 배율(1 = 원래 속도). 공격 속도 스탯과 곱해진다
+HIT = 0.533   # arms_only.py가 알려 준 hit_sec_30fps
+RATE = 1.0   # 몽타주 재생 배율(1 = 원래 속도). 공격 속도 스탯과 곱해진다
 
 def delete(path):
     try:

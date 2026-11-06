@@ -6,8 +6,8 @@
 import bpy, re
 # (원본, 이름, 끝 프레임 또는 None, 역재생 여부).
 # 끝 프레임에서 자르고, 역재생이 True면 그 뒤에 처음~끝 팔 동작을 거꾸로 붙여 처음 자세로 되돌아오게 한다.
-# 스태프 공격은 내려치기만 쓰려고 19프레임에서 자르고(20프레임부터 오른쪽으로 휘두르기 시작) 역재생으로 돌아온다.
-JOBS = [("Anim_Staff_Attack.fbx", "A_Staff_Attack_ArmsOnly", 19, True), ("Anim_Skill_Fireball.fbx", "A_Skill_Fireball_ArmsOnly", None, False)]
+# 스태프 공격은 내려치기만 쓰려고 17프레임에서 자르고(그 뒤로 오른쪽으로 휘두르기 시작) 역재생으로 돌아온다.
+JOBS = [("Anim_Staff_Attack.fbx", "A_Staff_Attack_ArmsOnly", 17, True), ("Anim_Skill_Fireball.fbx", "A_Skill_Fireball_ArmsOnly", None, False)]
 SRC = r"C:\UnrealProject\ProjectR\SourceArt\Mixamo"
 OUT = r"C:\UnrealProject\ProjectR\SourceArt\Export"
 

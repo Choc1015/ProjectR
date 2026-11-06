@@ -8,9 +8,9 @@ def setp(path, vals):
 
 # tunables - DAY desert: warm high sun through the missing / torn canopies, sand-coloured bounce from below.
 # (forest temple: sun 40 lux scatter 20, fog 0.08, sky 1.2, EV 3.6)
-SUN = {'pitch': -55, 'yaw': 40, 'lux': 40.0, 'scatter': 12.0, 'color': {'r': 255, 'g': 226, 'b': 180, 'a': 255}}
+SUN = {'pitch': -55, 'yaw': 40, 'lux': 40.0, 'scatter': 12.0, 'color': {'r': 1.0, 'g': 0.886, 'b': 0.706, 'a': 1.0}}
 FOG = {'density': 0.04, 'scatter_dist': 0.85}
-SKY = {'intensity': 2.0, 'lower': {'r': 0.45, 'g': 0.38, 'b': 0.28, 'a': 1}, 'color': {'r': 255, 'g': 232, 'b': 205, 'a': 255}}  # warm tint: shade read blue; 1.2 left the shaded walls ~60-70 grey
+SKY = {'intensity': 2.0, 'lower': {'r': 0.45, 'g': 0.38, 'b': 0.28, 'a': 1}, 'color': {'r': 1.0, 'g': 0.91, 'b': 0.80, 'a': 1.0}}  # warm tint: shade read blue; 1.2 left the shaded walls ~60-70 grey
 EV = 4.4   # 3.6 washed the sand floor out to ~230 grey in the capture
 
 def ppv():
@@ -22,6 +22,7 @@ def ppv():
     return found[0]['refPath'].split('PersistentLevel.')[-1]
 
 def run():
+    call('scene.SceneTools.load_level', {'level_path': LV.split('.')[0]})   # light colours are linear 0-1 (0-255 clamps to white)
     pp = ppv()
     call('actor.ActorTools.set_actor_transform', {'actor': ref(LV + 'DirectionalLight_0'),
          'xform': {'location': {'x': 0, 'y': 0, 'z': 1500}, 'rotation': {'pitch': SUN['pitch'], 'yaw': SUN['yaw'], 'roll': 0}, 'scale': {'x': 1, 'y': 1, 'z': 1}}})

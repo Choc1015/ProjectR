@@ -115,6 +115,7 @@ unreal-worker가 `describe_toolset`으로 확인한 도구를 한 줄씩 추가�
 ### 스킬트리 작업에서 확인
 - `texture.TextureTools / import_file(folder_path, asset_name, source_file)` — PNG → Texture2D. UI용은 `set_properties`로 `compressionSettings: TC_EditorIcon`, `lODGroup: TEXTUREGROUP_UI`.
 - `data_table.DataTableTools / import_file(folder_path, asset_name, source_file, schema=ref('/Script/ProjectR.<구조체>'))`, `list_rows`, `get_rows(data_table, row_names)`.
+  `add_rows(data_table, row_names)`, `set_rows(data_table, values=JSON 문자열 {행: {camelCase 열: 값}})`(적은 열만 바뀜, FText는 그냥 문자열, 구조체는 {"X":..}). 에디터가 쥔 표는 `AssetTools.delete`가 True를 돌려도 안 지워져 import_file이 "already exists"로 실패 → 이걸로 행을 넣는다.
   행 구조체에 `Name` 필드를 두지 않는다(JSON 행 이름 키와 겹쳐 도구에서 사라짐). 열 바꾸면 DT 지우고 다시 임포트.
 - BP CDO의 C++ 컴포넌트: `<CDO>:SkillTree`. 구조체·에셋 참조는 `set_properties`에 `{"style": {"background": "/Game/..T.T"}}`처럼 경로 문자열로 넣으면 된다.
 - MCP 커넥터가 끊긴 세션(ECONNREFUSED 후 에디터 재시작)에서는 `Tools/McpRun.ps1 -ScriptFile x.py`로 HTTP 직접 실행.
@@ -131,3 +132,4 @@ unreal-worker가 `describe_toolset`으로 확인한 도구를 한 줄씩 추가�
 - 미사모 로그인이 풀리면 크롬 탭이 Adobe 로그인(auth.services.adobe.com)으로 가므로 사용자에게 로그인을 부탁한다. 다운로드 창 기본값(FBX Binary)으로 받으면 된다.
 - 언리얼 유니티 빌드라 .cpp의 익명 namespace 함수 이름이 다른 파일과 겹치면 C2084 오류가 난다(파일마다 다른 이름을 쓴다).
 - 애니메이션 본 값 확인: `projectr_toolset...AnimationAssetTools.get_bone_pose_at_time(animation, bone_name_suffix, time)` → [스케일xyz, 위치xyz](컴포넌트 공간). execute_tool_script 안에서는 `import unreal` 불가(math·json·re 등만 허용)라 이런 건 툴셋에 함수를 추가하고 `reload_remote.py projectr_toolset`로 불러온다.
+- 라이트 `lightColor`(포인트·디렉셔널·스카이)는 `set_properties`에 **0~1 선형 값**으로 넣는다. `{'r':255,...}`로 넣으면 (1,1,1) 흰색으로 잘린다(광산 랜턴·달빛, 오아시스 해가 이 때문에 흰색이었음, 2026-11-07 발견).

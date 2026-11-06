@@ -8,7 +8,7 @@ def setp(path, vals):
 
 # tunables - NIGHT forge: furnace, braziers and molten channels (08_lights, 09_glow) carry the light, faint moonlight through the vents,
 # sky fill only keeps the corners from going pitch black. (day version was sun 40 lux / sky 1.2 / EV 3.6)
-SUN = {'pitch': -62, 'yaw': 30, 'lux': 0.6, 'scatter': 4.0, 'color': {'r': 170, 'g': 190, 'b': 255, 'a': 255}}
+SUN = {'pitch': -62, 'yaw': 30, 'lux': 0.6, 'scatter': 4.0, 'color': {'r': 0.67, 'g': 0.75, 'b': 1.0, 'a': 1.0}}
 FOG = {'density': 0.03, 'scatter_dist': 0.6}
 SKY = {'intensity': 0.03,'lower': {'r': 0.02, 'g': 0.018, 'b': 0.015, 'a': 1}}
 EV = 0.6
@@ -22,6 +22,7 @@ def ppv():
     return found[0]['refPath'].split('PersistentLevel.')[-1]
 
 def run():
+    call('scene.SceneTools.load_level', {'level_path': LV.split('.')[0]})   # light colours are linear 0-1 (0-255 clamps to white)
     pp = ppv()
     call('actor.ActorTools.set_actor_transform', {'actor': ref(LV + 'DirectionalLight_0'),
          'xform': {'location': {'x': 0, 'y': 0, 'z': 1500}, 'rotation': {'pitch': SUN['pitch'], 'yaw': SUN['yaw'], 'roll': 0}, 'scale': {'x': 1, 'y': 1, 'z': 1}}})

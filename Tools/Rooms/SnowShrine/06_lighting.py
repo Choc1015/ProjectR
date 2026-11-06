@@ -8,9 +8,9 @@ def setp(path, vals):
 
 # tunables - DAY snow: pale cool daylight through the broken roof panels, bright snow bounce from below.
 # Starting point = oasis values with a neutral-cool tint; snow is bright, so exposure stays high.
-SUN = {'pitch': -52, 'yaw': 25, 'lux': 35.0, 'scatter': 10.0, 'color': {'r': 245, 'g': 248, 'b': 255, 'a': 255}}
+SUN = {'pitch': -52, 'yaw': 25, 'lux': 35.0, 'scatter': 10.0, 'color': {'r': 0.96, 'g': 0.97, 'b': 1.0, 'a': 1.0}}
 FOG = {'density': 0.05, 'scatter_dist': 0.8}
-SKY = {'intensity': 2.0, 'lower': {'r': 0.5, 'g': 0.52, 'b': 0.55, 'a': 1}, 'color': {'r': 255, 'g': 250, 'b': 245, 'a': 255}}
+SKY = {'intensity': 2.0, 'lower': {'r': 0.5, 'g': 0.52, 'b': 0.55, 'a': 1}, 'color': {'r': 1.0, 'g': 0.98, 'b': 0.96, 'a': 1.0}}
 EV = 4.4
 
 def ppv():
@@ -22,6 +22,7 @@ def ppv():
     return found[0]['refPath'].split('PersistentLevel.')[-1]
 
 def run():
+    call('scene.SceneTools.load_level', {'level_path': LV.split('.')[0]})   # light colours are linear 0-1 (0-255 clamps to white)
     pp = ppv()
     call('actor.ActorTools.set_actor_transform', {'actor': ref(LV + 'DirectionalLight_0'),
          'xform': {'location': {'x': 0, 'y': 0, 'z': 1500}, 'rotation': {'pitch': SUN['pitch'], 'yaw': SUN['yaw'], 'roll': 0}, 'scale': {'x': 1, 'y': 1, 'z': 1}}})

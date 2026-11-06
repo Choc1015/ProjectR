@@ -19,7 +19,8 @@
 - 방마다 입구·출구가 있고, 가운데는 몬스터와 싸울 공간, 둘레는 소품으로 알뜰하게 채운다.
 - 순서: 제미나이로 테마·소품 레퍼런스를 뽑아 보여 준다 → 사용자가 고른다 → 블렌더로 만든다 → 언리얼에 배치 → 사용자 검수.
 - 레퍼런스는 `Docs/ArtRef/Rooms/`. 첫 방 테마: 숲속 신전 폐허.
-- 방 레벨은 `/Game/Maps/Rooms/L_Room_<테마>`(DevMap을 복제해 조명 유지). 방 크기 24m x 24m, 중심 원점, 입구 -X·출구 +X 아치, 바닥은 2m 타일 12x12.
+- 방 레벨은 `/Game/Maps/Rooms/L_Room_<테마>`(DevMap을 복제해 조명 유지). 방 크기 24m x 24m, 중심 원점, 바닥은 2m 타일 12x12(두 모양을 섞고 돌려 반복 무늬 방지, 이끼는 타일에 넣지 않고 큰 덩어리로 따로).
+- 방은 사방 벽과 천장으로 막는다(숲속 신전: 높이 8m 석조 벽 4m 모듈, -X·+X 가운데에 8m 문 벽, 천장 4m 판 6x6을 z=8m에 두고 일부는 무너진 판으로 하늘·빛이 들게).
 - 소품: 블렌더 원본 `SourceArt/<테마>_Props.blend`, FBX `SourceArt/Export/<테마>/SM_<약자>_*.fbx`, 언리얼 `/Game/Props/<테마>/`(숲속 신전은 약자 FT).
 - MCP 배치: `SceneTools.add_to_scene_from_asset`의 `xform`은 `{location, rotation{pitch,yaw,roll}, scale}` 형식이다(`translation`/쿼터니언을 넘기면 조용히 원점에 놓인다).
 

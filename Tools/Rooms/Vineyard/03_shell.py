@@ -34,7 +34,8 @@ def run():
     i = 0
     for gx in range(12):
         for gy in range(12):
-            m = 'FloorTileB' if (gx * 5 + gy * 3 + gx * gy) % 3 == 0 else 'FloorTile'
+            # dirt tiles are high contrast: only ~1 in 5, scattered by a hash (the old modulo formula drew diagonal stairs)
+            m = 'FloorTileB' if ((gx * 73856093) ^ (gy * 19349663)) % 5 == 0 else 'FloorTile'
             add(m, 'VY_Floor_%03d' % i, -1100 + gx * 200, -1100 + gy * 200, 0, ((gx * 7 + gy * 11) % 4) * 90); i += 1
     for k, (m, x, y, yaw) in enumerate(LEAVES):
         add(m, 'VY_Leaf_%02d' % k, x, y, 0, yaw)

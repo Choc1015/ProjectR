@@ -95,3 +95,8 @@ Tools/McpRun.ps1 -ScriptFile Tools/Rooms/<테마>/<번호>_<이름>.py
 - 03: 돌 틀 + 베이지 패널 벽, 둥근 창 벽 `WINDOWS` 5곳, 돌 기둥 `PILLARS`, 가운데 지름 6 m 둥근 깔개.
 - 04: 책장은 벽 받침 앞(1188)에 붙인다. 08 라이트는 04·05의 촛불 위치를 따른다(촛대 6 cd, 벽 촛대 4 cd, 책상·바닥 초 2~3 cd).
 - 06: 하늘빛 0.12, EV 0.4(밤 방보다 조금 밝게). 09: 촛불 발광, 둥근 창·수정구 약한 남색 발광.
+
+## Vineyard (햇살 포도원 저장고, `L_Room_Vineyard`, 약자 VY, 낮) — 밤샘 자동 제작
+
+원본 `SourceArt/Vineyard_Props.blend`, FBX `SourceArt/Export/Vineyard/`, 에셋 `/Game/Props/Vineyard/`. Oasis 스크립트를 바탕으로 천 차양을 포도 덩굴 차양(`VineCanopy`, 성긴 `VineCanopySparse`)으로 바꾸고 돌 기둥 `PIERS`를 더했다. 상세 레퍼런스 없이 `room_themes_8.png` 포도원 그림만 보고 만들었다.
+- 03: 흙 타일(`FloorTileB`)은 대비가 커서 해시로 1/5만 흩어 놓는다(나머지 방이 쓰는 `(gx*5+gy*3+gx*gy)%3` 식은 여기서 계단 무늬가 됐다).

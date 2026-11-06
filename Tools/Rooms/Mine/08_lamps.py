@@ -17,8 +17,13 @@ CEILING = [(-450, -300), (500, -300), (-100, 700)]
 # small fills at the lit glass of the workbench / shelf lanterns (x, y, z)
 SMALL = [(1120, -400, 130), (400, -1140, 200), (1140, 800, 190)]
 
-LAMP = {'cd': 12.0, 'radius': 1300, 'color': {'r': 255, 'g': 160, 'b': 80, 'a': 255}, 'scatter': 3.0}
-FILL = {'cd': 3.0, 'radius': 350}
+# v2 (user: v1 12 cd / 13 m was too strong, white hot spots on the walls): weak, short, deep orange pools so the
+# glowing lantern models lead. Wall lights sit 25 cm in front of the lantern to soften the spot on the rock.
+WALL = {'cd': 2.5, 'radius': 650, 'forward': 25}
+CEIL = {'cd': 3.0, 'radius': 750}          # ceiling lanterns hang ~6 m up: radius must still reach the floor
+LAMP = {'color': {'r': 255, 'g': 130, 'b': 50, 'a': 255}, 'scatter': 1.0}
+FILL = {'cd': 0.8, 'radius': 250}
+REIMPORT_MESHES = False  # True only when the lantern / workbench / shelf FBX changed (then re-run 04, 05, 09)
 
 def xf(x, y, z, yaw=0):
     return {'location': {'x': x, 'y': y, 'z': z}, 'rotation': {'pitch': 0, 'yaw': yaw, 'roll': 0}, 'scale': {'x': 1, 'y': 1, 'z': 1}}
@@ -43,25 +48,26 @@ def lamp(mesh, name, x, y, z, yaw):
 
 def run():
     out = {'rm': 0}
-    for p in ('MN_Lamp_', 'MN_LampLight_', 'MN_Prop_Workbench', 'MN_Decor_WallShelf'):
+    for p in ('MN_Lamp_', 'MN_LampLight_') + (('MN_Prop_Workbench', 'MN_Decor_WallShelf') if REIMPORT_MESHES else ()):
         for a in call('scene.SceneTools.find_actors', {'name': p, 'tag': '', 'collision_channels': []}):
             call('scene.SceneTools.remove_from_scene', {'actor': a}); out['rm'] += 1
-    for a in ['SM_MN_' + n for n in REIMPORT] + ['M_MN_Glass', 'M_MN_Flame']:
+    for a in (['SM_MN_' + n for n in REIMPORT] + ['M_MN_Glass', 'M_MN_Flame']) if REIMPORT_MESHES else []:
         try:
             call('asset.AssetTools.delete', {'path': P + a})
         except Exception:
             pass
-    for n in REIMPORT:
+    for n in REIMPORT if REIMPORT_MESHES else []:
         call('static_mesh.StaticMeshTools.import_file', {'folder_path': '/Game/Props/Mine', 'asset_name': 'SM_MN_' + n,
              'source_file': SRC + n + '.fbx', 'import_materials': True})
     k = 0
     for side, t in FRAMES:
         x, y = SIDES[side](t, 1157)
+        lx, ly = SIDES[side](t, 1157 - WALL['forward'])
         lamp('SM_MN_Lantern', 'MN_Lamp_%02d' % k, x, y, 600, (k * 37) % 90)
-        out['l%02d' % k] = light('MN_LampLight_%02d' % k, x, y, 600 + FLAME['Lantern'] * 100, LAMP['cd'], LAMP['radius'], True); k += 1
+        out['l%02d' % k] = light('MN_LampLight_%02d' % k, lx, ly, 600 + FLAME['Lantern'] * 100, WALL['cd'], WALL['radius'], True); k += 1
     for x, y in CEILING:
         lamp('SM_MN_LanternChain', 'MN_Lamp_%02d' % k, x, y, 765, (k * 53) % 90)
-        out['l%02d' % k] = light('MN_LampLight_%02d' % k, x, y, 765 + FLAME['LanternChain'] * 100, LAMP['cd'], LAMP['radius'], True); k += 1
+        out['l%02d' % k] = light('MN_LampLight_%02d' % k, x, y, 765 + FLAME['LanternChain'] * 100, CEIL['cd'], CEIL['radius'], True); k += 1
     for x, y, z in SMALL:
         out['l%02d' % k] = light('MN_LampLight_%02d' % k, x, y, z, FILL['cd'], FILL['radius'], False); k += 1
     call('asset.AssetTools.save_assets', {'asset_paths': []})

@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Subsystems/WorldSubsystem.h"
+#include "ItemTypes.h"
 #include "RunSubsystem.generated.h"
 
 class APlayerController;
@@ -58,6 +59,11 @@ public:
 
 	/** 런 동안 들고 있는 무기(무기 표 행 이름). 방을 옮겨 캐릭터가 새로 생겨도 이어서 든다. */
 	FName CurrentWeapon;
+
+	/** 런 동안의 가방·끼운 젬. 인벤토리 컴포넌트가 바뀔 때마다 써 두고 새 방에서 읽는다. */
+	bool bHasInventory = false;
+	TArray<FInventoryStack> SavedBag;
+	TArray<FName> SavedGems;
 
 private:
 	void Generate();

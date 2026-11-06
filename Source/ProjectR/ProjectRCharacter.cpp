@@ -24,6 +24,8 @@
 #include "ProjectRProjectile.h"
 #include "RunSubsystem.h"
 #include "WeaponPickup.h"
+#include "InventoryComponent.h"
+#include "InventoryWidget.h"
 #include "WeaponTypes.h"
 
 AProjectRCharacter::AProjectRCharacter()
@@ -51,6 +53,7 @@ AProjectRCharacter::AProjectRCharacter()
 	SkillTree = CreateDefaultSubobject<USkillTreeComponent>(TEXT("SkillTree"));
 	Stats = CreateDefaultSubobject<UPlayerStatsComponent>(TEXT("Stats"));
 	Skills = CreateDefaultSubobject<UPlayerSkillComponent>(TEXT("Skills"));
+	Inventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
 	SwordMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SwordMesh"));
 	SwordMesh->SetupAttachment(GetMesh(), WeaponSocketName);
 	SwordMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -252,23 +255,14 @@ void AProjectRCharacter::ClearNearbyPickup(AWeaponPickup* Pickup)
 
 void AProjectRCharacter::PickUpNearbyWeapon()
 {
+	// 주운 무기는 가방으로 들어간다(가방이 가득 차면 줍지 않는다). 바꿔 들기는 인벤토리에서.
 	AWeaponPickup* Pickup = NearbyPickup.Get();
-	if (!Pickup || Pickup->WeaponId == CurrentWeapon)
+	if (!Pickup || !Inventory->AddItem(Pickup->WeaponId))
 	{
 		return;
 	}
-	const FName Dropped = CurrentWeapon;
-	EquipWeapon(Pickup->WeaponId);
-	// 내려놓은 무기가 그 자리에 남는다. 안내 글도 바뀐 무기로 갱신한다.
-	Pickup->SetWeapon(Dropped);
-	if (IsValid(Pickup) && !Pickup->IsActorBeingDestroyed())
-	{
-		SetNearbyPickup(Pickup);
-	}
-	else
-	{
-		ClearNearbyPickup(Pickup);
-	}
+	ClearNearbyPickup(Pickup);
+	Pickup->SetWeapon(NAME_None);
 }
 
 void AProjectRCharacter::FireWeaponProjectile(const FWeaponRow& Row)
@@ -315,6 +309,7 @@ void AProjectRCharacter::CreateInput()
 	JumpAction = NewObject<UInputAction>(this, TEXT("IA_Jump"));
 	AttackAction = NewObject<UInputAction>(this, TEXT("IA_Attack"));
 	SkillTreeAction = NewObject<UInputAction>(this, TEXT("IA_SkillTree"));
+	InventoryAction = NewObject<UInputAction>(this, TEXT("IA_Inventory"));
 
 	DefaultMappingContext = NewObject<UInputMappingContext>(this, TEXT("IMC_Default"));
 
@@ -345,6 +340,7 @@ void AProjectRCharacter::CreateInput()
 	DefaultMappingContext->MapKey(JumpAction, EKeys::SpaceBar);
 	DefaultMappingContext->MapKey(AttackAction, EKeys::LeftMouseButton);
 	DefaultMappingContext->MapKey(SkillTreeAction, EKeys::K);
+	DefaultMappingContext->MapKey(InventoryAction, EKeys::I);
 
 	const FKey SkillKeys[] = { EKeys::Q, EKeys::E, EKeys::R, EKeys::F };
 	for (int32 Slot = 0; Slot < UE_ARRAY_COUNT(SkillKeys); ++Slot)
@@ -369,6 +365,7 @@ void AProjectRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		Input->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		Input->BindAction(AttackAction, ETriggerEvent::Started, this, &AProjectRCharacter::Attack);
 		Input->BindAction(SkillTreeAction, ETriggerEvent::Started, this, &AProjectRCharacter::ToggleSkillTree);
+		Input->BindAction(InventoryAction, ETriggerEvent::Started, this, &AProjectRCharacter::ToggleInventory);
 		for (int32 Slot = 0; Slot < SkillSlotActions.Num(); ++Slot)
 		{
 			Input->BindAction(SkillSlotActions[Slot], ETriggerEvent::Started, this, &AProjectRCharacter::UseSkillSlot, Slot);
@@ -557,6 +554,39 @@ void AProjectRCharacter::UseSkillSlot(int32 Slot)
 	{
 		ResetCombo();
 	}
+}
+
+void AProjectRCharacter::ToggleInventory()
+{
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (!PC)
+	{
+		return;
+	}
+
+	if (InventoryWidget)
+	{
+		InventoryWidget->RemoveFromParent();
+		InventoryWidget = nullptr;
+		PC->SetPause(false);
+		PC->SetShowMouseCursor(false);
+		PC->SetInputMode(FInputModeGameOnly());
+		return;
+	}
+	if (SkillTreeWidget)
+	{
+		return;
+	}
+
+	InventoryWidget = CreateWidget<UInventoryWidget>(PC, UInventoryWidget::StaticClass());
+	InventoryWidget->Init(this, Inventory);
+	InventoryWidget->AddToViewport(15);
+	PC->SetPause(true);
+	PC->SetShowMouseCursor(true);
+	FInputModeUIOnly Mode;
+	Mode.SetWidgetToFocus(InventoryWidget->TakeWidget());
+	Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	PC->SetInputMode(Mode);
 }
 
 void AProjectRCharacter::ToggleSkillTree()

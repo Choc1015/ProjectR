@@ -76,6 +76,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	void Heal(float Amount);
 
+	/** 최대 마나를 넘지 않게 회복 */
+	UFUNCTION(BlueprintCallable, Category = "Stats")
+	void RestoreMana(float Amount);
+
 	/** 마나 소비 감소를 적용한 비용을 낼 수 있으면 깎고 true */
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	bool TrySpendMana(float BaseCost);

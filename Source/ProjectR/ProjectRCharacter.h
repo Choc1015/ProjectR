@@ -19,6 +19,8 @@ class USkillTreeWidget;
 class UDataTable;
 class UStaticMesh;
 class AWeaponPickup;
+class UInventoryComponent;
+class UInventoryWidget;
 struct FInputActionValue;
 struct FWeaponRow;
 
@@ -49,6 +51,9 @@ public:
 	void SetNearbyPickup(AWeaponPickup* Pickup);
 	void ClearNearbyPickup(AWeaponPickup* Pickup);
 
+	/** I: 인벤토리 창을 열고 닫는다. 열려 있는 동안 게임이 멈춘다. */
+	void ToggleInventory();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual float TakeDamage(float DamageAmount, const FDamageEvent& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
@@ -71,6 +76,10 @@ protected:
 	/** 스킬 4칸: 젬 Q·E·R + 무기 F */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UPlayerSkillComponent> Skills;
+
+	/** 가방(포션·젬·무기)과 장착칸. 창 그림·배치는 여기의 Style */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UInventoryComponent> Inventory;
 
 	/** 화면 아래 체력·마나 바와 아이템 칸의 그림·배치 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HUD")
@@ -191,6 +200,12 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UInputAction> SkillTreeAction;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UInputAction> InventoryAction;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UInventoryWidget> InventoryWidget;
 
 	/** Q·E·R·F 순서 (젬 3칸, 무기 칸) */
 	UPROPERTY(Transient)

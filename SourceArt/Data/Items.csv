@@ -1,0 +1,8 @@
+﻿---,DisplayName,Kind,Icon,Description,MaxStack,HealthRestore,ManaRestore
+Potion,체력 포션,Consumable,/Game/UI/Inventory/T_Item_Potion.T_Item_Potion,체력을 50 회복한다,10,50,0
+ManaPotion,마나 포션,Consumable,/Game/UI/Inventory/T_Item_ManaPotion.T_Item_ManaPotion,마나를 50 회복한다,10,0,50
+Gem_Spin,회전 베기 젬,Gem,/Game/UI/Inventory/T_Item_Gem_Spin.T_Item_Gem_Spin,내 주변 3m 안의 모든 적에게 스킬 공격력 x1.5 피해,1,0,0
+Gem_Slam,내려찍기 젬,Gem,/Game/UI/Inventory/T_Item_Gem_Slam.T_Item_Gem_Slam,앞쪽 4m 부채꼴의 적에게 스킬 공격력 x2.5 피해,1,0,0
+Gem_Breath,숨 고르기 젬,Gem,/Game/UI/Inventory/T_Item_Gem_Breath.T_Item_Gem_Breath,최대 체력의 25% 회복,1,0,0
+Sword,검,Weapon,/Game/UI/Inventory/T_Item_Sword.T_Item_Sword,근접 콤보. 고유 스킬 F: 돌진 베기,1,0,0
+Staff,스태프,Weapon,/Game/UI/Inventory/T_Item_Staff.T_Item_Staff,호박빛 마법탄을 쏜다. 고유 스킬 F: 화염구,1,0,0

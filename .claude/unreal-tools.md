@@ -123,3 +123,7 @@ unreal-worker가 `describe_toolset`으로 확인한 도구를 한 줄씩 추가�
 - 글꼴 임포트: `projectr_toolset.toolsets.font.FontTools.import_font_face(folder_path, asset_name, source_file)` → FontFace(Inline). C++에서는 FCompositeFont에 FTypefaceEntry + FFontData(FontFace)로 감싸 FSlateFontInfo로 쓴다.
 - 머티리얼 발광: `material.MaterialTools.get_property_input(material, material_property='MP_EmissiveColor')`(열거값은 `MP_EmissiveColor` 형식, 비어 있으면 expression이 문자열 'None'), `add_expression(material_or_function, expression_class={'refPath':'/Script/Engine.MaterialExpressionConstant3Vector'})` → `connect_to_output(expression, '', 'MP_EmissiveColor')` → `set_properties(expr, {'constant':{r,g,b,a}})` → `recompile`. 셰이딩 모델은 머티리얼에 `set_properties({'shadingModel':'MSM_Unlit'})`. FBX 임포트는 블렌더 Emission을 안 가져온다.
 - 스크립트 안 반환 dict는 `_StrictDict`라 `.get(key, default)`가 안 된다. 클래스로 배치: `add_to_scene_from_class(actor_type={'refPath':'/Script/Engine.PointLight'}, ...)`, 라이트 컴포넌트는 `<actor>.LightComponent0`(`intensityUnits: 'Candelas'` 됨).
+
+### 방 지도 작업에서 확인
+- PIE 중에도 `scene.SceneTools.find_actors`는 게임 월드를 찾고, `actor.ActorTools.set_actor_transform`으로 플레이어를 옮길 수 있다(트리거 확인용). 스크립트 안 `time.sleep` 동안은 게임이 틱하지 않는다.
+- `EditorAppToolset.CaptureViewport`는 `captureTransform`이 필수이고 UI는 안 찍힌다. 콘솔 명령 도구는 없다.

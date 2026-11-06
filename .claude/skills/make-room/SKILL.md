@@ -40,6 +40,7 @@ description: Use when the user asks to make a new map room, a new room theme, mo
 - 사방 벽(4m 모듈, 높이 8m)과 천장(4m 판 6x6, z=8m, 일부는 무너진 판). 벽 장식은 위치·높이·크기·좌우 반전을 섞어 띄엄띄엄. 같은 장식이 규칙적으로 반복되면 안 된다.
 - 가운데 약 14m는 싸울 공간(낮은 엄폐물 1~2개만), 둘레 5m 띠를 소품으로 알뜰하게.
 - 시작 위치(PlayerStart) -X 쪽, 출구는 +X 벽 가운데의 검은 판 아치(뚫지 않음, 문턱 없음). 벽 모듈 이음매의 기둥·받침이 문 뒤로 가려지게 검은 판을 벽에서 앞으로 뺀다.
+- 출구 메시 이름은 반드시 `SM_<약자>_ExitDoor`(정면 로컬 +Y가 방 쪽). 게임 시작 때 이 메시 자리에 출구 판정이 자동으로 붙어 방 지도가 열린다. 새 방은 프로젝트 세팅 > Game > Run Map의 Rooms에 레벨과 이름을 추가해야 지도에 나온다.
 - `add_to_scene_from_asset`의 `xform`은 `{location, rotation{pitch,yaw,roll}, scale}`.
 - 벽에 붙는 것은 블렌더에서 벽면 Y=0, 방 쪽이 -Y로 만든다 → 언리얼 yaw: 남(-Y 벽) 0, 북 180, 서 270, 동 90.
 

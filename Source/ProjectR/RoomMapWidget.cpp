@@ -148,21 +148,21 @@ void URoomMapWidget::Build()
 		FontAsset = FontFace;
 	}
 
-	// 화면 전체를 어둡게 덮고, 그 위에 지도 판을 화면에 맞춰 키운다.
+	// 게임 화면을 완전히 가린다. 지도 판(원본 배경 그림 그대로)이 화면을 꽉 채우고, 비율이 달라 남는 곳은 판 가장자리 색으로 메운다.
 	UCanvasPanel* Root = WidgetTree->ConstructWidget<UCanvasPanel>();
 	WidgetTree->RootWidget = Root;
 
-	UImage* Dim = WidgetTree->ConstructWidget<UImage>();
-	Dim->SetColorAndOpacity(FLinearColor(0.f, 0.f, 0.f, 0.6f));
-	UCanvasPanelSlot* DimSlot = Root->AddChildToCanvas(Dim);
-	DimSlot->SetAnchors(FAnchors(0.f, 0.f, 1.f, 1.f));
-	DimSlot->SetOffsets(FMargin(0.f));
+	UImage* Cover = WidgetTree->ConstructWidget<UImage>();
+	Cover->SetColorAndOpacity(Settings->CoverColor);
+	UCanvasPanelSlot* CoverSlot = Root->AddChildToCanvas(Cover);
+	CoverSlot->SetAnchors(FAnchors(0.f, 0.f, 1.f, 1.f));
+	CoverSlot->SetOffsets(FMargin(0.f));
 
 	UScaleBox* Fit = WidgetTree->ConstructWidget<UScaleBox>();
-	Fit->SetStretch(EStretch::ScaleToFit);
+	Fit->SetStretch(EStretch::ScaleToFill);
 	UCanvasPanelSlot* FitSlot = Root->AddChildToCanvas(Fit);
 	FitSlot->SetAnchors(FAnchors(0.f, 0.f, 1.f, 1.f));
-	FitSlot->SetOffsets(FMargin(30.f));
+	FitSlot->SetOffsets(FMargin(0.f));
 
 	USizeBox* BoardBox = WidgetTree->ConstructWidget<USizeBox>();
 	BoardBox->SetWidthOverride(Settings->BoardSize.X);
@@ -195,7 +195,7 @@ void URoomMapWidget::Build()
 	};
 
 	AddText(FText::FromString(TEXT("다음 방을 고르세요")), Settings->TitleFontSize, FVector2D(Settings->BoardSize.X * 0.5, Settings->BoardSize.Y * 0.05));
-	AddText(FText::FromString(TEXT("Esc: 닫기")), Settings->LabelFontSize, FVector2D(Settings->BoardSize.X * 0.5, Settings->BoardSize.Y * 0.9));
+	AddText(FText::FromString(TEXT("Esc: 닫기")), Settings->LabelFontSize, Settings->BoardSize * Settings->CloseHintPosition);
 
 	// 길 먼저, 칸은 그 위에
 	for (int32 i = 0; i < Nodes.Num(); ++i)

@@ -10,7 +10,7 @@ def run():
     for n in NAMES:
         path = '/Game/UI/Map/' + n
         try:
-            call('asset.AssetTools.delete', {'asset_paths': [path]})
+            call('asset.AssetTools.delete', {'path': path})
         except Exception:
             pass
         try:

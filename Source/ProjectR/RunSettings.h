@@ -105,6 +105,14 @@ public:
 	UPROPERTY(EditAnywhere, Config, Category = "Look")
 	float LockedOpacity = 0.55f;
 
+	/** "Esc: 닫기" 글 위치(판 크기 대비 0~1). 맨 아래 가운데는 시작 칸 이름과 겹쳐서 왼쪽으로 뺐다. */
+	UPROPERTY(EditAnywhere, Config, Category = "Look")
+	FVector2D CloseHintPosition = FVector2D(0.32, 0.9);
+
+	/** 지도 뒤를 덮는 색(불투명). 화면 비율이 그림과 달라 남는 곳에 보인다. */
+	UPROPERTY(EditAnywhere, Config, Category = "Look")
+	FLinearColor CoverColor = FLinearColor(1.f, 1.f, 1.f, 1.f);
+
 	UPROPERTY(EditAnywhere, Config, Category = "Look")
 	int32 LabelFontSize = 20;
 

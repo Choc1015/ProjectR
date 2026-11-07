@@ -62,3 +62,10 @@ DeepSeek는 이 대화를 모른다. 지시문 하나로 끝까지 할 수 있�
 - 사용량: `opencode.cmd stats`. 잔액은 platform.deepseek.com.
 - 잔액이 바닥나면 `402 Insufficient Balance`로 실패한다. 그때는 **작업을 멈추고 사용자에게 "DeepSeek 잔액 부족, 충전 필요"라고 알린다.**
   Sonnet 워커나 Claude 직접 처리로 몰래 바꾸지 않는다(Claude 토큰을 쓰게 되므로). 사용자가 충전하거나 다른 방법을 정할 때까지 기다린다.
+
+## 실제로 써 보며 알게 된 것 (2026-11-07, 장터 방)
+
+- `opencode.cmd`가 PATH에 없을 수 있다. `& "$env:APPDATA\npm\node_modules\opencode-ai\bin\opencode.exe" run ...`로 직접 부른다.
+- 긴 지시문은 명령줄에 넣지 말고 파일로 써서 `-f <파일>`로 첨부하고, 메시지는 짧게("첨부한 지시 파일대로 수행하고 [보고] 형식으로 보고해").
+- 메시지에 "블렌더 MCP(execute_blender_code)로 바로 작업해. 파일 검색이나 에이전트 설정 찾기는 하지 마"를 넣는다. 안 넣었을 때 두 번 연속 파일 목록만 출력하고 끝났다.
+- DeepSeek는 그림을 못 봐서 모양은 Claude가 블렌더 `look`으로 한 번 확인한다(장터 벽의 대각 버팀이 창을 가렸다).

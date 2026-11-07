@@ -8,10 +8,10 @@ def setp(path, vals):
 
 # tunables - DAWN market (user picked: as in the theme art): low pink-gold sun from the east-ish through the missing awnings,
 # cool blue-lilac sky fill so the shade is not grey. Start values, tune by capture.
-SUN = {'pitch': -18, 'yaw': 160, 'lux': 25.0, 'scatter': 6.0, 'color': {'r': 1.0, 'g': 0.78, 'b': 0.62, 'a': 1.0}}
+SUN = {'pitch': -24, 'yaw': 160, 'lux': 14.0, 'scatter': 4.0, 'color': {'r': 1.0, 'g': 0.88, 'b': 0.78, 'a': 1.0}}   # 25 lux pink-orange turned the whole room orange
 FOG = {'density': 0.04, 'scatter_dist': 0.8}
 SKY = {'intensity': 1.4, 'lower': {'r': 0.35, 'g': 0.3, 'b': 0.28, 'a': 1}, 'color': {'r': 0.82, 'g': 0.84, 'b': 1.0, 'a': 1.0}}
-EV = 3.6
+EV = 3.4
 
 def ppv():
     # DevMap has no post process volume: make one (unbound) the first time and use its real object path

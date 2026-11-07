@@ -12,7 +12,9 @@ MOSS = [('MossPatch', -420, -360, 25), ('MossPatch', 520, 480, 160), ('MossPatch
         ('MossPatchSmall', -720, 320, 210), ('MossPatch', 800, -460, 300), ('MossPatchSmall', -140, 760, 340),
         ('MossPatch', -880, 880, 110), ('MossPatch', 900, -900, 40), ('MossPatchSmall', 300, 1000, 200), ('MossPatchSmall', -950, -300, 130)]
 # inner-wood ceiling 6x6 at 8 m, three knot holes for faint moonlight (hole centre: blender (0,-1.1) -> UE +110 in y)
-HOLES = {(-600, 200), (600, -600), (200, 1000)}
+# Review 2026-11-07: the hole at (200, 1000) sat against the north wall (its opening is shifted +110 in y, reaching past the wall face at
+# 1170), so looking up through it showed the wall top and the open outside. Holes must stay at least one panel away from the walls.
+HOLES = {(-600, 200), (600, -600), (200, 600)}
 
 def xf(x, y, z=0, yaw=0, sx=1.0, s=1.0):
     return {'location': {'x': x, 'y': y, 'z': z}, 'rotation': {'pitch': 0, 'yaw': yaw, 'roll': 0}, 'scale': {'x': sx * s, 'y': s, 'z': s}}
@@ -43,8 +45,6 @@ def run():
     for cx in CENTERS:
         for cy in CENTERS:
             add('CeilingHole' if (cx, cy) in HOLES else 'Ceiling', 'MU_Ceiling_%02d' % j, cx, cy, 800, 0); j += 1
-            if (cx, cy) in HOLES:   # review 2026-11-07: the sky showed through the knot holes -> a solid panel caps each one (panel is 781-860)
-                add('Ceiling', 'MU_CeilingCap_%02d' % j, cx, cy, 880, 0)
     add('EntranceDoor', 'MU_Entrance', -1200, 0, 0, 270)
     add('ExitDoor', 'MU_ExitDoor', 1200, 0, 0, 90)
     call('asset.AssetTools.save_assets', {'asset_paths': []})

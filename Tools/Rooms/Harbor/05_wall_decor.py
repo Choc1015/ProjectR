@@ -7,12 +7,12 @@ SIDES = {'S': (0, lambda t: (t, -FACE)), 'N': (180, lambda t: (-t, FACE)), 'W': 
 # t along the wall in the wall's own X (S t=x, N t=-x, W t=-y, E t=y). Posts at S -400/800, N -400/800, W -800/400, E -800/400.
 # (piece, side, t cm, height cm, scale, mirror)
 DECOR = [
-    ('WallGap', 'S', -900, 250, 1.0, False), ('WallSail', 'S', -150, 250, 1.0, False),
+    ('WallSail', 'S', -150, 250, 1.0, False),   # WallGap (glowing plank gaps) dropped: the walls are stone now (review 2026-11-07)
     ('WallFish', 'S', 350, 280, 1.0, False), ('WallBoard', 'S', 1000, 180, 1.0, False),
     ('WallNet', 'N', -800, 150, 1.0, False), ('WallRing', 'N', 150, 250, 1.0, False),
-    ('WallShelf', 'N', 550, 200, 1.0, True), ('WallGap', 'N', -350, 400, 0.8, True),
+    ('WallShelf', 'N', 550, 200, 1.0, True),
     ('WallRope', 'W', -650, 150, 1.0, False), ('WallOars', 'W', 550, 250, 1.0, True),
-    ('WallFish', 'W', -950, 300, 0.9, True), ('WallGap', 'W', 950, 250, 1.1, False),
+    ('WallFish', 'W', -950, 300, 0.9, True),
     ('WallNet', 'E', -500, 150, 0.9, True), ('WallBoard', 'E', 700, 180, 0.9, True),
     ('WallRing', 'E', -1000, 250, 0.9, False), ('WallSail', 'E', -300, 260, 0.9, True),
 ]

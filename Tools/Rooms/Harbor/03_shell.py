@@ -5,6 +5,8 @@ P = '/Game/Props/Harbor/SM_HB_'
 SIDES = {'S': (0, lambda t, d: (t, -d)), 'N': (180, lambda t, d: (-t, d)), 'W': (270, lambda t, d: (-d, -t)), 'E': (90, lambda t, d: (d, t))}
 CENTERS = (-1000, -600, -200, 200, 600, 1000)
 
+# review 2026-11-07: stone warehouse + timber roof to match the stone quay floor (Harbor_Walls.blend, imported by 12_stone_import.py):
+# StoneWall/StoneWallB, StoneCorner, RoofPlain (one dark board colour, solid). Old plank Wall/WallB/Corner/Roof/RoofBroken unused.
 WALLB = {('S', 600), ('S', -1000), ('N', -200), ('N', 1000), ('W', -600), ('W', 200), ('W', 1000), ('E', -200)}  # west wall faces the sunset: more gaps
 MIRROR = {('S', -200), ('S', 1000), ('N', 600), ('N', -600), ('W', -1000), ('E', 600), ('E', -600)}
 # timber posts on some seams, kept off the flooded corner (south-west, x and y < -600)
@@ -38,13 +40,13 @@ def run():
     for side, (yaw, pos) in SIDES.items():
         for c in CENTERS:
             x, y = pos(c, 1200)
-            add('WallB' if (side, c) in WALLB else 'Wall', 'HB_Wall_%02d' % k, x, y, 0, yaw, -1.0 if (side, c) in MIRROR else 1.0); k += 1
+            add('StoneWallB' if (side, c) in WALLB else 'StoneWall', 'HB_Wall_%02d' % k, x, y, 0, yaw, -1.0 if (side, c) in MIRROR else 1.0); k += 1
     for j, (side, t) in enumerate(POSTS):
         yaw, pos = SIDES[side]
         x, y = pos(t, 1200)
         add('Post', 'HB_Post_%02d' % j, x, y, 0, yaw)
     for j, (x, y, yaw) in enumerate([(-1200, -1200, 0), (1200, -1200, 90), (-1200, 1200, 270), (1200, 1200, 180)]):
-        add('Corner', 'HB_Corner_%02d' % j, x, y, 0, yaw)
+        add('StoneCorner', 'HB_Corner_%02d' % j, x, y, 0, yaw)
     r = 0
     for line in LINES:
         for c in CENTERS:
@@ -53,7 +55,7 @@ def run():
     j = 0
     for gx, cx in enumerate(CENTERS):
         for gy, cy in enumerate(CENTERS):
-            add('RoofBroken' if (cx, cy) in BROKEN else 'Roof', 'HB_Roof_%02d' % j, cx, cy, 800, ((gx * 5 + gy * 3) % 4) * 90, 1.05, 1.05, 1.0); j += 1
+            add('RoofPlain', 'HB_Roof_%02d' % j, cx, cy, 792, ((gx * 5 + gy * 3) % 2) * 180, 1.0, 1.0, 1.0); j += 1
     add('EntranceDoor', 'HB_Entrance', -1200, 0, 0, 270)
     add('ExitDoor', 'HB_ExitDoor', 1200, 0, 0, 90)
     call('asset.AssetTools.save_assets', {'asset_paths': []})

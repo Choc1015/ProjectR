@@ -1,11 +1,11 @@
 import json
 # Deck tone (review 2026-11-07 follow-up): the three board tones + dark gap lines read as busy stripes in Unreal.
 # Pull DeckB / DeckC / DeckGap toward the main Deck colour so the floor is one calm wood surface with faint board lines.
-# Shared by the three deck rooms (Harbor, Mill, Library); the blender colours in SourceArt/<Theme>_Floor.blend stay as the originals.
+# Shared by the deck rooms (Mill, Library); the blender colours in SourceArt/<Theme>_Floor.blend stay as the originals.
 E = 'editor_toolset.toolsets.'
 def call(n, a): return execute_tool(E + n, json.dumps(a))['returnValue']
 def ref(p): return {'refPath': p}
-ROOMS = [('Harbor', 'HB'), ('Mill', 'ML'), ('Library', 'LB')]
+ROOMS = [('Mill', 'ML'), ('Library', 'LB')]   # Harbor dropped the deck for a stone quay
 PULL = {'DeckB': 0.65, 'DeckC': 0.65, 'DeckGap': 0.45}   # 0 = keep, 1 = same as Deck
 # NOTE: each run pulls again (cumulative) - re-import the decks (10_floor) before running it a second time
 GAP_DARK = 0.8                                           # gap ends a little darker than the boards

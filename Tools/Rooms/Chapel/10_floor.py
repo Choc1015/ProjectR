@@ -22,6 +22,14 @@ BRANCHES = [(0, 0, 0, 900, 130), (0, 900, 0, 900, 260)]   # path to the altar + 
 FADE = 220
 HOLES = 0.08
 TUFTS = 40
+try:
+    GROUND                           # (x, y, scale x, scale y) pieces of the 24x24 m ground plane
+except NameError:
+    GROUND = [(0, 0, 1.0, 1.0)]
+try:
+    EXCLUDE                          # no stones in these rects (x1, y1, x2, y2), cm
+except NameError:
+    EXCLUDE = []
 
 class Rng:
     # tiny LCG: the MCP script sandbox does not allow 'import random'
@@ -78,7 +86,8 @@ def run():
                 pass
             call('static_mesh.StaticMeshTools.import_file', {'folder_path': '/Game/Props/' + THEME, 'asset_name': 'SM_%s_%s' % (AB, n),
                  'source_file': SRC + n + '.fbx', 'import_materials': True})
-    add('Ground', AB + '_Ground', 0, 0, 0)
+    for k, (gx, gy, sx, sy) in enumerate(GROUND):          # ground plane is 24x24 m; scaled pieces leave holes (water etc.)
+        add('Ground', '%s_Ground_%d' % (AB, k), gx, gy, 0, 0, sx, sy, 1.0)
     rng = Rng(SEED)
     flags, tufts, spots = 0, 0, []
     y = -1180
@@ -88,6 +97,8 @@ def run():
         while x < 1180:
             L = rng.choice(LEN)
             cx, cy = x + L / 2, y + h / 2
+            if any(a - 30 < cx < c + 30 and b - 30 < cy < d + 30 for (a, b, c, d) in EXCLUDE):
+                x += L; continue
             keep = 1.0 - smooth((paved(cx, cy) + FADE * 0.3) / FADE)   # 1 inside, 0 outside, ragged band between
             if rng.random() < keep and not rng.random() < HOLES:
                 m = rng.choice(('Flag_A', 'Flag_A', 'Flag_B', 'Flag_C'))

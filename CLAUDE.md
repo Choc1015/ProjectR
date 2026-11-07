@@ -13,31 +13,24 @@
 4. **혼합 구현.** 핵심 로직은 C++(라이브 코딩으로 컴파일), 조정과 연결은 블루프린트.
 5. **작게 키운다.** 거시적인 기획 질문은 하지 않는다. 다음 작은 단계만 묻는다.
 
-## 맵 규칙 (사용자가 정함)
+## 규칙 문서 (필요할 때만 읽는다)
 
-- 맵은 **방 단위**로 만들어 계속 찍어낸다. 방은 실내가 아니라 **세상 한 조각을 방 크기에 담은 것**(숲, 폐허 등 바깥 풍경도 방 하나).
-- 방마다 입구·출구가 있고, 가운데는 몬스터와 싸울 공간, 둘레는 소품으로 알뜰하게 채운다.
-- 순서: 제미나이로 테마·소품 레퍼런스를 뽑아 보여 준다 → 사용자가 고른다 → 블렌더로 만든다 → 언리얼에 배치 → 사용자 검수.
-- 레퍼런스는 `Docs/ArtRef/Rooms/`. 2026-11-07 밤샘으로 10개 더 만듦(Oasis·SnowShrine·Forge·Greenhouse·Harbor·Mushroom·Library·Vineyard·Mill·Chapel, 검수 전, 보고서 `Docs/Rooms/2026-11-07_밤샘_방_제작.md`). 첫 방 테마: 숲속 신전 폐허. 두 번째 방: 버려진 광산 동굴 `L_Room_Mine`(약자 MN, 바위벽·바위 천장 틈 3곳, 나무 갱도 틀 출구, 밤: 랜턴 불빛이 주광이고 사용자가 원해서 발광·포인트 라이트를 씀). DevMap에는 PostProcessVolume이 없어 방 라이팅 스크립트가 처음 한 번 만든다.
-- 방 만드는 전체 절차·결정 묶음은 프로젝트 스킬 `.claude/skills/make-room/SKILL.md`, 방별 조립 스크립트는 `Tools/Rooms/<테마>/`(README에 번호별 설명). 방 수정은 해당 번호 스크립트를 고쳐 다시 돌린다.
-- 방 레벨은 `/Game/Maps/Rooms/L_Room_<테마>`(DevMap을 복제해 조명 유지). 방 크기 24m x 24m, 중심 원점, 바닥은 2m 타일 12x12(두 모양을 섞고 돌려 반복 무늬 방지, 이끼는 타일에 넣지 않고 큰 덩어리로 따로).
-- 출구는 뚫지 않고 검은 판을 채운 아치문 `SM_FT_ExitDoor`(동쪽 +X 벽 가운데. 벽 모듈 이음매의 기둥·받침을 가리려고 검은 판을 벽에서 38cm 앞에 두고 문턱 없음). 입구는 아직 없음.
-- 방은 사방 벽과 천장으로 막는다(숲속 신전: 높이 8m 석조 벽 4m 모듈(문 없이 막힘, 이끼는 `TempleWallMoss` 몇 개만 불규칙하게·일부 좌우 반전, 벽 장식 `SM_FT_Wall*` 8종을 위치·높이·크기·좌우 반전을 섞어 16개, 장식 원점은 벽면 Y=0이고 방 쪽으로 튀어나옴. 랜턴 발광·조명은 없음)
-- 라이팅(숲속 신전): 해 pitch -62 yaw 30·40 lux, 스카이라이트 1.2(아래 반구 따뜻한 회색, 구석이 새까맣지 않게), 볼류메트릭 안개, PostProcessVolume_0 노출 고정 EV 3.6. 빛줄기는 진짜 빛 + 볼류메트릭 안개로만(해 산란 20, 안개 밀도 0.08·산란 분포 0.9). 빛기둥 메시 `SM_FT_LightShaft`는 만들어 뒀지만 배치하지 않음(사용자 선택). 빛 떨어지는 곳마다 떠다니는 빛 먼지 `NS_FT_LightDust`(엔진 HangingParticulates 템플릿, 따뜻한 HDR 색, 상자 320x320x650)
-- 나이아가라 MCP: `NiagaraToolsets.NiagaraToolset_System.*`(CreateNiagaraSystem은 템플릿 시스템 필수 → MinimalLightweight로 만들고 RemoveEmitter·AddEmitter), 입력은 GetEmitterTopology로 scriptName 찾고 SetStackInputData(struct는 GetStackInputData 결과 그대로), 천장 4m 판 6x6을 z=8m에 두고 일부는 무너진 판으로 하늘·빛이 들게).
-- 소품: 블렌더 원본 `SourceArt/<테마>_Props.blend`, FBX `SourceArt/Export/<테마>/SM_<약자>_*.fbx`, 언리얼 `/Game/Props/<테마>/`(숲속 신전은 약자 FT).
-- MCP 배치: `SceneTools.add_to_scene_from_asset`의 `xform`은 `{location, rotation{pitch,yaw,roll}, scale}` 형식이다(`translation`/쿼터니언을 넘기면 조용히 원점에 놓인다).
+토큰을 아끼려고 큰 규칙은 `Docs/Rules/`로 옮겼다. 해당 작업을 시작하기 전에 그 파일을 먼저 읽는다. 내용은 예전 CLAUDE.md와 같다.
 
-## 아트 통일 규칙 (모든 모델·UI·이펙트·아이콘에 적용)
+| 이런 작업 전에 | 읽을 파일 |
+|---|---|
+| 맵·방 만들기·수정, 라이팅, 나이아가라, MCP 배치 | `Docs/Rules/map.md` (방은 `make-room` 스킬도) |
+| 새 모델·소품·UI·이펙트·아이콘, 제미나이 프롬프트 | `Docs/Rules/art.md` |
+| C++ 클래스·BP·데이터 표(DT)·HUD·인벤토리·무기·스킬·지도·애니메이션 구조 | `Docs/Rules/structure.md` |
+| 블렌더 모델링·익스포트, 언리얼 임포트, 미사모 애니메이션 | `Docs/Rules/asset.md` |
 
-새 그래픽은 지금 만들어진 것과 같은 게임처럼 보여야 한다. 기준은 `Docs/ArtRef/`의 그림과 `Docs/ArtRef/GeminiPrompts.md`.
-- **3D(모델·소품·무기·이펙트):** 스타일라이즈드 로우폴리, 면 셰이딩, 단색 + 약한 그라데이션, 세밀한 텍스처 없음.
-  색은 가죽 갈색 · 철 회색 · 바랜 천 파랑 · 짚 노랑의 차분하고 따뜻한 톤. 밝고 아늑한 중세 판타지(다크·네온·사실적 톤 금지).
-- **2D(UI·아이콘):** 빈티지 양피지 바탕 위 세피아 잉크 선, 강조는 바랜 금박, 포인트는 진한 붉은 밀랍. 깔끔하고 단정하게.
-  UI 조각은 흰 단색(#FFFFFF) 배경으로 따로 뽑아 흰색을 지운다(바탕과 합쳐 뽑지 않는다).
-- **제미나이 프롬프트:** 3D는 "공통 스타일 문구", 2D는 "UI 공통 스타일 문구"를 반드시 끝에 붙인다. 새 프롬프트는 `GeminiPrompts.md`에 추가한다.
-- **블렌더 모델링:** 레퍼런스 그림을 먼저 받고 만든다. 기존 모델(`SK_Player`, 허수아비, 검)과 폴리 밀도·색감·비율을 맞춘다.
-- 위 기준에서 벗어나는 그래픽이 필요하면 만들기 전에 사용자에게 묻는다. 스타일이 바뀌면 이 절과 프롬프트 문서를 같이 고친다.
+새로 알게 된 사실은 해당 파일에 한 줄로 적는다. 어느 파일에도 안 맞으면 이 파일에 적는다.
+
+## 프로젝트 기본
+- 엔진 버전: UE 5.8 (`C:\Program Files\Epic Games\UE_5.8`), C++ 모듈 `ProjectR`
+- Unreal MCP: `http://127.0.0.1:8010/mcp` (Config/DefaultEditorPerProjectUserSettings.ini에서 자동 시작)
+- 폴더 규칙: 개발용 스크립트는 `Tools/`, 프로젝트 툴셋은 `Content/Python/projectr_toolset/`
+- 네이밍 규칙: UE 표준 접두사(`BP_`, `WBP_`, `M_`, `MI_`, `SM_`, `SK_`, `T_`, `ABP_`, `NS_`)
 
 ## 백업
 
@@ -64,7 +57,7 @@
 
 ### 컨텍스트 절약
 - 레벨·액터 전체 덤프 금지. 필요한 범위만 걸러서 조회한다.
-- 아래 "프로젝트 구조"와 `.claude/unreal-tools.md`(확인된 도구 목록)에 있는 내용은 MCP로 다시 조회하지 않는다.
+- `Docs/Rules/structure.md`(프로젝트 구조)와 `.claude/unreal-tools.md`(확인된 도구 목록)에 있는 내용은 MCP로 다시 조회하지 않는다.
   `describe_toolset`은 결과가 수만 자라 금지. 모르는 도구는 엔진 파이썬 소스를 grep한다
   (`C:\Program Files\Epic Games\UE_5.8\Engine\Plugins\Experimental\Toolsets\**\*.py`).
 - 기능 하나가 끝나면 `/compact` 또는 새 세션을 제안한다.
@@ -80,60 +73,6 @@
    화면 판단이 필요하면 사용자 스크린샷을 받는다. 같은 문제를 추측으로 두 번 이상 고치지 않고 먼저 원인을 묻는다.
 5. **파일은 필요한 부분만 읽는다.** 이미 읽은 파일은 다시 읽지 않고, 큰 파일은 `offset/limit` 또는 Grep으로 본다.
 6. **응답은 짧게.** 결과 요약·바뀐 값·조정 위치만 쓴다. 과정 설명과 이미 말한 내용을 반복하지 않는다.
-7. **새로 알게 된 사실은 바로 기록한다.** 도구 사용법은 `.claude/unreal-tools.md`, 에셋·구조 규칙은 이 파일에 한 줄로.
+7. **새로 알게 된 사실은 바로 기록한다.** 도구 사용법은 `.claude/unreal-tools.md`, 에셋·구조·맵 규칙은 해당 `Docs/Rules/*.md`에 한 줄로.
    같은 조사를 두 번 하지 않기 위해서다.
 
-## 프로젝트 구조
-- 엔진 버전: UE 5.8 (`C:\Program Files\Epic Games\UE_5.8`), C++ 모듈 `ProjectR`
-- 레벨: `/Game/Maps/DevMap` (월드 세팅 게임모드 `BP_GameMode`, PlayerStart (0,0,92) yaw 0, 허수아비 (250,0,0) yaw 90)
-- Unreal MCP: `http://127.0.0.1:8010/mcp` (Config/DefaultEditorPerProjectUserSettings.ini에서 자동 시작)
-- C++ (`Source/ProjectR/`)
-  - `AProjectRCharacter`: 이동·시점(Enhanced Input을 코드에서 생성), 몽타주 콤보, `Hit` 노티파이 타격 판정,
-    카메라 `FirstPersonCamera` 하나(캡슐에 붙음, 마우스 좌우·위아래, 코드는 카메라·메시 Transform을 덮어쓰지 않음 → BP 뷰포트 값 그대로), `CameraViewOffset`, 공격 시 카메라 전진, 공격별 검 회전
-  - `ATrainingDummy`: 맞으면 흔들리고 횟수 표시 / `UProjectRAnimInstance`: `Speed`, `bIsInAir`
-  - `USkillTreeComponent`(캐릭터의 `SkillTree`): 포인트·해금, 그림·배치 수치(`Style`) / `USkillTreeWidget`: 표를 읽어 원형 트리를 코드로 생성, K로 열기, 드래그 이동·휠 확대(배율은 `Style`의 View 항목), 노드 설명창(`Style`의 Tooltip 항목, 그림 `T_SkillTooltip`을 위·가운데·아래로 잘라 가운데만 세로로 늘림. UI 그림은 표시 크기의 1.5배 정도로 미리 줄여 넣는다)
-  - `UPlayerStatsComponent`(캐릭터의 `Stats`): 스탯 `EPlayerStat` 15종, 기본값 `BaseStats`(BP에서 조정) + 해금한 스킬 보너스. 최종 = (기본 + 더하기) × (1 + %/100).
-    현재 체력·마나와 재생, 방어 = 피해 × 100/(100+방어력−관통). 기본 공격 피해·치명타·공격 속도(몽타주 재생 속도)는 이미 연결됨. 특수 스킬(Stat=None)은 효과 미구현
-  - `UPlayerSkillComponent`(캐릭터의 `Skills`): 젬 3칸 Q·E·R(`GemSkills`) + 무기 고유 스킬 F(`WeaponSkill`, 무기 액터가 생기면 무기로 옮김). 효과 종류 `ESkillEffect`(Dash/Spin/Slam/Heal), 효과는 `HitDelay` 초 뒤. 스킬 모션 중엔 기본 공격 막힘
-    스킬 표 `SourceArt/Data/Skills.csv` → `/Game/Data/DT_Skills`(바꾸면 지우고 다시 임포트). 스킬 모션 `AM_Skill_<이름>`(미사모 원본 `SourceArt/Mixamo/Anim_Skill_*.fbx`, 팔만 남긴 것 `SourceArt/Export/A_Skill_*_ArmsOnly.fbx`)
-  - `UPlayerHUDWidget`: 화면 아래 가운데 1~0 아이템 칸 10개(빈 칸) + 그 위 체력 바(왼쪽 반)·마나 바(오른쪽 반), 숫자 표시. 그림·배치는 캐릭터의 `HUDStyle`(그림 `/Game/UI/HUD/T_HudPanel`(전체를 감싸는 판)·`T_HudBar`·`T_HudSlot`, 판과 바 틀은 양끝 장식 비율 유지하고 가운데만 가로로 늘림)
-  - 인벤토리: `UInventoryComponent`(캐릭터의 `Inventory`, 가방 20칸 + 장착칸 무기 1·젬 Q·E·R, 런 동안 `URunSubsystem`에 저장, 시작 아이템 `StartItems`, 창 그림·배치 `Style`) / `UInventoryWidget`(I로 열기, 게임 멈춤, 검은 바탕 위 찢어진 일지, 끌어다 놓기로 장착·옮기기, 우클릭으로 포션 마시기·장착). 아이템 표 `SourceArt/Data/Items.csv` → `/Game/Data/DT_Items`(행 이름 = 아이템 ID, 젬은 스킬 ID·무기는 무기 ID와 같게). 그림 `/Game/UI/Inventory/`(원본 `SourceArt/UI/Inventory/`, 임포트 `Tools/Inventory/01_import_textures_and_table.py`). 바닥 무기는 E로 줍으면 가방으로 들어간다
-  - 방 지도(런): `URunSubsystem`(게임 인스턴스, 레벨을 옮겨도 지도 유지. 시작 칸 + 줄 6 x 열 5에 길 3개, 칸마다 방을 정하되 바로 아래 칸과 같은 방은 피함) / `URoomWorldSubsystem`(게임 월드 시작 시 메시 이름이 `_ExitDoor`로 끝나는 스태틱 메시 액터마다 `ARoomExitDoor` 판정을 자동으로 붙임 → 방 레벨에 따로 놓을 것 없음) / `URoomMapWidget`(지도 화면 코드 생성, 게임 일시정지, 갈 수 있는 칸만 숨쉬듯 커지고 클릭하면 `OpenLevel`, Esc 닫기). 방 목록·지도 크기·그림·배치는 프로젝트 세팅 > Game > Run Map(`URunSettings`, DefaultGame.ini). 맨 위 칸에서 출구로 나가면 새 지도로 처음 방부터. 지도 그림 `/Game/UI/Map/T_Map*`(원본 `SourceArt/UI/Map/`, 임포트 `Tools/UI/import_map_textures.py`)
-  - 무기: 표 `SourceArt/Data/Weapons.csv` → `/Game/Data/DT_Weapons`(행 `FWeaponRow`: 메시, BP 손잡이 위치 위에 더할 오프셋, 콤보 몽타주(비우면 BP `AttackMontages`·검 회전), `bProjectileAttack`(Hit 순간 탄 발사), 탄 메시·속도·배율·발사 위치·불빛 색, 기본 공격 피해 배율 `DamageMultiplier`·모션 속도 배율 `AttackSpeedMultiplier`, 고유 스킬 F). 캐릭터 `EquipWeapon(ID)`가 `SwordMesh`(이름은 그대로, 지금 든 무기 메시) 교체. 런 동안 무기는 `URunSubsystem::CurrentWeapon`에 남아 방을 옮겨도 유지. 지금: 검(Sword, F=Sword_Dash), 스태프(Staff, 호박 탄 x0.8, F=Staff_Fireball 화염구 3m 폭발), 전투 도끼(BattleAxe, 피해 x1.4·속도 x0.8, 콤보 `AM_Axe_Attack1`→`2`(1타 미사모 Standing Melee Attack Downward를 내려찍는 동안 왼쪽으로 70도 sweep해 오른쪽→왼쪽 끝으로, 2타 Stable Sword Inward Slash Hit 1.3초, 어깨를 25도 들어 올림), F 던지기 속도 900, F=Axe_Throw 던져서 되돌아옴 `AThrownWeapon`), 번개 지팡이(StormWand, 노란 탄 피해 x0.6·모션 속도 x0.5, 기본 공격 `AM_Wand_Attack`(미사모 Bash 34~68프레임, Hit 0.5초 = 내리친 손이 앞에 오는 원본 49프레임), F=Wand_ChainLightning 연쇄 번개 3번 튐). 에셋 `/Game/Weapons/BattleAxe/`·`/Game/Weapons/StormWand/`(원본 `SourceArt/Weapons2.blend`, 원점=손잡이·대는 +Z), 조립 `Tools/Weapons/08_import_axe_and_wand.py`. 스킬 효과 `ThrowWeapon`(든 무기 메시를 던짐)·`ChainLightning`(표 열 ChainCount·ChainRadius, ProjectileMesh = +X 1m 번개 구간 메시)
-  - 표를 고칠 때: 에디터가 쥔 DT는 지우고 다시 임포트가 안 된다(삭제가 안 먹고 "already exists"). `DataTableTools.add_rows`+`set_rows`로 행만 넣는다(08 스크립트 참고). CSV도 같이 고쳐 둔다
-  - `AWeaponPickup`: 바닥 무기(떠서 회전, `WeaponId`만 고르면 메시는 표에서). 근처에서 E(젬 2번 칸 대신) → 가방에 넣음, HUD 가운데 안내 글 `SetPrompt`. 숲속 신전 시작 지점 앞(-650,0)에 스태프 하나
-  - `AProjectRProjectile`: 탄·화염구 공용(중력 없음, 처음 닿은 곳에서 피해, `ExplosionRadius`>0이면 범위 피해 + 나이아가라). 스킬 효과 `ESkillEffect::Projectile`(스킬 표 열 ProjectileMesh·ProjectileSpeed·ImpactEffect, Range = 폭발 반지름)
-  - 스태프 에셋 `/Game/Weapons/Staff/`(SM_Staff 원점=손잡이(아래 끝 0.5m 위)·대는 +Z, SM_StaffBolt, SM_Fireball, NS_FireballExplosion, 발광은 `Tools/Weapons/01`에서 재질에 꽂음). 블렌더 원본 `SourceArt/Staff.blend`. 조립 스크립트 `Tools/Weapons/01~05`
-  - 팔만 남기는 모션 변환은 블렌더 MCP로 `Tools/Blender/arms_only.py`(JOBS만 바꿔 실행, 오른손 최고 속도 프레임 = Hit 시점도 알려 줌)
-- 스킬 표: 원본 `SourceArt/Data/SkillTree.csv`(UTF-8, 열 `---,DisplayName,Parent,Cost,Icon,Description,Stat,StatValue,bStatPercent`) → `/Game/Data/DT_SkillTree`(바꾸면 지우고 다시 임포트). UI 그림 `/Game/UI/SkillTree/`
-- 스킬 아이콘: `SourceArt/UI/SkillIcons/T_Skill_<스킬ID>.png`(256px, 투명) → `/Game/UI/SkillIcons/`. 새 아이콘은 크롬(Claude in Chrome)에서 제미나이로 4x4 시트를 뽑아 `Tools/SliceIconSheet.ps1`로 자른다. 표의 Icon 칸은 `/Game/UI/SkillIcons/T_Skill_<ID>.T_Skill_<ID>`
-- BP (`/Game/Blueprints/`): `BP_PlayerCharacter`(메시 `SK_PlayerArms`, 콤보 `AM_Attack5`→`AM_Attack2`,
-  카메라 위치는 BP에서 눈 높이로), `BP_TrainingDummy`, `BP_GameMode`
-- 캐릭터 (`/Game/Characters/Player/`): `SK_Player`(전신), `SK_PlayerArms`(튜닉 몸통 재질 분리), 스켈레톤 `SK_Player_Skeleton`,
-  `ABP_Player`(BS_Locomotion: A_Idle·A_Walk_ArmsOnly·A_Run_ArmsOnly → Slot DefaultSlot. 걷기·달리기도 팔만 움직이고 몸은 제자리), `Animations/`, `Montages/`
-- 공격 애니메이션은 미사모 원본(`SourceArt/Mixamo`)에서 팔 본만 남기고 몸은 대기 자세로 고정해 만든다
-  (`SourceArt/Export/A_Attack*_ArmsOnly.fbx`). Hit 노티파이는 오른손 속도가 최대인 프레임에 둔다. 몸통을 고정하면 팔 궤적이 틀어져서 `arms_only.py`가 어깨 방향을 원본의 엉덩이 기준 방향으로 다시 맞춘다(2026-11-06 고침. 그 전에 만든 검·스태프 모션은 예전 방식)
-  미사모 모션은 몸통이 크게 도는 것·마법 시전 모션은 고르지 않고 휘두르는 모션을 고른다(무기 이름 키워드에 얽매이지 않음). 몸통을 돌려 좌우를 바꾸는 꼼수는 사용자가 싫어함. 후보 몇 개를 받아 팔만 남긴 오른손 궤적(앞·오른쪽·위)을 재고, 최종 선택은 사용자에게 이름으로 묻는다(미사모에서 미리 볼 수 있음).
-- 폴더 규칙: 개발용 스크립트는 `Tools/`, 프로젝트 툴셋은 `Content/Python/projectr_toolset/`
-- 네이밍 규칙: UE 표준 접두사(`BP_`, `WBP_`, `M_`, `MI_`, `SM_`, `SK_`, `T_`, `ABP_`, `NS_`)
-- 글꼴: 상업적 무료(SIL OFL 등)만 쓴다. 원본·라이선스는 `SourceArt/Fonts/`, 에셋은 `/Game/UI/Fonts/FF_<이름>`(FontFace, Inline). 설명창 글꼴은 나눔손글씨 펜(`FF_NanumPenScript`), HUD 숫자는 Cinzel Bold(`FF_Cinzel`, 영문·숫자만 있고 한글 없음). 이 글꼴엔 `·` 같은 특수기호가 없어 네모로 깨진다(표 설명에도 쓰지 말 것)
-
-## 에셋 규칙 (블렌더 → 언리얼)
-<!-- 첫 에셋을 언리얼로 가져와 방향·크기를 확인한 뒤 확정한 값을 적는다. -->
-- 블렌더 원본 경로: `SourceArt/` (`.blend`, Git LFS)
-- 익스포트 경로: `SourceArt/Export/` (`.fbx`)
-- 언리얼 임포트 경로: 캐릭터 `/Game/Characters/<이름>/`, 무기 `/Game/Weapons/<이름>/`, 소품 `/Game/Props/<이름>/`, 블루프린트 `/Game/Blueprints/`
-- 스케일/단위: 블렌더 미터 단위, 1 unit = 1 m (언리얼 100 cm). 확정
-- 익스포트 설정(확정): `apply_scale_options='FBX_SCALE_NONE'`, `mesh_smooth_type='FACE'`, 나머지 기본값.
-  `FBX_SCALE_ALL`은 언리얼에서 100배 작게(1 m → 1 cm) 들어온다.
-- 축·원점(확정): 블렌더 정면 -Y, 원점 바닥 중앙. 스태틱 메시는 언리얼에서 정면이 +Y로 들어온다(허수아비는 yaw 90으로 배치).
-- 미사모 캐릭터(현재 SK_Player): 업로드 FBX가 `FBX_SCALE_ALL`로 내보낸 것이라 `AnimationAssetTools`로 `uniform_scale=100` 임포트.
-  손 본에 x100 스케일이 있으므로 본에 붙이는 컴포넌트는 `bAbsoluteScale=True`. 메시 yaw 180이 정면(+X).
-- 임포트·몽타주·애님BP 생성은 프로젝트 툴셋 `projectr_toolset.toolsets.animation_asset.AnimationAssetTools`를 쓴다.
-  수정 후 다시 불러오기: 엔진 파이썬으로 `toolset_registry/tests/reload_remote.py projectr_toolset` (새 테스트 추가는 에디터 재시작 필요).
-- `ActorTools.set_actor_transform`은 빠진 필드를 0으로 덮어쓴다. 위치·회전·스케일을 모두 넘긴다.
-- 블렌더에서 미사모 리그로 애니메이션을 만들 때: 불러온 아마추어에 X 90도 회전이 걸려 있어, 내보내기 전에
-  회전 적용(`transform_apply(rotation=True)`)을 해야 언리얼에서 눕지 않는다. 임포트는 `uniform_scale=100`.
-  (직접 만든 베기 모션은 품질 문제로 폐기하고 미사모 Attack 1~3을 쓴다. 기록은 커밋 b96adc6.)
-- 블렌더 MCP: `bpy.ops.wm.read_factory_settings`·`read_homefile`·파일 새로 열기는 애드온 서버를 내려 연결이 끊긴다. 씬을 비울 땐 오브젝트·액션·메시를 직접 지운다. 호출은 하나씩 순서대로.
-- 알려진 문제: 애니메이션을 `replace_existing=True`로 재임포트하면 배율이 두 번 곱해진다(x10000). 지우고 새로 임포트한다.

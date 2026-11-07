@@ -5,7 +5,7 @@ description: Use when the user asks to make a new map room, a new room theme, mo
 
 # 방 만들기 (ProjectR)
 
-방 하나 = 세상 한 조각을 방 크기에 담은 전투 공간. 계속 찍어낸다. 첫 방(숲속 신전 폐허, `L_Room_ForestTemple`)이 기준 예시이고, 만든 과정은 `Tools/Rooms/README.md`와 `Tools/Rooms/ForestTemple/*.py`에 있다. CLAUDE.md의 맵 규칙·아트 통일 규칙·MCP 규칙을 그대로 따른다.
+방 하나 = 세상 한 조각을 방 크기에 담은 전투 공간. 계속 찍어낸다. 첫 방(숲속 신전 폐허, `L_Room_ForestTemple`)이 기준 예시이고, 만든 과정은 `Tools/Rooms/README.md`와 `Tools/Rooms/ForestTemple/*.py`에 있다. 시작 전에 `Docs/Rules/map.md`(맵 규칙)와 `Docs/Rules/art.md`(아트 통일 규칙)를 읽고, CLAUDE.md의 MCP 규칙과 함께 그대로 따른다.
 
 ## 사용자 결정은 한 번에 묶어서 묻는다 (사용자 요청)
 
@@ -32,7 +32,7 @@ description: Use when the user asks to make a new map room, a new room theme, mo
 3. **언리얼 조립** — `Tools/Rooms/<테마>/`에 번호 스크립트를 새로 만들어 `Tools/McpRun.ps1`로 돌린다(ForestTemple 스크립트를 복사해 테마 약자·좌표만 바꾸는 게 빠르다). DevMap을 `/Game/Maps/Rooms/L_Room_<테마>`로 복제해 조명을 유지하고, 허수아비·바닥은 지운다.
 4. **라이팅** — ForestTemple 최종값에서 시작해 테마에 맞게 조정(README 표). 랜턴 같은 발광·포인트 라이트는 넣지 않는다(사용자가 과하다고 함).
 5. **검수** — 에디터 캡처(`Tools/Rooms/capture.py`)로 배치만 숫자·그림으로 확인하고, 분위기는 사용자 플레이 스크린샷으로 판단한다. 같은 문제를 추측으로 두 번 고치지 않는다.
-6. **기록·백업** — 단계마다 커밋·푸쉬(서명 줄은 세션 지침). 새 프롬프트는 GeminiPrompts.md에, 새 사실은 CLAUDE.md에 한 줄로. 방 하나가 끝나면 개발일지를 끊을지 제안한다.
+6. **기록·백업** — 단계마다 커밋·푸쉬(서명 줄은 세션 지침). 새 프롬프트는 GeminiPrompts.md에, 새 사실은 `Docs/Rules/map.md`에 한 줄로. 방 하나가 끝나면 개발일지를 끊을지 제안한다.
 
 ## 배치 기준 (24m 방)
 
@@ -59,7 +59,7 @@ description: Use when the user asks to make a new map room, a new room theme, mo
 
 - 제미나이 새 대화창은 이미지 생성을 거부한 적이 있다 → 위 대화창을 계속 쓴다.
 - 에디터 캡처에는 볼류메트릭 안개·나이아가라가 안 보인다.
-- 나이아가라 만들기는 CLAUDE.md의 "나이아가라 MCP" 줄 참고(빛 먼지 `NS_FT_LightDust`는 다른 방에서도 재사용 가능).
+- 나이아가라 만들기는 `Docs/Rules/map.md`의 "나이아가라 MCP" 줄 참고(빛 먼지 `NS_FT_LightDust`는 다른 방에서도 재사용 가능).
 - 라이트 색(`lightColor`)은 0~1 선형 값으로 넣는다. 0~255는 흰색으로 잘린다.
 - 다른 방 스크립트를 복사할 때 `LV`/`load_level`의 레벨 이름과 `/Game/Props/<테마>/` 경로를 전부 바꿨는지 grep으로 확인한다(06이 레벨을 열기 때문에, 틀리면 03~05가 남의 방에 놓인다).
 - 발광은 FBX로 안 넘어온다 → 방의 `09_glow.py`로 머티리얼에 직접 연결(불꽃·유리·버섯처럼 빛나는 것은 언릿). 빛나는 모델 자리에 같은 색 포인트 라이트를 두면 "모델에서 빛이 난다"로 읽힌다(사용자 피드백).

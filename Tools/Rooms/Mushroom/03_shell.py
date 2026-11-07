@@ -22,7 +22,7 @@ def add(m, name, x, y, z=0, yaw=0, sx=1.0, s=1.0):
 
 def run():
     out = {'rm': 0}
-    for p in ('MU_Floor_', 'MU_Moss_', 'MU_Wall_', 'MU_Corner_', 'MU_Ceiling_', 'MU_Entrance', 'MU_ExitDoor'):
+    for p in ('MU_Floor_', 'MU_Moss_', 'MU_Wall_', 'MU_Corner_', 'MU_Ceiling_', 'MU_CeilingCap_', 'MU_Entrance', 'MU_ExitDoor'):
         for a in call('scene.SceneTools.find_actors', {'name': p, 'tag': '', 'collision_channels': []}):
             call('scene.SceneTools.remove_from_scene', {'actor': a}); out['rm'] += 1
     i = 0
@@ -43,6 +43,8 @@ def run():
     for cx in CENTERS:
         for cy in CENTERS:
             add('CeilingHole' if (cx, cy) in HOLES else 'Ceiling', 'MU_Ceiling_%02d' % j, cx, cy, 800, 0); j += 1
+            if (cx, cy) in HOLES:   # review 2026-11-07: the sky showed through the knot holes -> a solid panel caps each one (panel is 781-860)
+                add('Ceiling', 'MU_CeilingCap_%02d' % j, cx, cy, 880, 0)
     add('EntranceDoor', 'MU_Entrance', -1200, 0, 0, 270)
     add('ExitDoor', 'MU_ExitDoor', 1200, 0, 0, 90)
     call('asset.AssetTools.save_assets', {'asset_paths': []})

@@ -8,7 +8,7 @@ P = '/Game/Props/Harbor/'
 # Flame / glass are unlit: lit, their base colour caught the lamp's own light and washed the glow out to white.
 # (r, g, b, strength, unlit)
 GLOW = {
-    'M_HB_Glow':    (1.0, 0.50, 0.18, 1.5, True),    # sunset light seen through the broken wall planks
+    'M_HB_Glow':    (0.62, 0.74, 1.0, 1.0, True),    # moonlit sky seen through the broken wall planks (was sunset orange 1,0.5,0.18 x1.5)
 }
 
 def run():

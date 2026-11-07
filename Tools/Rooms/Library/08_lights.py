@@ -16,6 +16,10 @@ LIGHTS = [
 ]
 COLOR = {'r': 1.0, 'g': 0.62, 'b': 0.3, 'a': 1.0}   # linear 0-1
 
+# moonlit night (06 EV 1.6, was 0.6): warm lights x4 / radius x1.5 so they still pop against the blue
+GAIN = 4.0
+RGAIN = 1.5   # wider warm pools
+
 def run():
     for a in call('scene.SceneTools.find_actors', {'name': 'LB_Light_', 'tag': '', 'collision_channels': []}):
         call('scene.SceneTools.remove_from_scene', {'actor': a})
@@ -23,7 +27,7 @@ def run():
         a = call('scene.SceneTools.add_to_scene_from_class', {'actor_type': {'refPath': '/Script/Engine.PointLight'}, 'name': 'LB_Light_%02d' % k,
                  'xform': {'location': {'x': x, 'y': y, 'z': z}, 'rotation': {'pitch': 0, 'yaw': 0, 'roll': 0}, 'scale': {'x': 1, 'y': 1, 'z': 1}}})
         call('object.ObjectTools.set_properties', {'instance': ref(a['refPath'] + '.LightComponent0'), 'values': json.dumps(
-            {'intensityUnits': 'Candelas', 'intensity': cd, 'attenuationRadius': r, 'lightColor': COLOR,
+            {'intensityUnits': 'Candelas', 'intensity': cd * GAIN, 'attenuationRadius': r * RGAIN, 'lightColor': COLOR,
              'sourceRadius': 3, 'castShadows': True, 'volumetricScatteringIntensity': 1.5})})
     call('asset.AssetTools.save_assets', {'asset_paths': []})
     return {'lights': len(LIGHTS)}

@@ -12,6 +12,10 @@ LIGHTS = [
     (750, 1000, 180, 3.0, 500, (1.0, 0.75, 0.35)),     # seed pod string
 ]
 
+# moonlit night (06 EV 1.6, was 0.6): warm lights x4 / radius x1.5 so they still pop against the blue
+GAIN = 4.0
+RGAIN = 1.5   # wider warm pools
+
 def run():
     for a in call('scene.SceneTools.find_actors', {'name': 'MU_Light_', 'tag': '', 'collision_channels': []}):
         call('scene.SceneTools.remove_from_scene', {'actor': a})
@@ -19,7 +23,7 @@ def run():
         a = call('scene.SceneTools.add_to_scene_from_class', {'actor_type': {'refPath': '/Script/Engine.PointLight'}, 'name': 'MU_Light_%02d' % k,
                  'xform': {'location': {'x': x, 'y': y, 'z': z}, 'rotation': {'pitch': 0, 'yaw': 0, 'roll': 0}, 'scale': {'x': 1, 'y': 1, 'z': 1}}})
         call('object.ObjectTools.set_properties', {'instance': ref(a['refPath'] + '.LightComponent0'), 'values': json.dumps(
-            {'intensityUnits': 'Candelas', 'intensity': cd, 'attenuationRadius': r, 'lightColor': {'r': cr, 'g': cg, 'b': cb, 'a': 1.0},
+            {'intensityUnits': 'Candelas', 'intensity': cd * GAIN, 'attenuationRadius': r * RGAIN, 'lightColor': {'r': cr, 'g': cg, 'b': cb, 'a': 1.0},
              'sourceRadius': 20, 'castShadows': True, 'volumetricScatteringIntensity': 2.0})})
     call('asset.AssetTools.save_assets', {'asset_paths': []})
     return {'lights': len(LIGHTS)}

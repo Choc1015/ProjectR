@@ -14,8 +14,12 @@ def light(name, x, y, z, cd, radius, shadows):
     a = call('scene.SceneTools.add_to_scene_from_class', {'actor_type': {'refPath': '/Script/Engine.PointLight'}, 'name': name,
              'xform': {'location': {'x': x, 'y': y, 'z': z}, 'rotation': {'pitch': 0, 'yaw': 0, 'roll': 0}, 'scale': {'x': 1, 'y': 1, 'z': 1}}})
     call('object.ObjectTools.set_properties', {'instance': ref(a['refPath'] + '.LightComponent0'), 'values': json.dumps(
-        {'intensityUnits': 'Candelas', 'intensity': cd, 'attenuationRadius': radius, 'lightColor': COLOR,
+        {'intensityUnits': 'Candelas', 'intensity': cd * GAIN, 'attenuationRadius': radius * RGAIN, 'lightColor': COLOR,
          'sourceRadius': 10, 'castShadows': shadows, 'volumetricScatteringIntensity': 2.0})})
+
+# moonlit night (06 EV 1.6, was 0.6): warm lights x4 / radius x1.5 so they still pop against the blue
+GAIN = 4.0
+RGAIN = 1.5   # wider warm pools
 
 def run():
     n = 0

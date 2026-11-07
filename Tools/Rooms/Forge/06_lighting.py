@@ -6,12 +6,14 @@ LV = '/Game/Maps/Rooms/L_Room_Forge.L_Room_Forge:PersistentLevel.'
 def setp(path, vals):
     call('object.ObjectTools.set_properties', {'instance': ref(LV + path), 'values': json.dumps(vals)})
 
-# tunables - NIGHT forge: furnace, braziers and molten channels (08_lights, 09_glow) carry the light, faint moonlight through the vents,
-# sky fill only keeps the corners from going pitch black. (day version was sun 40 lux / sky 1.2 / EV 3.6)
-SUN = {'pitch': -62, 'yaw': 30, 'lux': 0.6, 'scatter': 4.0, 'color': {'r': 0.67, 'g': 0.75, 'b': 1.0, 'a': 1.0}}
+# tunables - MOONLIT NIGHT (review 2026-11-07, user picked "blue moonlight + fire"): make it feel dark without being dark.
+# The whole room is lit by pale blue moon + blue sky and a few shadowless blue fill lights under the roof (MOONFILL),
+# exposure is raised so floor and enemies read clearly; fires / lanterns (08 lights, 09 glow) are warm pools for contrast.
+SUN = {'pitch': -50, 'yaw': 30, 'lux': 4.0, 'scatter': 2.0, 'color': {'r': 0.62, 'g': 0.74, 'b': 1.0, 'a': 1.0}}
 FOG = {'density': 0.03, 'scatter_dist': 0.6}
-SKY = {'intensity': 0.03,'lower': {'r': 0.02, 'g': 0.018, 'b': 0.015, 'a': 1}}
-EV = 0.6
+SKY = {'intensity': 0.7, 'lower': {'r': 0.1, 'g': 0.11, 'b': 0.16, 'a': 1}, 'color': {'r': 0.62, 'g': 0.74, 'b': 1.0, 'a': 1.0}}
+EV = 1.6
+MOONFILL = {'cd': 50.0, 'radius': 1800, 'z': 650, 'xy': [(-600, -600), (600, -600), (-600, 600), (600, 600)], 'color': {'r': 0.62, 'g': 0.74, 'b': 1.0, 'a': 1.0}}
 
 def ppv():
     # DevMap has no post process volume: make one (unbound) the first time and use its real object path
@@ -33,12 +35,20 @@ def run():
     setp('ExponentialHeightFog_0.HeightFogComponent0', {'fogDensity': FOG['density'], 'fogHeightFalloff': 0.2, 'bEnableVolumetricFog': True,
          'volumetricFogScatteringDistribution': FOG['scatter_dist'], 'volumetricFogExtinctionScale': 1.0, 'volumetricFogDistance': 3000})
     setp('SkyLight_0.SkyLightComponent0', {'intensity': SKY['intensity'], 'volumetricScatteringIntensity': 0.2,
-         'bLowerHemisphereIsBlack': False, 'lowerHemisphereColor': SKY['lower']})
+         'lightColor': SKY['color'], 'bLowerHemisphereIsBlack': False, 'lowerHemisphereColor': SKY['lower']})
     setp(pp, {'bUnbound': True, 'settings': {
         'bOverride_AutoExposureMinBrightness': True, 'autoExposureMinBrightness': EV,
         'bOverride_AutoExposureMaxBrightness': True, 'autoExposureMaxBrightness': EV,
         'bOverride_BloomIntensity': True, 'bloomIntensity': 0.9,
         'bOverride_VignetteIntensity': True, 'vignetteIntensity': 0.5}})
+    for a in call('scene.SceneTools.find_actors', {'name': 'MoonFill_', 'tag': '', 'collision_channels': []}):
+        call('scene.SceneTools.remove_from_scene', {'actor': a})
+    for k, (x, y) in enumerate(MOONFILL['xy']):
+        a = call('scene.SceneTools.add_to_scene_from_class', {'actor_type': {'refPath': '/Script/Engine.PointLight'}, 'name': 'MoonFill_%d' % k,
+                 'xform': {'location': {'x': x, 'y': y, 'z': MOONFILL['z']}, 'rotation': {'pitch': 0, 'yaw': 0, 'roll': 0}, 'scale': {'x': 1, 'y': 1, 'z': 1}}})
+        call('object.ObjectTools.set_properties', {'instance': ref(a['refPath'] + '.LightComponent0'), 'values': json.dumps(
+            {'intensityUnits': 'Candelas', 'intensity': MOONFILL['cd'], 'attenuationRadius': MOONFILL['radius'], 'lightColor': MOONFILL['color'],
+             'sourceRadius': 200, 'castShadows': False, 'volumetricScatteringIntensity': 0.0})})
     call('asset.AssetTools.save_assets', {'asset_paths': []})
     return {'pp': pp, 'sky': call('object.ObjectTools.get_properties', {'instance': ref(LV + 'SkyLight_0.SkyLightComponent0'), 'properties': ['intensity']}),
             'fog': call('object.ObjectTools.get_properties', {'instance': ref(LV + 'ExponentialHeightFog_0.HeightFogComponent0'), 'properties': ['bEnableVolumetricFog', 'fogDensity']})}

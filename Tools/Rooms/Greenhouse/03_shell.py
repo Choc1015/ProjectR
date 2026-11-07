@@ -31,14 +31,7 @@ def run():
     for p in ('GH_Floor_', 'GH_Grass_', 'GH_Wall_', 'GH_Post_', 'GH_Corner_', 'GH_Rib_', 'GH_Roof_', 'GH_Entrance', 'GH_ExitDoor'):
         for a in call('scene.SceneTools.find_actors', {'name': p, 'tag': '', 'collision_channels': []}):
             call('scene.SceneTools.remove_from_scene', {'actor': a}); out['rm'] += 1
-    i = 0
-    for gx in range(12):
-        for gy in range(12):
-            # tile mix of path stones and grass; GRASS patches below break the grid up
-            m = 'FloorTileB' if (gx * 5 + gy * 3 + gx * gy) % 3 == 0 else 'FloorTile'
-            add(m, 'GH_Floor_%03d' % i, -1100 + gx * 200, -1100 + gy * 200, 0, ((gx * 7 + gy * 11) % 4) * 90); i += 1
-    for k, (m, x, y, yaw) in enumerate(GRASS):
-        add(m, 'GH_Grass_%02d' % k, x, y, 0, yaw)
+    i = 0   # floor moved to 10_floor.py (review 2026-11-07: the 2 m tile mix + GRASS patches read as a messy grid); run it after this
     k = 0
     for side, (yaw, pos) in SIDES.items():
         for c in CENTERS:

@@ -60,4 +60,5 @@ DeepSeek는 이 대화를 모른다. 지시문 하나로 끝까지 할 수 있�
 ## 비용
 
 - 사용량: `opencode.cmd stats`. 잔액은 platform.deepseek.com.
-- 잔액이 바닥나면 `402 Insufficient Balance`로 실패한다. 그때는 사용자에게 알리고 기존 방식(Sonnet 워커)으로 돌아간다.
+- 잔액이 바닥나면 `402 Insufficient Balance`로 실패한다. 그때는 **작업을 멈추고 사용자에게 "DeepSeek 잔액 부족, 충전 필요"라고 알린다.**
+  Sonnet 워커나 Claude 직접 처리로 몰래 바꾸지 않는다(Claude 토큰을 쓰게 되므로). 사용자가 충전하거나 다른 방법을 정할 때까지 기다린다.

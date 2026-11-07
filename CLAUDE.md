@@ -23,6 +23,7 @@
 | 새 모델·소품·UI·이펙트·아이콘, 제미나이 프롬프트 | `Docs/Rules/art.md` |
 | C++ 클래스·BP·데이터 표(DT)·HUD·인벤토리·무기·스킬·지도·애니메이션 구조 | `Docs/Rules/structure.md` |
 | 블렌더 모델링·익스포트, 언리얼 임포트, 미사모 애니메이션 | `Docs/Rules/asset.md` |
+| (Claude일 때) 워커·실행 작업을 맡기기 전 | `Docs/Rules/deepseek.md` |
 
 새로 알게 된 사실은 해당 파일에 한 줄로 적는다. 어느 파일에도 안 맞으면 이 파일에 적는다.
 
@@ -44,6 +45,9 @@
 - **unreal-worker**(Sonnet): 언리얼 에디터 조작. 배치, 수정, 조회, 임포트, 정리
 - **blender-worker**(Sonnet): 블렌더 모델링, 머티리얼, 익스포트
 - 블렌더 → 언리얼: blender-worker가 익스포트하고 unreal-worker가 임포트·배치한다. 메인은 두 요약만 받는다.
+- **Claude(Opus·Sonnet)로 돌고 있다면:** 위 워커 일과 설계가 끝난 실행 작업은 Sonnet 워커 대신 먼저 OpenCode의 DeepSeek에게 넘긴다(훨씬 싸다).
+  어떤 일을 어떻게 넘기는지는 `Docs/Rules/deepseek.md`. 이미지 판단·설계·사용자 질문·결과 검토는 Claude가 한다.
+  (네가 OpenCode의 DeepSeek면 이 줄은 무시한다.)
 
 ### 직접 호출 vs 위임
 - **위임**: MCP 호출이 3번 이상이거나, 결과가 클 것 같은 작업(씬 조회, 에셋 목록, 모델링)

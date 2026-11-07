@@ -29,9 +29,9 @@ def run():
     for gx in range(12):
         for gy in range(12):
             m = 'FloorTileB' if (gx * 5 + gy * 3 + gx * gy) % 3 == 0 else 'FloorTile'
-            add(m, 'MU_Floor_%03d' % i, -1100 + gx * 200, -1100 + gy * 200, 0, ((gx * 7 + gy * 11) % 4) * 90); i += 1
+            pass  # floor moved to 10_floor.py (review 2026-11-07): add(m, 'MU_Floor_%03d' % i, -1100 + gx * 200, -1100 + gy * 200, 0, ((gx * 7 + gy * 11) % 4) * 90); i += 1
     for k, (m, x, y, yaw) in enumerate(MOSS):
-        add(m, 'MU_Moss_%02d' % k, x, y, 0, yaw)
+        pass  # floor moved to 10_floor.py (review 2026-11-07): add(m, 'MU_Moss_%02d' % k, x, y, 0, yaw)
     k = 0
     for side, (yaw, pos) in SIDES.items():
         for c in CENTERS:

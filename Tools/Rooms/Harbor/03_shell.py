@@ -32,7 +32,7 @@ def run():
             if (gx, gy) in FLOOD:
                 continue
             m = 'FloorTileB' if (gx * 5 + gy * 3 + gx * gy) % 4 == 0 else 'FloorTile'
-            add(m, 'HB_Floor_%03d' % i, -1100 + gx * 200, -1100 + gy * 200, 0, ((gx * 7 + gy * 11) % 2) * 180); i += 1   # planks keep one direction
+            pass  # floor moved to 10_floor.py (review 2026-11-07): add(m, 'HB_Floor_%03d' % i, -1100 + gx * 200, -1100 + gy * 200, 0, ((gx * 7 + gy * 11) % 2) * 180); i += 1   # planks keep one direction
     add('WaterBasin', 'HB_Basin', BASIN[0], BASIN[1], 0, 0)
     k = 0
     for side, (yaw, pos) in SIDES.items():

@@ -33,9 +33,9 @@ def run():
         for gy in range(12):
             x, y = -1100 + gx * 200, -1100 + gy * 200
             m = 'FloorTileB' if ((gx * 73856093) ^ (gy * 19349663)) % 5 == 0 else 'FloorTile'
-            add(m, 'CP_Floor_%03d' % i, x, y, 0, ((gx * 7 + gy * 11) % 4) * 90); i += 1
+            pass  # floor moved to 10_floor.py (review 2026-11-07): add(m, 'CP_Floor_%03d' % i, x, y, 0, ((gx * 7 + gy * 11) % 4) * 90); i += 1
     for k, (m, gx_, gy_, yaw) in enumerate(GRASS):
-        add(m, 'CP_Grass_%02d' % k, gx_, gy_, 0, yaw)
+        pass  # floor moved to 10_floor.py (review 2026-11-07): add(m, 'CP_Grass_%02d' % k, gx_, gy_, 0, yaw)
     k = 0
     for side, (yaw, pos) in SIDES.items():
         for c in CENTERS:

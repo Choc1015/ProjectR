@@ -36,9 +36,9 @@ def run():
         for gy in range(12):
             # dirt tiles are high contrast: only ~1 in 5, scattered by a hash (the old modulo formula drew diagonal stairs)
             m = 'FloorTileB' if ((gx * 73856093) ^ (gy * 19349663)) % 5 == 0 else 'FloorTile'
-            add(m, 'VY_Floor_%03d' % i, -1100 + gx * 200, -1100 + gy * 200, 0, ((gx * 7 + gy * 11) % 4) * 90); i += 1
+            pass  # floor moved to 10_floor.py (review 2026-11-07): add(m, 'VY_Floor_%03d' % i, -1100 + gx * 200, -1100 + gy * 200, 0, ((gx * 7 + gy * 11) % 4) * 90); i += 1
     for k, (m, x, y, yaw) in enumerate(LEAVES):
-        add(m, 'VY_Leaf_%02d' % k, x, y, 0, yaw)
+        pass  # floor moved to 10_floor.py (review 2026-11-07): add(m, 'VY_Leaf_%02d' % k, x, y, 0, yaw)
     k = 0
     for side, (yaw, pos) in SIDES.items():
         for c in CENTERS:

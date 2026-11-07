@@ -26,7 +26,7 @@ def run():
     for gx in range(12):
         for gy in range(12):
             m = 'FloorTileB' if (gx * 5 + gy * 3 + gx * gy) % 3 == 0 else 'FloorTile'
-            add(m, 'LB_Floor_%03d' % i, -1100 + gx * 200, -1100 + gy * 200, 0, ((gx * 7 + gy * 11) % 4) * 90); i += 1
+            pass  # floor moved to 10_floor.py (review 2026-11-07): add(m, 'LB_Floor_%03d' % i, -1100 + gx * 200, -1100 + gy * 200, 0, ((gx * 7 + gy * 11) % 4) * 90); i += 1
     add('Rug', 'LB_Rug', 0, 0, 0, 10)
     k = 0
     for side, (yaw, pos) in SIDES.items():

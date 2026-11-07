@@ -35,7 +35,7 @@ def run():
                 add('Stream', 'ML_Stream_%02d' % s, x, y, 0, 0, 1.0, STREAM_SY, 1.0); s += 1
                 continue
             m = 'FloorTileB' if ((gx * 73856093) ^ (gy * 19349663)) % 5 == 0 else 'FloorTile'
-            add(m, 'ML_Floor_%03d' % i, x, y, 0, ((gx * 7 + gy * 11) % 2) * 180); i += 1   # planks keep one direction
+            pass  # floor moved to 10_floor.py (review 2026-11-07): add(m, 'ML_Floor_%03d' % i, x, y, 0, ((gx * 7 + gy * 11) % 2) * 180); i += 1   # planks keep one direction
     k = 0
     for side, (yaw, pos) in SIDES.items():
         for c in CENTERS:
